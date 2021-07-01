@@ -1,0 +1,16 @@
+{
+  "name": "flask-serverless.loopback.jp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Shingo Yamada <uzuranoie@gmail.com> (https://github.com/uzura8)",
+  "license": "ISC",
+  "devDependencies": {
+    "serverless-python-requirements": "^5.1.1",
+    "serverless-wsgi": "^1.7.8"
+  }
+}
