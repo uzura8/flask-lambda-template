@@ -10,7 +10,9 @@
   "author": "Shingo Yamada <uzuranoie@gmail.com> (https://github.com/uzura8)",
   "license": "ISC",
   "devDependencies": {
+    "serverless": "^2.51.2",
     "serverless-dynamodb-local": "^0.2.40",
+    "serverless-prune-plugin": "^1.5.1",
     "serverless-python-requirements": "^5.1.1",
     "serverless-wsgi": "^1.7.8"
   }

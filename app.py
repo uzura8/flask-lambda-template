@@ -13,15 +13,6 @@ if IS_LOCAL:
 else:
     dynamodb = boto3.resource('dynamodb')
 
-@app.route('/')
-def index():
-    return jsonify({'message': 'Hello World!'})
-
-
-#@app.route('/<path:path>')
-#def any_path(path):
-#    return jsonify({'message': 'Here: /' + path})
-
 
 @app.route('/users/<string:user_id>')
 def get_user(user_id):
@@ -59,3 +50,13 @@ def users():
         items = res['Items']
 
         return jsonify(items)
+
+
+@app.route('/')
+def index():
+    return jsonify({'message': 'Hello World!'})
+
+
+@app.route('/<path:path>')
+def any_path(path):
+    return jsonify({'message': 'Here: /' + path})

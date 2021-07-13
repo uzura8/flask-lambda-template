@@ -1,4 +1,10 @@
 #!/bin/bash
 
-curl -H "Content-Type: application/json" -X POST http://localhost:5000/users -d '{"userId": "taroyamada", "name": "Taro Yamada"}'
+if test $IS_LOCAL -eq 1 ; then
+  URL="http://localhost:5000"
+else
+  URL=$BASE_URL
+fi
+
+curl -H "Content-Type: application/json" -X POST "${URL}/users" -d '{"userId": "taroyamada5", "name": "Taro Yamada5"}'
 

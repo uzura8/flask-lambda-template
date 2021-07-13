@@ -4,7 +4,7 @@ plugins:
   - serverless-python-requirements
   - serverless-wsgi
   - serverless-dynamodb-local
-
+  - serverless-prune-plugin
 custom:
   tableName: 'users-table-${self:provider.stage}'
   wsgi:
@@ -17,6 +17,9 @@ custom:
       migrate: true
     stages:
       - dev
+  prune:
+    automatic: true
+    number: 5
 
 provider:
   name: aws
@@ -37,6 +40,20 @@ provider:
             - dynamodb:DeleteItem
           Resource:
             - { "Fn::GetAtt": ["UsersDynamoDBTable", "Arn" ] }
+        - Effect: Allow
+          Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+          Resource:
+            - "*"
+  logs:
+    restApi:
+      accessLogging: true # Optional configuration which enables or disables access logging. Defaults to true.
+      executionLogging: true # Optional configuration which enables or disables execution logging. Defaults to true.
+      level: ERROR # Optional configuration which specifies the log level to use for execution logging. May be set to either INFO or ERROR.
+      fullExecutionData: true # Optional configuration which specifies whether or not to log full requests/responses for execution logging. Defaults to true.
+  logRetentionInDays: 14
   environment:
     USERS_TABLE: ${self:custom.tableName}
 
@@ -46,14 +63,18 @@ functions:
     events:
       - http: ANY /
       - http: 'ANY {proxy+}'
-  getUser:
-    handler: wsgi.handler
-    events:
-      - http: 'GET /users/{proxy+}'
-  createUser:
-    handler: wsgi.handler
-    events:
-      - http: 'POST /users'
+  #getUser:
+  #  handler: wsgi.handler
+  #  events:
+  #    - http: 'GET /users/{proxy+}'
+  #getUsers:
+  #  handler: wsgi.handler
+  #  events:
+  #    - http: 'GET /users'
+  #createUser:
+  #  handler: wsgi.handler
+  #  events:
+  #    - http: 'POST /users'
 
 resources:
   Resources:
