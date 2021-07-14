@@ -7,7 +7,7 @@ plugins:
   - serverless-prune-plugin
 
 custom:
-  tableName: 'users-table-${self:provider.stage}'
+  prjPrefix: ${self:service}-${self:provider.stage}
   defaultStage: dev
   wsgi:
     app: app/handler.app
@@ -57,7 +57,7 @@ provider:
       fullExecutionData: true # Optional configuration which specifies whether or not to log full requests/responses for execution logging. Defaults to true.
   logRetentionInDays: 14
   environment:
-    USERS_TABLE: ${self:custom.tableName}
+    PRJ_PREFIX: ${self:custom.prjPrefix}
 
 functions:
   app:
@@ -94,4 +94,4 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-        TableName: ${self:custom.tableName}
+        TableName: ${self:custom.prjPrefix}-users

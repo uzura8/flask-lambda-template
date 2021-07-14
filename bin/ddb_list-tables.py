@@ -2,7 +2,8 @@ import os
 import boto3
 from pprint import pprint #!!!!!!!!!!!!!!!!
 
-USERS_TABLE = os.environ['USERS_TABLE']
+TABLE_NAME = 'users'
+USERS_TABLE = '-'.join([os.environ['PRJ_PREFIX'], TABLE_NAME])
 IS_LOCAL = bool(os.environ.get('IS_LOCAL'))
 
 
@@ -29,22 +30,22 @@ class DynamoDBHandler:
         return [t.table_name for t in table_list]
 
 
-    def check_table_name(self, table_name):
-        if table_name not in self.tables:
+    def get_table(self, table_name):
+        table_name_real = '-'.join([os.environ['PRJ_PREFIX'], table_name])
+        if table_name_real not in self.tables:
             raise Exception('Table name is invalid')
 
-        return True
+        table = self.dynamodb.Table(table_name_real)
+        return table
 
 
     def scan(self, table_name):
-        self.check_table_name(table_name)
-        table = self.dynamodb.Table(table_name)
-        res = table.scan()
-        return res
+        table = self.get_table(table_name)
+        return table.scan()
 
 
 ddh = DynamoDBHandler(IS_LOCAL)
 tables = ddh.list_tables()
 pprint(tables) #!!!!!!!!!!!!
-res = ddh.scan('users-table-dev')
+res = ddh.scan('users')
 pprint(res) #!!!!!!!!!!!!

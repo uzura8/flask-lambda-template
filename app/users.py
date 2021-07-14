@@ -5,7 +5,8 @@ from dynamodb import dynamodb
 
 bp = Blueprint('users', __name__, url_prefix='/users')
 
-USERS_TABLE = os.environ['USERS_TABLE']
+TABLE_NAME = 'users'
+USERS_TABLE = '-'.join([os.environ['PRJ_PREFIX'], TABLE_NAME])
 
 
 @bp.route('/<string:user_id>')

@@ -29,11 +29,15 @@ vi env.sh
 ```
 
 ```bash
+SERVICE="serverless-flask"
+STAGE="dev"
+export PRJ_PREFIX="${SERVICE}-${STAGE}"
+
 export AWS_PROFILE="your-profile-name"
 export AWS_REGION="ap-northeast-1"
-#export BASE_URL="https://xxxxxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com/dev"
-export USERS_TABLE="users-table-dev"
-export IS_LOCAL=1
+
+export BASE_URL="https://xxxxxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com/dev"
+export IS_LOCAL=0
 ```
 
 Execute below command
