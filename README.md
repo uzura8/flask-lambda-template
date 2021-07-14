@@ -31,7 +31,7 @@ vi env.sh
 ```bash
 export AWS_PROFILE="your-profile-name"
 export AWS_REGION="ap-northeast-1"
-export BASE_URL="https://xxxxxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com/dev"
+#export BASE_URL="https://xxxxxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com/dev"
 export USERS_TABLE="users-table-dev"
 export IS_LOCAL=1
 ```
@@ -53,8 +53,14 @@ Execute below command
 ````bash
 export AWS_PROFILE="your-profile-name"
 export AWS_REGION="ap-northeast-1"
-sls deploy
+sls deploy # Deploy for dev
 ````
+
+If deploy for prod
+
+```bash
+sls deploy --stage prd # Deploy for prod
+```
 
 Request https://xxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com/dev
 

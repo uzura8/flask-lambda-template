@@ -5,10 +5,12 @@ plugins:
   - serverless-wsgi
   - serverless-dynamodb-local
   - serverless-prune-plugin
+
 custom:
   tableName: 'users-table-${self:provider.stage}'
+  defaultStage: dev
   wsgi:
-    app: app.app
+    app: app/handler.app
     packRequirements: false
   pythonRequirements:
     dockerizePip: non-linux
@@ -24,7 +26,7 @@ custom:
 provider:
   name: aws
   runtime: python3.8
-  stage: dev
+  stage: ${opt:stage, self:custom.defaultStage}
   region: ap-northeast-1
   #profile: your-aws-profile-name
   iam:
@@ -49,8 +51,8 @@ provider:
             - "*"
   logs:
     restApi:
-      accessLogging: true # Optional configuration which enables or disables access logging. Defaults to true.
-      executionLogging: true # Optional configuration which enables or disables execution logging. Defaults to true.
+      accessLogging: false # Optional configuration which enables or disables access logging. Defaults to true.
+      executionLogging: false # Optional configuration which enables or disables execution logging. Defaults to true.
       level: ERROR # Optional configuration which specifies the log level to use for execution logging. May be set to either INFO or ERROR.
       fullExecutionData: true # Optional configuration which specifies whether or not to log full requests/responses for execution logging. Defaults to true.
   logRetentionInDays: 14
