@@ -6,5 +6,5 @@ else
   URL=$BASE_URL
 fi
 
-curl -H "Content-Type: application/json" -X POST "${URL}/users" -d '{"userId": "taroyamada5", "name": "Taro Yamada5"}'
+curl -H "Content-Type: application/json" -X POST "${URL}/users" -d '{"userId": "taroyamada", "name": "Taro Yamada"}'
 
