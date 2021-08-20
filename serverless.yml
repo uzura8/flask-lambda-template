@@ -1,4 +1,4 @@
-service: content-api
+service: ${file(./configs/common.yml):service}
 
 plugins:
   - serverless-python-requirements
