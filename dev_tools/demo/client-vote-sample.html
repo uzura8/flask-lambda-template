@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vote API Demo</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+<script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+<style>
+[v-cloak] { display: none !important; }
+.vote-count{
+  background-color: #f5f5f5;
+  padding: 0 .5rem;
+  margin-left: .5rem;
+}
+.loader-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background: #fff;
+  opacity: 0;
+  z-index: -1;
+  transition: opacity .3s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 6px;
+}
+.loader-wrapper .loader {
+  height: 80px;
+  width: 80px;
+}
+.loader-wrapper.is-active {
+  opacity: .5;
+  z-index: 1;
+}
+</style>
+</head>
+<body>
+<div class="container" id="app">
+  <div class="loader-wrapper" :class="{'is-active': isPageLoading}">
+    <div class="loader is-loading"></div>
+  </div>
+  <main class="section">
+    <h1 class="title is-2">Vote API Demo</h1>
+
+    <div>
+      <h3 class="title is-4">Links</h3>
+      <ul c lass="list">
+        <li><a href="https://github.com/uzura8/flask-lambda-template" target="_blank">Git Repo</a></li>
+      </ul>
+    </div>
+
+    <div class="mt-6">
+      <h2 class="title is-3">Demo Content</h2>
+      <div class="has-background-success-light p-3">
+        <label>Total Count</label>
+        <span class="is-size-3 ml-3">{{ totalCount | numFormat }}</span>
+        <a class="is-pulled-right" @click="loadVotesAll()">
+          <span class="icon is-small"><i class="fas fa-sync"></i></span>
+        </a>
+      </div>
+      <ul class="columns is-multiline mt-6">
+        <li
+          v-for="post in posts"
+          :key="post.id"
+          class="column is-half-tablet is-one-third-widescreen"
+        >
+          <article class="media">
+            <figure class="media-left">
+              <p class="image is-64x64">
+                <img src="https://bulma.io/images/placeholders/128x128.png">
+              </p>
+            </figure>
+            <div class="media-content">
+              <div class="content">
+                <p>
+                  <strong>{{ post.userName }}</strong> <small>@{{ post.userId }}</small> <small>31m</small><br>
+                  Sample text. Sample text. Sample text. Sample text. Sample text. Sample text. Sample text.
+                </p>
+              </div>
+              <nav class="level is-mobile">
+                <div class="level-left">
+                  <span class="level-item">
+                    <a @click="vote(post.id, 'like')">
+                      <span class="icon is-small"><i class="far fa-thumbs-up"></i></span>
+                    </a>
+                    <span class="vote-count">{{ post.votes.like | numFormat }}</span>
+                  </span>
+                  <span class="level-item">
+                    <a @click="vote(post.id, 'dislike')">
+                      <span class="icon is-small"><i class="far fa-thumbs-down"></i></span>
+                    </a>
+                    <span class="vote-count">{{ post.votes.dislike | numFormat }}</span>
+                  </span>
+                </div>
+              </nav>
+            </div>
+          </article>
+        </li>
+      </ul>
+    </div>
+    
+  </main>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+<script>
+new Vue ({
+  el: "#app",
+  data: {
+    apiBaseUrl: 'https://content-api-dev.example.com',
+    //apiBaseUrl: 'http://localhost:5000',
+    serviceId: 'fuga',
+    client: null,
+    posts: [],
+    isPageLoading: false,
+  },
+
+  computed: {
+    totalCount: function () {
+      var total = 0
+      this.posts.map(function (post) {
+        if ('votes' in post === false) return;
+        if ('like' in post.votes) {
+          total += post.votes.like
+        }
+        if ('dislike' in post.votes) {
+          total += post.votes.dislike
+        }
+      })
+      return total
+    }
+  },
+
+  created: function () {
+    this.setClient()
+    this.initPosts()
+    this.loadVotesAll()
+  },
+
+  filters: {
+    numFormat: function (num) {
+      num = parseInt(num)
+      if (isNaN(num)) return 0
+      return String(num).replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,')
+    }
+  },
+
+  methods: {
+    initPosts: function (votesData) {
+      for (let i = 1, n = 10; i <= n; i++) {
+        var contentId = ('0000' + i).slice(-4)
+        this.posts.push({
+          id: contentId,
+          userName: 'User' + i,
+          userId: 'user' + contentId,
+          votes: {
+            like: 0,
+            dislike: 0,
+          },
+        })
+      }
+    },
+
+    loadVotesAll: function () {
+      var _this = this
+      _this.isPageLoading = true
+      this.client.get(`/votes/${this.serviceId}`)
+        .then(function (res) {
+          _this.setVotesAll(res.data)
+          _this.isPageLoading = false
+        })
+        .catch(function (err) {
+          _this.isPageLoading = false
+          console.log(err)
+          alert('Error occurred')
+        })
+    },
+
+    setVotesAll: function (votesData) {
+      for (let i = 0, n = this.posts.length; i < n; i++) {
+        var contentId = this.posts[i].id
+        this.posts[i].votes.like = this.getVoteCount(votesData.items, contentId, 'like')
+        this.posts[i].votes.dislike = this.getVoteCount(votesData.items, contentId, 'dislike')
+      }
+    },
+
+    vote: function (contentId, voteType) {
+      var _this = this
+      this.client.post(`/votes/${this.serviceId}/${contentId}`, { 'type': voteType })
+        .then(function (res) {
+          _this.setVote(contentId, res.data)
+        })
+        .catch(function (err) {
+          console.log(err)
+          alert('Error occurred')
+        })
+    },
+
+    setVote: function (contentId, votesData) {
+      var idx = this.posts.findIndex(function (item) {
+        return item.id == contentId
+      })
+      this.posts[idx].votes = {
+        like: this.getVoteCount(votesData, contentId, 'like'),
+        dislike: this.getVoteCount(votesData, contentId, 'dislike'),
+      }
+    },
+
+    getVoteCount: function (items, contentId, voteType) {
+      if (!items) return 0;
+
+      var voteData = items.find(function (item) {
+        if (item.contentId != contentId) return false;
+        if (item.voteType != voteType) return false;
+        return true
+      })
+      return voteData != null ? voteData.voteCount : 0;
+    },
+
+    setClient: function () {
+      this.client = axios.create({
+        baseURL: this.apiBaseUrl,
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        responseType: 'json',
+        timeout: 3000,
+      })
+    },
+  },
+})
+</script>
+</body>
+</html>

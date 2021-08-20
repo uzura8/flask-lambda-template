@@ -5,7 +5,7 @@ bp = Blueprint('root', __name__)
 
 @bp.route('/')
 def index():
-    return jsonify({'message': 'Hello World!'})
+    return jsonify({'message': 'This is content-api'})
 
 
 @bp.route('/<path:path>')

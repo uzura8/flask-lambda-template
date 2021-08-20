@@ -17,27 +17,29 @@ Install python packages
 pip install -r requirement.txt
 ```
 
+Setup config files per stage
+
+```bash
+cp -r configs-sample configs
+vi configs/{stg-name}.yml
+```
+
 
 
 ## Work on local
 
-Set environment variables
+Setup venv
 
 ```bash
-cp env.sh.sample env.sh
-vi env.sh
+python3 -m venv .venv
+. .venv/bin/activate
 ```
 
+Start dynamodb local
+
 ```bash
-SERVICE="serverless-flask"
-STAGE="dev"
-export PRJ_PREFIX="${SERVICE}-${STAGE}"
-
-export AWS_PROFILE="your-profile-name"
-export AWS_REGION="ap-northeast-1"
-
-export BASE_URL="https://xxxxxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com/dev"
-export IS_LOCAL=0
+sls dynamodb install
+sls dynamodb start
 ```
 
 Execute below command
@@ -67,4 +69,32 @@ sls deploy --stage prd # Deploy for prod
 ```
 
 Request https://xxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com/dev
+
+
+
+## Development
+
+### Execute Backup task on local
+
+```bash
+serverless invoke local --function backupVoteLog
+```
+
+
+
+### Performance Test
+
+#### Setup K6
+
+Install for macOS
+
+```bash
+brew install k6
+```
+
+#### Execute
+
+```
+k6 run ./dev_tools/performance/vote.js --vus NN --duration MMs
+```
 

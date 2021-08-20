@@ -1,14 +1,21 @@
-service: serverless-flask
+service: content-api
 
 plugins:
   - serverless-python-requirements
   - serverless-wsgi
   - serverless-dynamodb-local
   - serverless-prune-plugin
+  - serverless-domain-manager
+  - serverless-api-gateway-throttling
+  - serverless-plugin-lambda-insights
+  - serverless-plugin-aws-alerts
+  - serverless-associate-waf
 
 custom:
-  prjPrefix: ${self:service}-${self:provider.stage}
   defaultStage: dev
+  prjPrefix: ${self:service}-${self:provider.stage}
+  stageConfigFileName: ./configs/${self:provider.stage}.yml
+  s3BucketName: ${self:custom.prjPrefix}-bucket
   wsgi:
     app: app/handler.app
     packRequirements: false
@@ -22,76 +29,186 @@ custom:
   prune:
     automatic: true
     number: 5
+  customDomain:
+    domainName: ${file(${self:custom.stageConfigFileName}):domainName}
+    stage: ${self:provider.stage}
+    basePath: 'api'
+    certificateName: ${self:custom.customDomain.domainName}
+    createRoute53Record: true
+    endpointType: 'regional'
+    securityPolicy: tls_1_2
+  apiGatewayThrottling:
+    maxRequestsPerSecond: 100
+    maxConcurrentRequests: 100
+  lambdaInsights:
+    defaultLambdaInsights: true #enables Lambda Insights for all functions
+  alerts:
+    stages:
+      - dev
+      - prd
+    topics:
+      alarm:
+        topic: ${self:custom.prjPrefix}-alerts-alarm
+        notifications:
+          - protocol: email
+            endpoint: ${file(${self:custom.stageConfigFileName}):notificationEmail}
+      #ok:
+      #  topic: ${self:custom.prjPrefix}-alerts-ok
+    alarms:
+      - functionErrors
+      - functionThrottles
+    definitions:
+      functionErrors:
+        period: 60
+  associateWaf:
+    name: web-api-acl # If need to use WAF, create WebACL named "web-api-acl". If not create, ignore this.
+    version: V2 #(optional) Regional | V2
 
 provider:
   name: aws
   runtime: python3.8
   stage: ${opt:stage, self:custom.defaultStage}
   region: ap-northeast-1
+  endpointType: REGIONAL
   #profile: your-aws-profile-name
   iam:
     role:
       statements:
         - Effect: Allow
           Action:
+            - dynamodb:DescribeTable
             - dynamodb:Query
             - dynamodb:Scan
             - dynamodb:GetItem
             - dynamodb:PutItem
             - dynamodb:UpdateItem
             - dynamodb:DeleteItem
-          Resource:
-            - { "Fn::GetAtt": ["UsersDynamoDBTable", "Arn" ] }
+          Resource: arn:aws:dynamodb:*:*:table/*
         - Effect: Allow
           Action:
             - logs:CreateLogGroup
             - logs:CreateLogStream
             - logs:PutLogEvents
           Resource:
-            - "*"
+            - '*'
+        #- Effect: 'Allow'
+        #  Action:
+        #    - 'dynamodb:*'
+        #  Resource: arn:aws:dynamodb:*:*:table/*
+        - Effect: Allow
+          Action:
+            - s3:ListBucket
+            - s3:GetObject
+            - s3:PutObject
+            - s3:DeleteObject
+          Resource: arn:aws:s3:::${self:custom.s3BucketName}/*
   logs:
     restApi:
-      accessLogging: false # Optional configuration which enables or disables access logging. Defaults to true.
-      executionLogging: false # Optional configuration which enables or disables execution logging. Defaults to true.
-      level: ERROR # Optional configuration which specifies the log level to use for execution logging. May be set to either INFO or ERROR.
-      fullExecutionData: true # Optional configuration which specifies whether or not to log full requests/responses for execution logging. Defaults to true.
+      accessLogging: ${file(${self:custom.stageConfigFileName}):logsRestApiAccessLogging}
+      executionLogging: ${file(${self:custom.stageConfigFileName}):logsRestApiExecutionLogging}
+      level: ${file(${self:custom.stageConfigFileName}):logsRestApiLevel}
+      fullExecutionData: ${file(${self:custom.stageConfigFileName}):logsRestApiFullExecutionData}
   logRetentionInDays: 14
   environment:
     PRJ_PREFIX: ${self:custom.prjPrefix}
+    APP_ROOT: /${self:custom.customDomain.basePath}
+    S3_BUCKET: ${self:custom.s3BucketName}
+    CORS_ACCEPT_ORIGINS: ${file(${self:custom.stageConfigFileName}):corsAcceptOrigins}
+    ACCEPT_SERVICE_IDS: ${file(${self:custom.stageConfigFileName}):acceptServiceIds}
+    ACCEPT_TYPES: ${file(${self:custom.stageConfigFileName}):acceptTypes}
+    BACKUP_VOTE_LOG_THRESHOLD_DAYS_OLDER_THAN : ${file(${self:custom.stageConfigFileName}):backupVoteLogThresholdDaysOlderThan}
+    BACKUP_VOTE_LOG_COUNT_FOR_ALL: ${file(${self:custom.stageConfigFileName}):backupVoteLogCountForAll}
+    BACKUP_VOTE_LOG_COUNT_FOR_EACH_SERVICE: ${file(${self:custom.stageConfigFileName}):backupVoteLogCountForEachService}
+
+package:
+  exclude:
+    - dev_tools/**
+    - node_modules/**
+    - configs-sample/**
+    - LICENSE
+    - README.md
+    - .venv/**
+    - __pycache__
+    - package-lock.json
 
 functions:
   app:
-    handler: wsgi.handler
+    handler: wsgi_handler.handler
+    memorySize: ${file(${self:custom.stageConfigFileName}):appMemorySize}
     events:
       - http: ANY /
-      - http: 'ANY {proxy+}'
-  #getUser:
-  #  handler: wsgi.handler
-  #  events:
-  #    - http: 'GET /users/{proxy+}'
-  #getUsers:
-  #  handler: wsgi.handler
-  #  events:
-  #    - http: 'GET /users'
-  #createUser:
-  #  handler: wsgi.handler
-  #  events:
-  #    - http: 'POST /users'
+      - http: ANY /{proxy+}
+    provisionedConcurrency: 2
+  backupVoteLog:
+    handler: app/backup_vote_log.main
+    memorySize: ${file(${self:custom.stageConfigFileName}):backupVoteLogMemorySize}
+    events:
+      - schedule: ${file(${self:custom.stageConfigFileName}):backupVoteLogEventSchedule}
 
 resources:
   Resources:
-    UsersDynamoDBTable:
+    Bucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.s3BucketName}
+    VoteLogDynamoDBTable:
       Type: 'AWS::DynamoDB::Table'
       Properties:
+        TableName: ${self:custom.prjPrefix}-vote-log
         AttributeDefinitions:
           -
-            AttributeName: userId
+            AttributeName: serviceId
+            AttributeType: S
+          -
+            AttributeName: createdAt
             AttributeType: S
         KeySchema:
           -
-            AttributeName: userId
+            AttributeName: serviceId
             KeyType: HASH
+          -
+            AttributeName: createdAt
+            KeyType: RANGE
         ProvisionedThroughput:
           ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
-        TableName: ${self:custom.prjPrefix}-users
+          WriteCapacityUnits: 5
+        #BillingMode: PAY_PER_REQUEST
+    VoteCountDynamoDBTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        TableName: ${self:custom.prjPrefix}-vote-count
+        AttributeDefinitions:
+          -
+            AttributeName: serviceId
+            AttributeType: S
+          -
+            AttributeName: contentId
+            AttributeType: S
+          -
+            AttributeName: contentIdType
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: serviceId
+            KeyType: HASH
+          -
+            AttributeName: contentIdType
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 8
+          WriteCapacityUnits: 8
+        #BillingMode: PAY_PER_REQUEST
+        LocalSecondaryIndexes:
+          -
+            IndexName: ${self:custom.prjPrefix}-vote-count-lsi
+            KeySchema:
+            -
+              AttributeName: serviceId
+              KeyType: HASH
+            -
+              AttributeName: contentId
+              KeyType: RANGE
+            Projection:
+              NonKeyAttributes:
+              - voteCount
+              ProjectionType: INCLUDE

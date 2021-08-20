@@ -19,6 +19,8 @@ nbproject/
 __pycache__
 .venv
 
-/env.sh
+/dev_tools/env.sh
 /.serverless
 /.dynamodb
+
+/configs/*

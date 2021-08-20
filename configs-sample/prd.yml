@@ -1,0 +1,15 @@
+domainName: content-api.example.com
+corsAcceptOrigins: 'https://prod.example.com,https://stg.example.com'
+acceptServiceIds: "hoge,fuga"
+acceptTypes: "like,dislike"
+notificationEmail: admin@example.com
+logsRestApiAccessLogging: false # Optional configuration which enables or disables access logging. Defaults to true.
+logsRestApiExecutionLogging: false # Optional configuration which enables or disables execution logging. Defaults to true.
+logsRestApiLevel: ERROR # Optional configuration which specifies the log level to use for execution logging. May be set to either INFO or ERROR.
+logsRestApiFullExecutionData: true # Optional configuration which specifies whether or not to log full requests/responses for execution logging. Defaults to true.
+appMemorySize: 256
+backupVoteLogThresholdDaysOlderThan: 14 # Days
+backupVoteLogCountForAll: 1000
+backupVoteLogCountForEachService: 500
+backupVoteLogMemorySize: 516
+backupVoteLogEventSchedule: rate(7 days)
