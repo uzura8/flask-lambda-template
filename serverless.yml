@@ -93,7 +93,15 @@ provider:
     BACKUP_VOTE_LOG_COUNT_FOR_EACH_SERVICE: ${file(${self:custom.stageConfigFileName}):backupVoteLogCountForEachService}
 
 package:
-  exclude: ${file(./config/exclude-files.yml)}
+  exclude:
+    - dev_tools/**
+    - node_modules/**
+    - config/stages-sample/**
+    - LICENSE
+    - README.md
+    - .venv/**
+    - __pycache__
+    - package-lock.json
 
 functions:
   app:

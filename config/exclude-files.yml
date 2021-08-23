@@ -1,8 +1,0 @@
-- dev_tools/**
-- node_modules/**
-- config/stages-sample/**
-- LICENSE
-- README.md
-- .venv/**
-- __pycache__
-- package-lock.json
