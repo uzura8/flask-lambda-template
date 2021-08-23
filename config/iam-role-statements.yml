@@ -1,0 +1,28 @@
+- Effect: Allow
+  Action:
+    - dynamodb:DescribeTable
+    - dynamodb:Query
+    - dynamodb:Scan
+    - dynamodb:GetItem
+    - dynamodb:PutItem
+    - dynamodb:UpdateItem
+    - dynamodb:DeleteItem
+  Resource: arn:aws:dynamodb:*:*:table/*
+- Effect: Allow
+  Action:
+    - logs:CreateLogGroup
+    - logs:CreateLogStream
+    - logs:PutLogEvents
+  Resource:
+    - '*'
+#- Effect: 'Allow'
+#  Action:
+#    - 'dynamodb:*'
+#  Resource: arn:aws:dynamodb:*:*:table/*
+- Effect: Allow
+  Action:
+    - s3:ListBucket
+    - s3:GetObject
+    - s3:PutObject
+    - s3:DeleteObject
+  Resource: arn:aws:s3:::${self:custom.s3BucketName}/*

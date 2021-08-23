@@ -1,0 +1,38 @@
+Type: 'AWS::DynamoDB::Table'
+Properties:
+  TableName: ${self:custom.prjPrefix}-vote-count
+  AttributeDefinitions:
+    -
+      AttributeName: serviceId
+      AttributeType: S
+    -
+      AttributeName: contentId
+      AttributeType: S
+    -
+      AttributeName: contentIdType
+      AttributeType: S
+  KeySchema:
+    -
+      AttributeName: serviceId
+      KeyType: HASH
+    -
+      AttributeName: contentIdType
+      KeyType: RANGE
+  ProvisionedThroughput:
+    ReadCapacityUnits: 8
+    WriteCapacityUnits: 8
+  #BillingMode: PAY_PER_REQUEST
+  LocalSecondaryIndexes:
+    -
+      IndexName: ${self:custom.prjPrefix}-vote-count-lsi
+      KeySchema:
+      -
+        AttributeName: serviceId
+        KeyType: HASH
+      -
+        AttributeName: contentId
+        KeyType: RANGE
+      Projection:
+        NonKeyAttributes:
+        - voteCount
+        ProjectionType: INCLUDE

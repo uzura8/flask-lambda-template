@@ -1,4 +1,4 @@
-service: ${file(./config/common.yml):service}
+service: ${file(./config/stages/common.yml):service}
 
 plugins:
   - serverless-python-requirements
@@ -14,7 +14,7 @@ plugins:
 custom:
   defaultStage: dev
   prjPrefix: ${self:service}-${self:provider.stage}
-  stageConfigFileName: ./config/${self:provider.stage}.yml
+  stageConfigFileName: ./config/stages/${self:provider.stage}.yml
   s3BucketName: ${self:custom.prjPrefix}-bucket
   wsgi:
     app: app/handler.app
@@ -73,35 +73,7 @@ provider:
   #profile: your-aws-profile-name
   iam:
     role:
-      statements:
-        - Effect: Allow
-          Action:
-            - dynamodb:DescribeTable
-            - dynamodb:Query
-            - dynamodb:Scan
-            - dynamodb:GetItem
-            - dynamodb:PutItem
-            - dynamodb:UpdateItem
-            - dynamodb:DeleteItem
-          Resource: arn:aws:dynamodb:*:*:table/*
-        - Effect: Allow
-          Action:
-            - logs:CreateLogGroup
-            - logs:CreateLogStream
-            - logs:PutLogEvents
-          Resource:
-            - '*'
-        #- Effect: 'Allow'
-        #  Action:
-        #    - 'dynamodb:*'
-        #  Resource: arn:aws:dynamodb:*:*:table/*
-        - Effect: Allow
-          Action:
-            - s3:ListBucket
-            - s3:GetObject
-            - s3:PutObject
-            - s3:DeleteObject
-          Resource: arn:aws:s3:::${self:custom.s3BucketName}/*
+      statements: ${file(./config/iam-role-statements.yml)}
   logs:
     restApi:
       accessLogging: ${file(${self:custom.stageConfigFileName}):logsRestApiAccessLogging}
@@ -121,15 +93,7 @@ provider:
     BACKUP_VOTE_LOG_COUNT_FOR_EACH_SERVICE: ${file(${self:custom.stageConfigFileName}):backupVoteLogCountForEachService}
 
 package:
-  exclude:
-    - dev_tools/**
-    - node_modules/**
-    - config-sample/**
-    - LICENSE
-    - README.md
-    - .venv/**
-    - __pycache__
-    - package-lock.json
+  exclude: ${file(./config/exclude-files.yml)}
 
 functions:
   app:
@@ -151,64 +115,5 @@ resources:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: ${self:custom.s3BucketName}
-    VoteLogDynamoDBTable:
-      Type: 'AWS::DynamoDB::Table'
-      Properties:
-        TableName: ${self:custom.prjPrefix}-vote-log
-        AttributeDefinitions:
-          -
-            AttributeName: serviceId
-            AttributeType: S
-          -
-            AttributeName: createdAt
-            AttributeType: S
-        KeySchema:
-          -
-            AttributeName: serviceId
-            KeyType: HASH
-          -
-            AttributeName: createdAt
-            KeyType: RANGE
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 5
-        #BillingMode: PAY_PER_REQUEST
-    VoteCountDynamoDBTable:
-      Type: 'AWS::DynamoDB::Table'
-      Properties:
-        TableName: ${self:custom.prjPrefix}-vote-count
-        AttributeDefinitions:
-          -
-            AttributeName: serviceId
-            AttributeType: S
-          -
-            AttributeName: contentId
-            AttributeType: S
-          -
-            AttributeName: contentIdType
-            AttributeType: S
-        KeySchema:
-          -
-            AttributeName: serviceId
-            KeyType: HASH
-          -
-            AttributeName: contentIdType
-            KeyType: RANGE
-        ProvisionedThroughput:
-          ReadCapacityUnits: 8
-          WriteCapacityUnits: 8
-        #BillingMode: PAY_PER_REQUEST
-        LocalSecondaryIndexes:
-          -
-            IndexName: ${self:custom.prjPrefix}-vote-count-lsi
-            KeySchema:
-            -
-              AttributeName: serviceId
-              KeyType: HASH
-            -
-              AttributeName: contentId
-              KeyType: RANGE
-            Projection:
-              NonKeyAttributes:
-              - voteCount
-              ProjectionType: INCLUDE
+    VoteLogDynamoDBTable: ${file(./config/dynamodb/vote-log.yml)}
+    VoteCountDynamoDBTable: ${file(./config/dynamodb/vote-count.yml)}
