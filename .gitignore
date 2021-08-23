@@ -19,8 +19,11 @@ nbproject/
 __pycache__
 .venv
 
-/dev_tools/env.sh
 /.serverless
+/.serverless-wsgi
+/serverless_wsgi.py
+/wsgi_handler.py
 /.dynamodb
 
+/dev_tools/env.sh
 /config/stages/*
