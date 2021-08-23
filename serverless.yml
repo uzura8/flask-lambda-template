@@ -1,4 +1,4 @@
-service: ${file(./configs/common.yml):service}
+service: ${file(./config/common.yml):service}
 
 plugins:
   - serverless-python-requirements
@@ -14,7 +14,7 @@ plugins:
 custom:
   defaultStage: dev
   prjPrefix: ${self:service}-${self:provider.stage}
-  stageConfigFileName: ./configs/${self:provider.stage}.yml
+  stageConfigFileName: ./config/${self:provider.stage}.yml
   s3BucketName: ${self:custom.prjPrefix}-bucket
   wsgi:
     app: app/handler.app
@@ -124,7 +124,7 @@ package:
   exclude:
     - dev_tools/**
     - node_modules/**
-    - configs-sample/**
+    - config-sample/**
     - LICENSE
     - README.md
     - .venv/**

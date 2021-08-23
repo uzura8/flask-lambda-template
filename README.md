@@ -20,8 +20,8 @@ pip install -r requirement.txt
 Setup config files per stage
 
 ```bash
-cp -r configs-sample configs
-vi configs/{stg-name}.yml
+cp -r config-sample config
+vi config/{stg-name}.yml
 ```
 
 
