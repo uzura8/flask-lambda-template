@@ -13,37 +13,6 @@ VOTE_LOG_TABLE = '-'.join([PRJ_PREFIX, 'vote-log'])
 VOTE_COUNT_TABLE = '-'.join([PRJ_PREFIX, 'vote-count'])
 ACCEPT_SERVICE_IDS = os.environ.get('ACCEPT_SERVICE_IDS', '').split(',')
 ACCEPT_TYPES = os.environ.get('ACCEPT_TYPES', '').split(',')
-cors_accept_origins_str = os.environ.get('CORS_ACCEPT_ORIGINS', '')
-CORS_ACCEPT_ORIGINS = cors_accept_origins_str.split(',') if cors_accept_origins_str else []
-
-
-@bp.errorhandler(InvalidUsage)
-def handle_invalid_usage(error):
-    response = jsonify(error.to_dict())
-    response.status_code = error.status_code
-    return response
-
-
-@bp.after_request
-def add_cors_headers(response):
-    response.headers.add('X-Content-Type-Options', 'nosniff')
-
-    r = request.referrer[:-1] if request.referrer else None
-    if not CORS_ACCEPT_ORIGINS:
-        response.headers.add('Access-Control-Allow-Origin', '*')
-
-    elif r is not None and r in CORS_ACCEPT_ORIGINS:
-        response.headers.add('Access-Control-Allow-Origin', r)
-
-    if not CORS_ACCEPT_ORIGINS or r is not None and r in CORS_ACCEPT_ORIGINS:
-        response.headers.add('Access-Control-Allow-Credentials', 'true')
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
-        response.headers.add('Access-Control-Allow-Headers', 'Cache-Control')
-        response.headers.add('Access-Control-Allow-Headers', 'X-Requested-With')
-        response.headers.add('Access-Control-Allow-Headers', 'Authorization')
-        response.headers.add('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE')
-
-    return response
 
 
 @bp.route('/<string:service_id>', methods=['GET'])
