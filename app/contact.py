@@ -30,6 +30,7 @@ def contats(service_id):
         return jsonify(body), 400
 
     vals = form.get_dict()
+    vals['serviceId'] = service_id
     vals['code'], vals['serviceIdCode'] = create_code(service_id)
     time = utc_iso(True, True)
     vals['createdAt'] = time
