@@ -1,10 +1,9 @@
 import os
 import re
+from flask import current_app
 from flask_wtf import FlaskForm, RecaptchaField
 from wtforms import StringField, TextAreaField, RadioField
 from wtforms.validators import ValidationError, DataRequired, Email, Length
-
-CONTACT_USE_RECAPTCHA = os.environ.get('CONTACT_USE_RECAPTCHA', 'False').lower() == 'true'
 
 
 class Contact(FlaskForm):
@@ -29,7 +28,7 @@ class Contact(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if CONTACT_USE_RECAPTCHA:
+        if current_app.config['CONTACT_RECAPTCHA_ENABLED']:
             self.recaptcha = RecaptchaField()
 
 

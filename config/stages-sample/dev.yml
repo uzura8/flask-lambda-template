@@ -16,4 +16,7 @@ backupVoteLogCountForEachService: 5
 backupVoteLogMemorySize: 128
 backupVoteLogEventSchedule: rate(3 minutes)
 
-contactUseRecaptcha: false
+contactRecaptchaEnabled: false
+contactRecaptchaUseSSL: false
+contactRecaptchaPublicKey: ''
+contactRecaptchaPrivateKey: ''

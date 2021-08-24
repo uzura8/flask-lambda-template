@@ -14,6 +14,15 @@ app = Flask(__name__)
 app.url_map.strict_slashes = False
 app.json_encoder = DecimalEncoder
 
+app.config['CONTACT_RECAPTCHA_ENABLED'] = \
+        os.environ.get('CONTACT_RECAPTCHA_ENABLED', 'False').lower() == 'true'
+if app.config['CONTACT_RECAPTCHA_ENABLED']:
+    app.config['RECAPTCHA_USE_SSL'] = \
+            os.environ.get('CONTACT_RECAPTCHA_USE_SSL', 'False').lower() == 'true'
+    app.config['RECAPTCHA_PUBLIC_KEY'] = os.environ.get('CONTACT_RECAPTCHA_PUBLIC_KEY', '')
+    app.config['RECAPTCHA_PRIVATE_KEY'] = os.environ.get('CONTACT_RECAPTCHA_PRIVATE_KEY', '')
+
+
 # get prefix from environment variable
 APP_ROOT = os.getenv('APP_ROOT')
 if not APP_ROOT is None:
