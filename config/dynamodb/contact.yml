@@ -1,0 +1,41 @@
+Type: 'AWS::DynamoDB::Table'
+Properties:
+  TableName: ${self:custom.prjPrefix}-contact
+  AttributeDefinitions:
+    -
+      AttributeName: serviceId
+      AttributeType: S
+    -
+      AttributeName: updatedAt
+      AttributeType: S
+    -
+      AttributeName: serviceIdCode
+      AttributeType: S
+  KeySchema:
+    -
+      AttributeName: serviceIdCode
+      KeyType: HASH
+  ProvisionedThroughput:
+    ReadCapacityUnits: 5
+    WriteCapacityUnits: 3
+  #BillingMode: PAY_PER_REQUEST
+
+  GlobalSecondaryIndexes:
+    -
+      IndexName: ${self:custom.prjPrefix}-contact-list-gsi
+      KeySchema:
+      -
+        AttributeName: serviceId
+        KeyType: HASH
+      -
+        AttributeName: updatedAt
+        KeyType: RANGE
+      Projection:
+        NonKeyAttributes:
+          - code
+          - status
+          - subject
+        ProjectionType: INCLUDE
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 3

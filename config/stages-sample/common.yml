@@ -1,1 +1,4 @@
 service: content-api
+
+contactSubject: 'Inquiries accepted'
+contactTypes: '[{"val":"1","label":"About this site"},{"val":"2","label":"About defects"},{"val":"3","label":"Others"}]'

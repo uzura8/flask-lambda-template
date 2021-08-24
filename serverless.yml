@@ -91,6 +91,9 @@ provider:
     BACKUP_VOTE_LOG_THRESHOLD_DAYS_OLDER_THAN : ${file(${self:custom.stageConfigFileName}):backupVoteLogThresholdDaysOlderThan}
     BACKUP_VOTE_LOG_COUNT_FOR_ALL: ${file(${self:custom.stageConfigFileName}):backupVoteLogCountForAll}
     BACKUP_VOTE_LOG_COUNT_FOR_EACH_SERVICE: ${file(${self:custom.stageConfigFileName}):backupVoteLogCountForEachService}
+    CONTACT_SUBJECT: ${file(./config/stages/common.yml):contactSubject}
+    CONTACT_TYPES: ${file(./config/stages/common.yml):contactTypes}
+    CONTACT_USE_RECAPTCHA: ${file(${self:custom.stageConfigFileName}):contactUseRecaptcha}
 
 package:
   exclude:
@@ -125,3 +128,4 @@ resources:
         BucketName: ${self:custom.s3BucketName}
     VoteLogDynamoDBTable: ${file(./config/dynamodb/vote-log.yml)}
     VoteCountDynamoDBTable: ${file(./config/dynamodb/vote-count.yml)}
+    ContactDynamoDBTable: ${file(./config/dynamodb/contact.yml)}

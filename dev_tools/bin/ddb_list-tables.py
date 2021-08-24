@@ -79,17 +79,6 @@ class DynamoDBHandler:
         return table.item_count
 
 
-    def delete_items_by_limit(self, table_name, limit):
-        table = self.get_table(table_name)
-        resp = table.scan(
-            Limit=limit
-        )
-        first = resp['Items'][0]
-        end = resp['Items'][-1]
-        pprint([first, end])
-        get_all_by_period()
-
-
 ddh = DynamoDBHandler(IS_LOCAL)
 tables = ddh.list_tables()
 pprint(tables)
@@ -107,3 +96,5 @@ res = ddh.get_table_count('vote-log')
 pprint(res)
 #res = ddh.get_all_by_limit('vote-log', 10)
 #pprint(res)
+res = ddh.scan('contact')
+pprint(res)

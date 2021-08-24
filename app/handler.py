@@ -5,6 +5,7 @@ from app.common.error import InvalidUsage
 from app.common.decimal_encoder import DecimalEncoder
 from app.root import bp as root_module
 from app.vote import bp as vote_module
+from app.contact import bp as contact_module
 
 cors_accept_origins_str = os.environ.get('CORS_ACCEPT_ORIGINS', '')
 CORS_ACCEPT_ORIGINS = cors_accept_origins_str.split(',') if cors_accept_origins_str else []
@@ -65,4 +66,5 @@ def add_cors_headers(response):
 
 
 app.register_blueprint(vote_module)
+app.register_blueprint(contact_module)
 app.register_blueprint(root_module)
