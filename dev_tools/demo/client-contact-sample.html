@@ -263,7 +263,7 @@ new Vue ({
       }
     },
 
-    postFields: function () {
+    postFields: function (recaptchaToken) {
       var vals = {
         contact_type: this.contactType,
         name: this.name,
@@ -272,6 +272,7 @@ new Vue ({
         tel: this.tel,
         content: this.content,
       }
+      if (recaptchaToken) vals['recaptcha'] = recaptchaToken
 
       var _this = this
       this.client.post(`/contacts/${this.serviceId}`, vals)
