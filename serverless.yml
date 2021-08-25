@@ -92,16 +92,6 @@ provider:
     BACKUP_VOTE_LOG_COUNT_FOR_ALL: ${file(${self:custom.stageConfigFileName}):backupVoteLogCountForAll}
     BACKUP_VOTE_LOG_COUNT_FOR_EACH_SERVICE: ${file(${self:custom.stageConfigFileName}):backupVoteLogCountForEachService}
     SES_REGION: ${file(./config/stages/common.yml):sesRegion}
-    CONTACT_SUBJECT: ${file(./config/stages/common.yml):contactSubject}
-    CONTACT_TYPES: ${file(./config/stages/common.yml):contactTypes}
-    CONTACT_EMAIL_FROM: ${file(./config/stages/common.yml):contactEmailFrom}
-    CONTACT_EMAIL_FROM_NAME: ${file(./config/stages/common.yml):contactEmailFromName}
-    CONTACT_EMAIL_COMPANY_NAME: ${file(./config/stages/common.yml):contactEmailCompanyName}
-    CONTACT_EMAIL_COMPANY_SITE_URL: ${file(./config/stages/common.yml):contactEmailCompanySiteUrl}
-    CONTACT_RECAPTCHA_ENABLED: ${file(${self:custom.stageConfigFileName}):contactRecaptchaEnabled}
-    CONTACT_RECAPTCHA_USE_SSL: ${file(${self:custom.stageConfigFileName}):contactRecaptchaUseSSL}
-    CONTACT_RECAPTCHA_PUBLIC_KEY: ${file(${self:custom.stageConfigFileName}):contactRecaptchaPublicKey}
-    CONTACT_RECAPTCHA_PRIVATE_KEY: ${file(${self:custom.stageConfigFileName}):contactRecaptchaPrivateKey}
 
 package:
   exclude:

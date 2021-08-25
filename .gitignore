@@ -29,3 +29,4 @@ __pycache__
 /dev_tools/var/*
 /config/stages/*
 /config/templates/*
+/config/contact/*

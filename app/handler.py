@@ -12,8 +12,7 @@ CORS_ACCEPT_ORIGINS = cors_accept_origins_str.split(',') if cors_accept_origins_
 
 app = Flask(
     __name__,
-    #static_folder='statics',
-    template_folder='../config/templates')
+    template_folder='../config')
 app.url_map.strict_slashes = False
 app.json_encoder = DecimalEncoder
 
@@ -27,14 +26,6 @@ jinja_options.update({
     'comment_end_string': '#]'
 })
 app.jinja_options = jinja_options
-
-app.config['CONTACT_RECAPTCHA_ENABLED'] = \
-        os.environ.get('CONTACT_RECAPTCHA_ENABLED', 'False').lower() == 'true'
-if app.config['CONTACT_RECAPTCHA_ENABLED']:
-    app.config['RECAPTCHA_USE_SSL'] = \
-            os.environ.get('CONTACT_RECAPTCHA_USE_SSL', 'False').lower() == 'true'
-    app.config['RECAPTCHA_PUBLIC_KEY'] = os.environ.get('CONTACT_RECAPTCHA_PUBLIC_KEY', '')
-    app.config['RECAPTCHA_PRIVATE_KEY'] = os.environ.get('CONTACT_RECAPTCHA_PRIVATE_KEY', '')
 
 
 # get prefix from environment variable

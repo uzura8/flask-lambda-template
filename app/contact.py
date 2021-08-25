@@ -1,6 +1,7 @@
 import os
 import json
-from flask import Blueprint, jsonify, request, render_template
+import configparser
+from flask import current_app, Blueprint, jsonify, request, render_template
 from dynamodb import dynamodb
 from app.common.email import send_email_on_ses
 from app.common.date import utc_iso
@@ -13,15 +14,7 @@ bp = Blueprint('contact', __name__, url_prefix='/contacts')
 PRJ_PREFIX = os.environ['PRJ_PREFIX']
 CONTACT_TABLE = '-'.join([PRJ_PREFIX, 'contact'])
 ACCEPT_SERVICE_IDS = os.environ.get('ACCEPT_SERVICE_IDS', '').split(',')
-CONTACT_SUBJECT = os.environ.get('CONTACT_SUBJECT', '')
-CONTACT_EMAIL_FROM = os.environ.get('CONTACT_EMAIL_FROM', '')
-CONTACT_EMAIL_FROM_NAME = os.environ.get('CONTACT_EMAIL_FROM_NAME', '')
-CONTACT_EMAIL_COMPANY_NAME = os.environ.get('CONTACT_EMAIL_COMPANY_NAME', '')
-CONTACT_EMAIL_COMPANY_SITE_URL = os.environ.get('CONTACT_EMAIL_COMPANY_SITE_URL', '')
 SES_REGION = os.environ.get('SES_REGION')
-
-contact_types = json.loads(os.environ.get('CONTACT_TYPES', ''))
-contact_type_choices = [(i['val'], i['label']) for i in contact_types]
 
 
 @bp.route('/<string:service_id>', methods=['POST'])
@@ -29,8 +22,10 @@ def contats(service_id):
     if service_id not in ACCEPT_SERVICE_IDS:
         raise InvalidUsage('ServiceId does not exist', 404)
 
+    config = set_service_ini(service_id)
+
     form = ContactForm()
-    form.contact_type.choices = contact_type_choices
+    form.contact_type.choices = config['type_choices']
     if not form.validate_on_submit():
         body = {'errors':form.errors}
         return jsonify(body), 400
@@ -42,7 +37,7 @@ def contats(service_id):
     vals['createdAt'] = time
     vals['updatedAt'] = time
     vals['status'] = 0
-    vals['subject'] = CONTACT_SUBJECT
+    vals['subject'] = config['subject']
     vals['ip'] = request.remote_addr
     vals['ua'] = request.headers.get('User-Agent')
     table = dynamodb.Table(CONTACT_TABLE)
@@ -61,8 +56,33 @@ def contats(service_id):
     #        current_app.config['DEFAULT_TIMEZONE'],
     #        '%Y/%m/%d %H:%M'
     #    )
-    send_contact_email(body['email'], body['subject'], body)
+    template_path = 'contact/{}/template.txt'.format(service_id)
+    send_contact_email(body['email'], body['subject'], body, template_path,
+                        config['email_from'], config['email_from_name'])
     return jsonify(body), 200
+
+
+def set_service_ini(service_id):
+    ini = configparser.ConfigParser()
+    ini.read('config/contact/{}/config.ini'.format(service_id), encoding='utf-8')
+
+    recaptcha_enabled = ini.get('recaptcha', 'enabled').lower() == 'true'
+    current_app.config['CONTACT_RECAPTCHA_ENABLED'] = recaptcha_enabled
+    if recaptcha_enabled:
+        current_app.config['RECAPTCHA_USE_SSL'] = \
+                ini.get('recaptcha', 'useSSL').lower() == 'true'
+        current_app.config['RECAPTCHA_PUBLIC_KEY'] = ini.get('recaptcha', 'publicKey')
+        current_app.config['RECAPTCHA_PRIVATE_KEY'] = ini.get('recaptcha', 'privateKey')
+
+    res = {}
+    res['subject'] = ini.get('mail', 'subject')
+    res['email_from'] = ini.get('mail', 'emailFrom')
+    res['email_from_name'] = ini.get('mail', 'emailFromName')
+
+    types = json.loads(ini.get('form', 'types'))
+    res['type_choices'] = [(i['val'], i['label']) for i in types]
+
+    return res
 
 
 def create_code(service_id):
@@ -87,17 +107,15 @@ def create_code(service_id):
     return code, service_id_code
 
 
-def send_contact_email(email_to, subject, inputs):
+def send_contact_email(email_to, subject, inputs, template_path, email_from, email_from_name=''):
     send_email_on_ses(
         subject,
-        sender=(CONTACT_EMAIL_FROM_NAME, CONTACT_EMAIL_FROM),
-        recipients=[email_to, CONTACT_EMAIL_FROM],
+        sender=(email_from_name, email_from),
+        recipients=[email_to, email_from],
         text_body=render_template(
-            'email/contact.txt',
+            template_path,
             email_to=email_to,
             inputs=inputs,
-            company_name=CONTACT_EMAIL_COMPANY_NAME,
-            company_site_url=CONTACT_EMAIL_COMPANY_SITE_URL,
         ),
         region=SES_REGION
     )

@@ -280,8 +280,9 @@ new Vue ({
           alert('Complete')
         })
         .catch(function (err) {
-          console.log(err.response)
-          if (err.response.status == 400 && 'errors' in err.response.data && err.response.data.errors != null) {
+          console.log(err)
+          if ('status' in err && err.response.status == 400 && 'errors' in err.response.data && err.response.data.errors != null) {
+            console.log(err.response)
             for (field in err.response.data.errors) {
               _this.errors[field] = err.response.data.errors[field][0]
             }
@@ -358,7 +359,7 @@ new Vue ({
           'Content-Type': 'application/json',
         },
         responseType: 'json',
-        timeout: 3000,
+        timeout: 10000,
       })
     },
 
