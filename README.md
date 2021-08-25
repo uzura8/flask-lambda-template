@@ -21,7 +21,9 @@ Setup config files per stage
 
 ```bash
 cp -r config/stages-sample config/stages
+cp -r config/templates-sample config/templates
 vi config/stages-sample/*
+vi config/templates/*
 ```
 
 

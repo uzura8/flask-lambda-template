@@ -10,19 +10,19 @@ class Contact(FlaskForm):
     class Meta:
         csrf = False
 
-    contact_type = RadioField('種別', choices=[], validators=[DataRequired()])
-    name = StringField('名前', validators=[DataRequired(), Length(max=248)])
-    name_phonetic = StringField('フリガナ',
+    contact_type = RadioField('Kinds', choices=[], validators=[DataRequired()])
+    name = StringField('Name', validators=[DataRequired(), Length(max=248)])
+    name_phonetic = StringField('Phonetic Name',
                 validators=[DataRequired(), Length(max=248)])
-    email = StringField('メールアドレス',
+    email = StringField('Email',
                 validators=[
                     DataRequired(),
-                    Email(message='メールアドレスが正しくありません。'),
+                    Email(message='Email is invalid'),
                     Length(max=128)
                 ])
-    tel = StringField('電話番号',
+    tel = StringField('Tel',
                 validators=[DataRequired(), Length(min=10, max=11)])
-    content = TextAreaField('内容', [DataRequired(), Length(max=3000)])
+    content = TextAreaField('Content', [DataRequired(), Length(max=3000)])
     recaptcha = None
 
 
@@ -37,7 +37,7 @@ class Contact(FlaskForm):
         pattern = r'^(0[5-9]0[0-9]{8}|0[1-9][1-9][0-9]{7})$'
         matches = re.match(pattern, field.data)
         if matches is None:
-            raise ValidationError('電話番号が正しくありません。')
+            raise ValidationError('Tel is invalid')
 
 
     def get_dict(self):

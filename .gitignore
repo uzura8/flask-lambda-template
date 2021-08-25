@@ -26,4 +26,6 @@ __pycache__
 /.dynamodb
 
 /dev_tools/env.sh
+/dev_tools/var/*
 /config/stages/*
+/config/templates/*

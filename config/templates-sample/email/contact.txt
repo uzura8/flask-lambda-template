@@ -1,0 +1,36 @@
+Dear [[ inputs.name ]]
+
+Thank you for contacting us from our website.
+We will contact you shortly after confirming the contents.
+Now, please wait a moment.
+
+
+Accepted contents
+-----------------
+[Receipt number]
+[[ inputs.code ]]
+
+[Reception time]
+[[ inputs.created_at_formatted ]]
+
+[Kinds]
+[[ inputs.contact_type_label ]]
+
+[Name]
+[[ inputs.name ]]
+
+[Phonetic Name]
+[[ inputs.name_phonetic ]]
+
+[Email]
+[[ email_to ]]
+
+[Tel]
+[[ inputs.tel ]]
+
+[Content]
+[[ inputs.content ]]
+----------
+
+* [[ company_name ]]
+* [[ company_site_url ]]

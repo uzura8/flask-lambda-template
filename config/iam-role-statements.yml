@@ -26,3 +26,8 @@
     - s3:PutObject
     - s3:DeleteObject
   Resource: arn:aws:s3:::${self:custom.s3BucketName}/*
+- Effect: Allow
+  Action:
+    - ses:SendEmail
+    - ses:SendRawEmail
+  Resource: '*'

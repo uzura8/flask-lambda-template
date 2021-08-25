@@ -10,9 +10,23 @@ from app.contact import bp as contact_module
 cors_accept_origins_str = os.environ.get('CORS_ACCEPT_ORIGINS', '')
 CORS_ACCEPT_ORIGINS = cors_accept_origins_str.split(',') if cors_accept_origins_str else []
 
-app = Flask(__name__)
+app = Flask(
+    __name__,
+    #static_folder='statics',
+    template_folder='../config/templates')
 app.url_map.strict_slashes = False
 app.json_encoder = DecimalEncoder
+
+jinja_options = app.jinja_options.copy()
+jinja_options.update({
+    'block_start_string': '[%',
+    'block_end_string': '%]',
+    'variable_start_string': '[[',
+    'variable_end_string': ']]',
+    'comment_start_string': '[#',
+    'comment_end_string': '#]'
+})
+app.jinja_options = jinja_options
 
 app.config['CONTACT_RECAPTCHA_ENABLED'] = \
         os.environ.get('CONTACT_RECAPTCHA_ENABLED', 'False').lower() == 'true'
