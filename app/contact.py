@@ -1,5 +1,7 @@
 import os
 import json
+import datetime
+import pytz
 import configparser
 from flask import current_app, Blueprint, jsonify, request, render_template
 from dynamodb import dynamodb
@@ -24,18 +26,21 @@ def contats(service_id):
 
     config = set_service_ini(service_id)
 
+    time_utc = utc_iso(True, True)
+    timezone = validate_timezone(request.headers.get('Time-Zone', ''), config['default_timezone'])
+    tz_local = pytz.timezone(timezone)
+    time_local = datetime.datetime.now(tz_local).strftime('%Y/%m/%d %H:%M')
+
     form = ContactForm()
     form.contact_type.choices = config['type_choices']
     if not form.validate_on_submit():
-        body = {'errors':form.errors}
-        return jsonify(body), 400
+        raise InvalidUsage('Requested data is invalid', 400, {'errors':form.errors})
 
     vals = form.get_dict()
     vals['serviceId'] = service_id
     vals['code'], vals['serviceIdCode'] = create_code(service_id)
-    time = utc_iso(True, True)
-    vals['createdAt'] = time
-    vals['updatedAt'] = time
+    vals['createdAt'] = time_utc
+    vals['updatedAt'] = time_utc
     vals['status'] = 0
     vals['subject'] = config['subject']
     vals['ip'] = request.remote_addr
@@ -46,16 +51,7 @@ def contats(service_id):
 
     types = form.contact_type.choices
     body['contact_type_label'] = [ label for val, label in types if val == body['contact_type'] ][0]
-    body['created_at_formatted'] = time
-    #if not current_app.config['DEFAULT_TIMEZONE']:
-    #    body['created_at_formatted'] = body['created_at'].\
-    #                                        strftime('%Y/%m/%d %H:%M')
-    #else:
-    #    body['created_at_formatted'] = conv_dt_from_utc(
-    #        body['created_at'],
-    #        current_app.config['DEFAULT_TIMEZONE'],
-    #        '%Y/%m/%d %H:%M'
-    #    )
+    body['created_at_formatted'] = time_local
     template_path = 'contact/{}/template.txt'.format(service_id)
     send_contact_email(body['email'], body['subject'], body, template_path,
                         config['email_from'], config['email_from_name'])
@@ -78,11 +74,22 @@ def set_service_ini(service_id):
     res['subject'] = ini.get('mail', 'subject')
     res['email_from'] = ini.get('mail', 'emailFrom')
     res['email_from_name'] = ini.get('mail', 'emailFromName')
+    res['default_timezone'] = ini.get('mail', 'defaultTimezone')
 
     types = json.loads(ini.get('form', 'types'))
     res['type_choices'] = [(i['val'], i['label']) for i in types]
 
     return res
+
+
+def validate_timezone(req_tz, def_tz):
+    if not req_tz:
+        req_tz = def_tz
+
+    if req_tz not in pytz.all_timezones:
+        raise InvalidUsage('Timezone is invalid', 400)
+
+    return req_tz
 
 
 def create_code(service_id):

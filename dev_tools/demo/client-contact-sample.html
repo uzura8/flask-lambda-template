@@ -40,7 +40,7 @@
 </style>
 </head>
 <body>
-<div class="container" id="app">
+<div class="container" id="app" v-cloak>
   <div class="loader-wrapper" :class="{'is-active': isPageLoading}">
     <div class="loader is-loading"></div>
   </div>
@@ -242,13 +242,13 @@ new Vue ({
     },
   },
 
-  created: function () {
+  created: function() {
     this.setClient()
     this.resetFields()
   },
 
   methods: {
-    submitForm: function () {
+    submitForm: function() {
       this.validateFields()
       if (this.hasError) return
 
@@ -263,7 +263,7 @@ new Vue ({
       }
     },
 
-    postFields: function (recaptchaToken) {
+    postFields: function(recaptchaToken) {
       var vals = {
         contact_type: this.contactType,
         name: this.name,
@@ -274,18 +274,20 @@ new Vue ({
       }
       if (recaptchaToken) vals['recaptcha'] = recaptchaToken
 
+      this.isPageLoading = true
       var _this = this
       this.client.post(`/contacts/${this.serviceId}`, vals)
         .then(function (res) {
+          _this.isPageLoading = true
           //_this.resetFields()
           alert('Complete')
         })
         .catch(function (err) {
-          console.log(err)
-          if ('status' in err && err.response.status == 400 && 'errors' in err.response.data && err.response.data.errors != null) {
-            console.log(err.response)
+          _this.isPageLoading = true
+          if ('response' in err && err.response.status == 400 && 'errors' in err.response.data && err.response.data.errors != null) {
             for (field in err.response.data.errors) {
-              _this.errors[field] = err.response.data.errors[field][0]
+              var errKey = _this.fSnakeToCamel(field)
+              _this.errors[errKey] = err.response.data.errors[field][0]
             }
           } else {
             alert('Error occurred')
@@ -352,16 +354,25 @@ new Vue ({
       return text.replace(/^[\s|　]+|[\s|　]+$/g,'');
     },
 
-    setClient: function () {
+    setClient: function() {
       this.client = axios.create({
         baseURL: this.apiBaseUrl,
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
+          'Time-Zone': 'Asia/Tokyo',
         },
         responseType: 'json',
         timeout: 10000,
       })
+    },
+
+    fSnakeToCamel: function(p) {
+      return p.replace(/_./g,
+        function(s) {
+          return s.charAt(1).toUpperCase()
+        }
+      )
     },
 
     resetFields: function () {
