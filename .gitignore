@@ -30,3 +30,4 @@ __pycache__
 /config/stages/*
 /config/templates/*
 /config/contact/*
+/config-bkup*
