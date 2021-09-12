@@ -1,0 +1,45 @@
+Type: 'AWS::DynamoDB::Table'
+Properties:
+  TableName: ${self:custom.prjPrefix}-information
+  AttributeDefinitions:
+    -
+      AttributeName: serviceIdSlug
+      AttributeType: S
+    -
+      AttributeName: serviceId
+      AttributeType: S
+    -
+      AttributeName: statusPublishAt
+      AttributeType: S
+  KeySchema:
+    -
+      AttributeName: serviceIdSlug
+      KeyType: HASH
+  ProvisionedThroughput:
+    ReadCapacityUnits: 5
+    WriteCapacityUnits: 3
+  #BillingMode: PAY_PER_REQUEST
+
+  GlobalSecondaryIndexes:
+    -
+      IndexName: gsi-list-all
+      KeySchema:
+      -
+        AttributeName: serviceId
+        KeyType: HASH
+      -
+        AttributeName: statusPublishAt
+        KeyType: RANGE
+      Projection:
+        NonKeyAttributes:
+          - id
+          - slug
+          - title
+          - isPublish
+          - publishAt
+          - serviceId
+          - categoryId
+        ProjectionType: INCLUDE
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 3

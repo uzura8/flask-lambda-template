@@ -127,3 +127,4 @@ resources:
     VoteLogDynamoDBTable: ${file(./config/dynamodb/vote-log.yml)}
     VoteCountDynamoDBTable: ${file(./config/dynamodb/vote-count.yml)}
     ContactDynamoDBTable: ${file(./config/dynamodb/contact.yml)}
+    InformationDynamoDBTable: ${file(./config/dynamodb/information.yml)}
