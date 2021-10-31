@@ -81,19 +81,6 @@ class Information(Base):
     #    return res['Items'] if 'Items' in res and res['Items'] else []
 
 
-    #@classmethod
-    #def get_all_by_category(self, service_id, cate_id):
-    #    table = self.get_table()
-    #    res = table.query(
-    #        IndexName='gsi-list-cate',
-    #        ProjectionExpression='title, categoryId, isPublish, id, slug, serviceId, publishAt',
-    #        KeyConditionExpression=Key('serviceIdCateId').eq('#'.join([service_id, cate_id]))\
-    #                & Key('statusPublishAt').begins_with('publish#'),
-    #        ScanIndexForward=False
-    #    )
-    #    return res['Items'] if 'Items' in res and res['Items'] else []
-
-
     @classmethod
     def get_one_by_slug(self, service_id, slug):
         table = self.get_table()
@@ -142,7 +129,6 @@ class Information(Base):
             'body': kwargs['body'],
             'serviceIdSlug': '#'.join([service_id, slug]),
             'statusPublishAt': '#'.join([status, publish_at]),
-            'serviceIdCateId': '#'.join([service_id, cate_id]),
         }
         table.put_item(Item=item)
         return item

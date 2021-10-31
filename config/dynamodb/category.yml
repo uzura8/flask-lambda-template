@@ -1,0 +1,59 @@
+Type: 'AWS::DynamoDB::Table'
+Properties:
+  TableName: ${self:custom.prjPrefix}-category
+  AttributeDefinitions:
+    -
+      AttributeName: id
+      AttributeType: N
+    -
+      AttributeName: serviceIdSlug
+      AttributeType: S
+    -
+      AttributeName: serviceId
+      AttributeType: S
+    -
+      AttributeName: parentPath
+      AttributeType: S
+  KeySchema:
+    -
+      AttributeName: id
+      KeyType: HASH
+  BillingMode: PAY_PER_REQUEST
+  #ProvisionedThroughput:
+  #  ReadCapacityUnits: 5
+  #  WriteCapacityUnits: 3
+
+  GlobalSecondaryIndexes:
+    -
+      IndexName: gsi-list-by-service
+      KeySchema:
+      -
+        AttributeName: serviceId
+        KeyType: HASH
+      -
+        AttributeName: parentPath
+        KeyType: RANGE
+      Projection:
+        NonKeyAttributes:
+          - label
+          - slug
+        ProjectionType: INCLUDE
+      #BillingMode: PAY_PER_REQUEST
+      #ProvisionedThroughput:
+      #  ReadCapacityUnits: 5
+      #  WriteCapacityUnits: 3
+    -
+      IndexName: gsi-one-by-slug
+      KeySchema:
+      -
+        AttributeName: serviceIdSlug
+        KeyType: HASH
+      Projection:
+        NonKeyAttributes:
+          - label
+          - parentPath
+        ProjectionType: INCLUDE
+      #BillingMode: PAY_PER_REQUEST
+      #ProvisionedThroughput:
+      #  ReadCapacityUnits: 5
+      #  WriteCapacityUnits: 3

@@ -79,7 +79,7 @@ def validation_schema_informations_post():
         },
         'categoryId': {
             'type': 'string',
-            'coerce': (NormalizerUtils.rtrim),
+            'coerce': (NormalizerUtils.trim),
             'required': True,
             'empty': False,
         },
@@ -92,7 +92,7 @@ def validation_schema_informations_post():
         },
         'publishAt': {
             'type': 'string',
-            'coerce': (NormalizerUtils.rtrim),
+            'coerce': (NormalizerUtils.trim),
             'required': False,
             'empty': True,
             'regex': r'\d{4}\-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([\+\-]\d{2}:\d{2}|Z)$',
@@ -113,7 +113,7 @@ def validation_schema_informations_post():
         },
         'sinceTime': {
             'type': 'string',
-            'coerce': (NormalizerUtils.rtrim),
+            'coerce': (NormalizerUtils.trim),
             'required': False,
             'nullable': True,
             'empty': True,
@@ -121,7 +121,7 @@ def validation_schema_informations_post():
         },
         'untilTime': {
             'type': 'string',
-            'coerce': (NormalizerUtils.rtrim),
+            'coerce': (NormalizerUtils.trim),
             'required': False,
             'nullable': True,
             'empty': True,
