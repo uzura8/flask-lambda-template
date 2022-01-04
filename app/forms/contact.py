@@ -10,7 +10,7 @@ class Contact(FlaskForm):
     class Meta:
         csrf = False
 
-    contact_type = RadioField('Kinds', choices=[], validators=[DataRequired()])
+    contact_type = RadioField('Kinds', choices=[], coerce=int, validators=[DataRequired()])
     name = StringField('Name', validators=[DataRequired(), Length(max=248)])
     name_phonetic = StringField('Phonetic Name',
                 validators=[DataRequired(), Length(max=248)])
