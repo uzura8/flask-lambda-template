@@ -33,6 +33,8 @@ def contats(service_id):
 
     form = ContactForm()
     form.contact_type.choices = config['type_choices']
+    if config['gender_choices']:
+        form.gender.choices = config['gender_choices']
     if not form.validate_on_submit():
         raise InvalidUsage('Requested data is invalid', 400, {'errors':form.errors})
 
@@ -51,6 +53,8 @@ def contats(service_id):
 
     types = form.contact_type.choices
     body['contact_type_label'] = [ label for val, label in types if val == body['contact_type'] ][0]
+    if body['gender']:
+        body['gender_label'] = [ label for val, label in types if val == body['gender'] ][0]
     body['created_at_formatted'] = time_local
     template_path = 'contact/{}/template.txt'.format(service_id)
     send_contact_email(body['email'], body['subject'], body, template_path,
@@ -78,6 +82,12 @@ def set_service_ini(service_id):
 
     types = json.loads(ini.get('form', 'types'))
     res['type_choices'] = [(i['val'], i['label']) for i in types]
+
+    res['gender_choices'] = None
+    items = {i[0]:i[1] for i in ini.items('form')}
+    if 'genders' in items:
+        genders = json.loads(ini.get('form', 'genders'))
+        res['gender_choices'] = [(i['val'], i['label']) for i in genders]
 
     return res
 
