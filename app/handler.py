@@ -6,7 +6,7 @@ from app.common.decimal_encoder import DecimalEncoder
 from app.root import bp as root_module
 from app.vote import bp as vote_module
 from app.contact import bp as contact_module
-from app.information import bp as information_module
+from app.post import bp as post_module
 from app.category import bp as category_module
 
 cors_accept_origins_str = os.environ.get('CORS_ACCEPT_ORIGINS', '')
@@ -85,5 +85,5 @@ def add_cors_headers(response):
 app.register_blueprint(vote_module)
 app.register_blueprint(contact_module)
 app.register_blueprint(category_module)
-app.register_blueprint(information_module)
+app.register_blueprint(post_module)
 app.register_blueprint(root_module)

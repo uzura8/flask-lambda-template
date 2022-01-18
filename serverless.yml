@@ -143,4 +143,4 @@ resources:
     VoteCountDynamoDBTable: ${file(./config/dynamodb/vote-count.yml)}
     ContactDynamoDBTable: ${file(./config/dynamodb/contact.yml)}
     CategoryDynamoDBTable: ${file(./config/dynamodb/category.yml)}
-    InformationDynamoDBTable: ${file(./config/dynamodb/information.yml)}
+    PostDynamoDBTable: ${file(./config/dynamodb/post.yml)}

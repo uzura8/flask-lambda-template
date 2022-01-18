@@ -241,7 +241,7 @@ ddh = DynamoDBHandler(IS_LOCAL)
 ##pprint(res)
 #res = ddh.scan('contact')
 #pprint(res)
-#res = ddh.scan('information')
+#res = ddh.scan('post')
 #pprint(res)
 #
 ##keys = [
@@ -251,13 +251,13 @@ ddh = DynamoDBHandler(IS_LOCAL)
 ##    {'serviceIdSlug': 'hoge#info07'},
 ##    {'serviceIdSlug': 'hoge#info09'},
 ##]
-##res = ddh.batch_get_items('information', keys)
+##res = ddh.batch_get_items('post', keys)
 ##pprint(res)
-##res = ddh.query_all('information', 'hoge', 'publish')
+##res = ddh.query_all('post', 'hoge', 'publish')
 ##pprint(res)
-#res = ddh.query_with_filter_cate('information', 'hoge', 'publish')
+#res = ddh.query_with_filter_cate('post', 'hoge', 'publish')
 #pprint(res)
-#res = ddh.query_with_filter_pks('information', 'hoge', 'publish')
+#res = ddh.query_with_filter_pks('post', 'hoge', 'publish')
 #pprint(res)
 
 params = {
@@ -267,7 +267,7 @@ params = {
     'sinceTime': '2021-09-12T00:41:48Z',
     'categoryIds': ['cate01', 'cate03'],
 }
-res = ddh.query_all('information', 'gsi-list-all', 'hoge', params)
+res = ddh.query_all('post', 'gsi-list-all', 'hoge', params)
 pprint(res)
 res = ddh.scan('site-config')
 pprint(res)

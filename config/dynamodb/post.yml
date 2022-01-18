@@ -1,6 +1,6 @@
 Type: 'AWS::DynamoDB::Table'
 Properties:
-  TableName: ${self:custom.prjPrefix}-information
+  TableName: ${self:custom.prjPrefix}-post
   AttributeDefinitions:
     -
       AttributeName: serviceIdSlug

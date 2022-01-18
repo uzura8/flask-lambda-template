@@ -4,8 +4,8 @@ from app.common.string import new_uuid
 from app.models.dynamodb.base import Base
 
 
-class Information(Base):
-    table_name = 'information'
+class Post(Base):
+    table_name = 'post'
 
 
     @classmethod

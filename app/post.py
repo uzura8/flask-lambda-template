@@ -1,46 +1,46 @@
 import os
 from flask import Blueprint, jsonify, request
-from app.models.dynamodb import Information
+from app.models.dynamodb import Post
 from app.common.error import InvalidUsage
 from app.validators import ValidatorExtended, NormalizerUtils
 #import time
 
-bp = Blueprint('information', __name__, url_prefix='/informations')
+bp = Blueprint('post', __name__, url_prefix='/posts')
 ACCEPT_SERVICE_IDS = os.environ.get('ACCEPT_SERVICE_IDS', '').split(',')
 
 
 @bp.route('/<string:service_id>', methods=['POST', 'GET'])
-def informations(service_id):
+def posts(service_id):
     if service_id not in ACCEPT_SERVICE_IDS:
         raise InvalidUsage('ServiceId does not exist', 404)
 
     if request.method == 'POST':
-        schema = validation_schema_informations_post()
+        schema = validation_schema_posts_post()
         vals = validate_req_params(schema, request.json)
-        item = Information.get_one_by_slug(service_id, vals['slug'])
+        item = Post.get_one_by_slug(service_id, vals['slug'])
         if item:
             raise InvalidUsage('Slug already used', 400)
 
         #time.sleep(1)
-        body = Information.create(service_id, vals)
+        body = Post.create(service_id, vals)
 
     else:
         params = {'publish': True}
         for key in ['limit', 'order', 'sinceTime', 'untilTime']:
             params[key] = request.args.get(key)
-        schema = validation_schema_informations_post()
+        schema = validation_schema_posts_post()
         vals = validate_req_params(schema, params)
-        body = Information.query_all('gsi-list-all', service_id, vals)
+        body = Post.query_all('gsi-list-all', service_id, vals)
 
     return jsonify(body), 200
 
 
 @bp.route('/<string:service_id>/<string:slug>', methods=['POST', 'GET', 'HEAD'])
-def information(service_id, slug):
+def post(service_id, slug):
     if service_id not in ACCEPT_SERVICE_IDS:
         raise InvalidUsage('ServiceId does not exist', 404)
 
-    item = Information.get_one_by_slug(service_id, slug)
+    item = Post.get_one_by_slug(service_id, slug)
     if not item:
         raise InvalidUsage('Not Found', 404)
 
@@ -53,7 +53,7 @@ def information(service_id, slug):
     return jsonify(item), 200
 
 
-def validation_schema_informations_post():
+def validation_schema_posts_post():
     return {
         'slug': {
             'type': 'string',
