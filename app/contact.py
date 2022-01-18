@@ -53,8 +53,10 @@ def contats(service_id):
 
     types = form.contact_type.choices
     body['contact_type_label'] = [ label for val, label in types if val == body['contact_type'] ][0]
+
     if body['gender']:
-        body['gender_label'] = [ label for val, label in types if val == body['gender'] ][0]
+        genders = form.gender.choices
+        body['gender_label'] = [ label for val, label in genders if val == body['gender'] ][0]
     body['created_at_formatted'] = time_local
     template_path = 'contact/{}/template.txt'.format(service_id)
     send_contact_email(body['email'], body['subject'], body, template_path,
