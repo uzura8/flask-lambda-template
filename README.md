@@ -23,7 +23,7 @@ Setup config files per stage
 cp -r config/stages-sample config/stages
 cp -r config/contact/sample config/contact/your-service-id
 vi config/stages-sample/*
-vi config/templates/*
+vi config/contact/your-service-ida/*
 ```
 
 
