@@ -98,11 +98,16 @@ package:
     - dev_tools/**
     - node_modules/**
     - config/stages-sample/**
+    - config-bkup_*
     - LICENSE
     - README.md
+    - .git/**
+    - .gitignore
     - .venv/**
     - __pycache__
     - package-lock.json
+    - public/**
+    - src/**
 
 functions:
   app:

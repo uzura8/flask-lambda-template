@@ -2,15 +2,15 @@ import os
 import re
 from flask import current_app
 from flask_wtf import FlaskForm, RecaptchaField
-from wtforms import StringField, TextAreaField, RadioField
-from wtforms.validators import ValidationError, DataRequired, Email, Length
+from wtforms import StringField, TextAreaField, RadioField, DateField
+from wtforms.validators import ValidationError, DataRequired, Email, Length, Optional
 
 
 class Contact(FlaskForm):
     class Meta:
         csrf = False
 
-    contact_type = RadioField('Kinds', choices=[], validators=[DataRequired()])
+    contact_type = RadioField('Kinds', choices=[], coerce=int, validators=[DataRequired()])
     name = StringField('Name', validators=[DataRequired(), Length(max=248)])
     name_phonetic = StringField('Phonetic Name',
                 validators=[DataRequired(), Length(max=248)])
@@ -22,6 +22,8 @@ class Contact(FlaskForm):
                 ])
     tel = StringField('Tel',
                 validators=[DataRequired(), Length(min=10, max=11)])
+    birthday = StringField('Birthday', validators=[Optional()])
+    gender = RadioField('Gender', choices=[], coerce=int, validators=[Optional()])
     content = TextAreaField('Content', [DataRequired(), Length(max=3000)])
     recaptcha = None
 
@@ -47,5 +49,7 @@ class Contact(FlaskForm):
             'name_phonetic': self.name_phonetic.data,
             'email': self.email.data,
             'tel': self.tel.data,
+            'birthday': self.birthday.data,
+            'gender': self.gender.data,
             'content': self.content.data,
         }
