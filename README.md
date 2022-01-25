@@ -4,6 +4,21 @@ This document refered to https://www.serverless.com/blog/flask-python-rest-api-s
 
 ## Instration
 
+#### Preparation
+
+You need below
+
+* nodeJS >= v14.15.X
+* aws-cli >= 1.18.X
+
+#### Install Serverless Framework
+
+```bash
+npm install -g serverless
+```
+
+### Install Packages
+
 Install npm packages
 
 ```bash
@@ -23,7 +38,7 @@ Setup config files per stage
 cp -r config/stages-sample config/stages
 cp -r config/contact/sample config/contact/your-service-id
 vi config/stages-sample/*
-vi config/templates/*
+vi config/contact/your-service-ida/*
 ```
 
 
@@ -46,23 +61,105 @@ sls dynamodb start
 
 Execute below command
 
-````bash
+```bash
 sls wsgi serve
-````
+```
 
 Request [http://127.0.0.1:5000](http://127.0.0.1:5000/hoge)
 
+
+#### Execute Script
+
+```bash
+sls invoke local --function funcName --data param
+```
+
+## Deploy AWS Resources for Static Site by Terraform
+
+#### Create AWS S3 Bucket for terraform state and frontend config
+
+Create S3 Bucket named "content-api-config-hoge"
+
+#### Preparation
+
+You need below
+
+* aws-cli >= 1.18.X
+* Terraform >= 0.14.5
+
+##### Example Installation Terraform by tfenv on mac
+
+```bash
+brew install tfenv
+tfenv install 0.14.5
+tfenv use 0.14.5
+```
+
+#### 1. Edit Terraform config file
+
+Copy sample file and edit variables for your env
+
+```bash
+cd (project_root_dir)/terraform
+cp terraform.tfvars.sample terraform.tfvars
+vi terraform.tfvars
+```
+
+```terraform
+ ...
+route53_zone_id = "Set your route53 zone id"
+domain_api_dev  = "your-domain-api-dev.example.com"
+domain_api_prd  = "your-domain-api.example.com"
+```
+
+#### 2. Set AWS profile name to environment variable
+
+```bash
+export AWS_PROFILE=your-aws-profile-name
+export AWS_DEFAULT_REGION="ap-northeast-1"
+```
+
+#### 3. Execute terraform init
+
+Command Example to init
+
+```bash
+terraform init -backend-config="bucket=content-api-config-hoge" -backend-config="key=terraform.tfstate" -backend-config="region=ap-northeast-1" -backend-config="profile=your-aws-profile-name"
+```
+
+#### 4. Execute terraform apply
+
+```bash
+terraform apply -auto-approve -var-file=./terraform.tfvars
+```
+
+
+## Create Domains for API
+
+Execute below command
+
+```bash
+export AWS_PROFILE="your-profile-name"
+export AWS_REGION="us-east-1"
+sls create_domain # Deploy for dev
+```
+
+If deploy for prod
+
+```bash
+sls create_domain --stage prd # Deploy for prod
+```
 
 
 ## Deploy to Lambda
 
 Execute below command
 
-````bash
+```bash
 export AWS_PROFILE="your-profile-name"
-export AWS_REGION="ap-northeast-1"
+export AWS_REGION="us-east-1"
 sls deploy # Deploy for dev
-````
+```
 
 If deploy for prod
 
@@ -83,7 +180,6 @@ serverless invoke local --function backupVoteLog
 ```
 
 
-
 ### Performance Test
 
 #### Setup K6
@@ -96,7 +192,24 @@ brew install k6
 
 #### Execute
 
-```
+```bash
 k6 run ./dev_tools/performance/vote.js --vus NN --duration MMs
+```
+
+
+## Destroy Resources
+
+Destroy for serverless resources
+
+```bash
+sls remove --stage Target-stage
+```
+
+Removed files in S3 Buckets named "your-domain.example.com-cloudfront-logs" and "your-domain.example.com" 
+
+Destroy for static server resources by Terraform
+
+```bash
+terraform destroy -auto-approve -var-file=./terraform.tfvars
 ```
 
