@@ -95,19 +95,28 @@ provider:
 
 package:
   exclude:
-    - dev_tools/**
     - node_modules/**
     - config/stages-sample/**
     - config-bkup_*
     - LICENSE
     - README.md
-    - .git/**
-    - .gitignore
+    - tags
     - .venv/**
     - __pycache__
     - package-lock.json
-    - public/**
+    - .babelrc
+    - .browserslistrc
+    - .dynamodb/**
+    - .eslintrc.js
+    - .git/**
+    - .gitignore
+    - .github/**
+    - .prettierrc.json
     - src/**
+    - public/**
+    - webpackConfigs/**
+    - develop/**
+    - terraform/**
 
 functions:
   app:

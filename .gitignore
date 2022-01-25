@@ -25,8 +25,8 @@ __pycache__
 /wsgi_handler.py
 /.dynamodb
 
-/dev_tools/env.sh
-/dev_tools/var/*
+/develop/env.sh
+/develop/var/*
 /config/stages/*
 /config/templates/*
 /config/contact/*
