@@ -32,6 +32,18 @@ class Base():
 
 
     @classmethod
+    def to_response(self, item):
+        res = {}
+        for i in self.response_attr:
+            k = i['key']
+            l = i['label']
+            if k in item:
+                res[l] = item[k]
+
+        return res
+
+
+    @classmethod
     def batch_get_items(self, keys):
         dynamodb = self.connect_dynamodb()
         table_name = self.get_table_name()

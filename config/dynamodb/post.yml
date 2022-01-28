@@ -35,10 +35,11 @@ Properties:
           - id
           - slug
           - title
+          - body
           - isPublish
           - publishAt
           - serviceId
-          - categoryId
+          - categorySlug
         ProjectionType: INCLUDE
       ProvisionedThroughput:
         ReadCapacityUnits: 5

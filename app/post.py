@@ -1,7 +1,8 @@
 import os
 from flask import Blueprint, jsonify, request
-from app.models.dynamodb import Post
+from app.models.dynamodb import Post, Category
 from app.common.error import InvalidUsage
+from app.common.request import validate_req_params
 from app.validators import ValidatorExtended, NormalizerUtils
 #import time
 
@@ -26,10 +27,22 @@ def posts(service_id):
 
     else:
         params = {'publish': True}
-        for key in ['limit', 'order', 'sinceTime', 'untilTime']:
+        for key in ['count', 'order', 'sinceTime', 'untilTime', 'category']:
             params[key] = request.args.get(key)
         schema = validation_schema_posts_post()
         vals = validate_req_params(schema, params)
+        cate_slug = vals.get('category')
+        if cate_slug:
+            cate = Category.get_one_by_slug(service_id, cate_slug, False, True)
+            if not cate:
+                raise InvalidUsage('Category does not exist', 404)
+
+            # For category filter
+            vals['categories'] = [cate_slug]
+            if cate['children']:
+                for c in cate['children']:
+                    vals['categories'].append(c['slug'])
+
         body = Post.query_all('gsi-list-all', service_id, vals)
 
     return jsonify(body), 200
@@ -40,7 +53,7 @@ def post(service_id, slug):
     if service_id not in ACCEPT_SERVICE_IDS:
         raise InvalidUsage('ServiceId does not exist', 404)
 
-    item = Post.get_one_by_slug(service_id, slug)
+    item = Post.get_one_by_slug(service_id, slug, True)
     if not item:
         raise InvalidUsage('Not Found', 404)
 
@@ -77,11 +90,12 @@ def validation_schema_posts_post():
             'empty': True,
             'default': '',
         },
-        'categoryId': {
+        'category': {
             'type': 'string',
             'coerce': (NormalizerUtils.trim),
-            'required': True,
-            'empty': False,
+            'nullable': True,
+            'required': False,
+            'empty': True,
         },
         'publish': {
             'type': 'boolean',
@@ -97,7 +111,7 @@ def validation_schema_posts_post():
             'empty': True,
             'regex': r'\d{4}\-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([\+\-]\d{2}:\d{2}|Z)$',
         },
-        'limit': {
+        'count': {
             'type': 'integer',
             'coerce': int,
             'required': False,
@@ -128,29 +142,3 @@ def validation_schema_posts_post():
             'regex': r'\d{4}\-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([\+\-]\d{2}:\d{2}|Z)$',
         },
     }
-
-
-def validate_req_params(schema, params=None):
-    target_schema = {}
-    target_vals = {}
-    if params:
-        for key, val in params.items():
-            if key in schema:
-                target_schema[key] = schema[key]
-                target_vals[key] = val
-
-    v = ValidatorExtended(target_schema)
-    if not v.validate(target_vals):
-        msg = 'Validation Failed'
-        field_errs = []
-        err_dict = v.errors
-        for key, errs in err_dict.items():
-            for err in errs:
-                field_errs.append({
-                    'field': key,
-                    'message': err,
-                })
-
-        raise InvalidUsage(msg, 400, {'errors': field_errs})
-
-    return v.document

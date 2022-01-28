@@ -2,10 +2,13 @@ from boto3.dynamodb.conditions import Key
 from app.common.date import utc_iso, iso_offset2utc
 from app.common.string import new_uuid
 from app.models.dynamodb.base import Base
+from app.models.dynamodb.category import Category
 
 
 class Post(Base):
     table_name = 'post'
+    response_attr = [
+    ]
 
 
     @classmethod
@@ -16,13 +19,14 @@ class Post(Base):
         until_time = params.get('untilTime', '')
         since_time = params.get('sinceTime', '')
         is_desc = params.get('order', 'asc') == 'desc'
-        limit = params.get('limit', 5)
-        cate_ids = params.get('categoryIds', [])
+        limit = params.get('count', 5)
+        cate_slugs = params.get('categories', [])
 
         exp_attr_names = {}
         exp_attr_vals = {}
         option = {
             'IndexName': index_name,
+            'ProjectionExpression': 'title, id, slug, body, publishAt, categorySlug',
             'KeyConditionExpression': '#si = :si AND begins_with(#sp, :sp)',
             'ScanIndexForward': not is_desc,
             'Limit': limit,
@@ -45,12 +49,12 @@ class Post(Base):
             exp_attr_names['#ut'] = 'publishAt'
             exp_attr_vals[':ut'] = until_time
 
-        if cate_ids:
+        if cate_slugs:
             filter_exp_cids = []
-            for i, cid in enumerate(cate_ids):
+            for i, cid in enumerate(cate_slugs):
                 val_name = 'cid' + str(i)
                 filter_exp_cids.append('#{v} = :{v}'.format(v=val_name))
-                exp_attr_names['#{v}'.format(v=val_name)] = 'categoryId'
+                exp_attr_names['#{v}'.format(v=val_name)] = 'categorySlug'
                 exp_attr_vals[':{v}'.format(v=val_name)] = cid
             if filter_exp:
                 filter_exp = '{} AND ({})'.format(filter_exp, ' OR '.join(filter_exp_cids))
@@ -73,7 +77,7 @@ class Post(Base):
     #    table = self.get_table()
     #    res = table.query(
     #        IndexName='gsi-list-all',
-    #        ProjectionExpression='title, categoryId, isPublish, id, slug, serviceId, publishAt',
+    #        ProjectionExpression='title, categorySlug, isPublish, id, slug, serviceId, publishAt',
     #        KeyConditionExpression=Key('serviceId').eq(service_id)\
     #                & Key('statusPublishAt').begins_with('publish#'),
     #        ScanIndexForward=False
@@ -82,13 +86,21 @@ class Post(Base):
 
 
     @classmethod
-    def get_one_by_slug(self, service_id, slug):
+    def get_one_by_slug(self, service_id, slug, with_cate=False):
         table = self.get_table()
         res = table.query(
-            ProjectionExpression='title, categoryId, isPublish, id, slug, serviceId, publishAt',
+            ProjectionExpression='title, id, slug, body, publishAt, categorySlug',
             KeyConditionExpression=Key('serviceIdSlug').eq('#'.join([service_id, slug])),
         )
-        return res['Items'][0] if 'Items' in res and res['Items'] else None
+        if 'Items' not in res or not res['Items']:
+            return None
+
+        item = res['Items'][0]
+        if with_cate and 'categorySlug' in item and item['categorySlug']:
+            item['category'] = Category.get_one_by_slug(service_id, item['categorySlug'], True)
+
+
+        return item
 
 
     @classmethod
@@ -107,13 +119,13 @@ class Post(Base):
         else:
             publish_at = time
 
-        required_attrs = ['slug', 'categoryId', 'title']
+        required_attrs = ['slug', 'category', 'title']
         for attr in required_attrs:
             if attr not in kwargs or len(kwargs[attr].strip()) == 0:
                 raise ValueError("Argument '%s' requires values" % attr)
 
         slug = kwargs['slug']
-        cate_id = kwargs['categoryId']
+        cate_slug = kwargs['category']
 
         table = self.get_table()
         item = {
@@ -124,7 +136,7 @@ class Post(Base):
             'slug': slug,
             'isPublish': is_publish,
             'publishAt': publish_at,
-            'categoryId': cate_id,
+            'categorySlug': cate_slug,
             'title': kwargs['title'],
             'body': kwargs['body'],
             'serviceIdSlug': '#'.join([service_id, slug]),
