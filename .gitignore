@@ -31,3 +31,10 @@ __pycache__
 /config/templates/*
 /config/contact/*
 /config-bkup*
+
+# Terraform
+/terraform/.terraform
+/terraform/.terraform.lock.hcl
+/terraform/.terraform.tfstate.lock.info
+/terraform/terraform.tfvars
+/terraform/terraform.tfstate*
