@@ -1,14 +1,14 @@
 #!/bin/bash
 
 if test $IS_LOCAL -eq 1 ; then
-  URL="http://localhost:5000/api"
+  URL="http://127.0.0.1:5000/api"
 else
   URL=$BASE_URL
 fi
 
 SERVICE_ID="hoge"
 
-curl -H "Content-Type: application/json" -X POST "${URL}/categories/${SERVICE_ID}" -d '{"label":"ルート01", "slug":"hoge-root", "parentId":"0"}'
+curl -H "Content-Type: application/json" -X POST "${URL}/categories/${SERVICE_ID}" -d '{"label":"ルート01", "slug":"root", "parentId":"0"}'
 curl -H "Content-Type: application/json" -X POST "${URL}/categories/${SERVICE_ID}" -d '{"label":"東北", "slug":"tohoku", "parentId":1}'
 curl -H "Content-Type: application/json" -X POST "${URL}/categories/${SERVICE_ID}" -d '{"label":"関東", "slug":"kanto", "parentId":1}'
 curl -H "Content-Type: application/json" -X POST "${URL}/categories/${SERVICE_ID}" -d '{"label":"東京", "slug":"tokyo", "parentId":3}'
