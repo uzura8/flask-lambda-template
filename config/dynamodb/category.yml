@@ -37,6 +37,7 @@ Properties:
         NonKeyAttributes:
           - label
           - slug
+          - parentPath
         ProjectionType: INCLUDE
       #BillingMode: PAY_PER_REQUEST
       #ProvisionedThroughput:

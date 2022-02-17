@@ -97,8 +97,8 @@ class Post(Base):
 
         item = res['Items'][0]
         if with_cate and 'categorySlug' in item and item['categorySlug']:
-            item['category'] = Category.get_one_by_slug(service_id, item['categorySlug'], True)
-
+            item['category'] = Category.get_one_by_slug(service_id, item['categorySlug'],
+                                                        True, False, True)
 
         return item
 

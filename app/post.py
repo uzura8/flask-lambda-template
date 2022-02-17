@@ -33,7 +33,7 @@ def posts(service_id):
         vals = validate_req_params(schema, params)
         cate_slug = vals.get('category')
         if cate_slug:
-            cate = Category.get_one_by_slug(service_id, cate_slug, False, True)
+            cate = Category.get_one_by_slug(service_id, cate_slug, False, True, False, False)
             if not cate:
                 raise InvalidUsage('Category does not exist', 404)
 

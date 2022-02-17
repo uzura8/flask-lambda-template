@@ -23,7 +23,7 @@ def handle_list(service_id):
         body = Category.create(service_id, vals)
 
     else:
-        pass
+        body = Category.get_all_by_service_id(service_id)
 
     return jsonify(body), 200
 
@@ -32,8 +32,15 @@ def handle_list(service_id):
 def handle_detail(service_id, slug):
     if service_id not in ACCEPT_SERVICE_IDS:
         raise InvalidUsage('ServiceId does not exist', 404)
-    vals = validate_req_params(validation_schema(), {'slug':slug})
-    item = Category.get_one_by_slug(service_id, vals['slug'], True)
+
+    params = {'slug':slug}
+    if request.method == 'GET':
+        for key in ['withParents', 'withChildren']:
+            params[key] = request.args.get(key)
+
+    vals = validate_req_params(validation_schema(), params)
+    item = Category.get_one_by_slug(service_id, vals['slug'],
+                                vals['withParents'], vals['withChildren'], True)
     if not item:
         raise InvalidUsage('Not Found', 404)
 
@@ -68,5 +75,19 @@ def validation_schema():
             'required': True,
             'nullable': False,
             'empty': False,
+        },
+        'withParents': {
+            'type': 'boolean',
+            'coerce': (str, NormalizerUtils.to_bool),
+            'required': False,
+            'empty': True,
+            'default': False,
+        },
+        'withChildren': {
+            'type': 'boolean',
+            'coerce': (str, NormalizerUtils.to_bool),
+            'required': False,
+            'empty': True,
+            'default': False,
         },
     }

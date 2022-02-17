@@ -8,11 +8,31 @@ class Category(Base):
         {'key':'id', 'label':'id'},
         {'key':'slug', 'label':'slug'},
         {'key':'label', 'label':'label'},
+        {'key':'parents', 'label':'parents'},
+        {'key':'children', 'label':'children'},
     ]
 
 
     @classmethod
-    def get_one_by_slug(self, service_id, slug, with_parents=False, with_children=False):
+    def get_all_by_service_id(self, service_id):
+        table = self.get_table()
+        option = {
+            'IndexName': 'gsi-list-by-service',
+            'ProjectionExpression': 'id, slug, label, parentPath',
+            'KeyConditionExpression': '#si = :si',
+            'ExpressionAttributeNames': {'#si':'serviceId'},
+            'ExpressionAttributeValues': {':si':service_id},
+        }
+        result = table.query(**option)
+        if 'Items' not in result or not result['Items']:
+            return []
+        items = result['Items']
+        return self.convert_to_nested(items)
+
+
+    @classmethod
+    def get_one_by_slug(self, service_id, slug, with_parents=False, with_children=False,
+                        for_response=False, is_nested=True):
         table = self.get_table()
         res = table.query(
             IndexName='gsi-one-by-slug',
@@ -36,10 +56,15 @@ class Category(Base):
             del item['parentPath']# Removed unnecessary attr
 
         if with_children:
-            self_path = '{}#{}'.format(parent_path, item['id'])
-            item['children'] = self.get_children_by_parent_path(service_id, self_path)
+            if parent_path == '0':
+                self_path = str(item['id'])
+            else:
+                self_path = '%s#%s' % (parent_path, item['id'])
+            item['children'] =\
+                self.get_children_by_parent_path(service_id, self_path, True,
+                                                    for_response, is_nested)
 
-        return item
+        return self.to_response(item) if for_response else item
 
 
     @classmethod
@@ -53,7 +78,7 @@ class Category(Base):
 
         res = []
         for item in items:
-            if item.get('parentPath') == 'root':
+            if item.get('parentPath') == '0':
                 continue
 
             res.append(self.to_response(item))
@@ -71,22 +96,30 @@ class Category(Base):
 
 
     @classmethod
-    def get_children_by_parent_path(self, service_id, parent_path):
+    def get_children_by_parent_path(self, service_id, parent_path,
+                                with_children=False, for_response=False, is_nested=True):
         table = self.get_table()
         option = {
             'IndexName': 'gsi-list-by-service',
-            'ProjectionExpression': 'slug',
-            'KeyConditionExpression': '#si = :si AND begins_with(#pp, :pp)',
+            'ProjectionExpression': 'id, slug, label, parentPath',
             'ExpressionAttributeNames': {'#si':'serviceId', '#pp':'parentPath'},
             'ExpressionAttributeValues': {':si':service_id, ':pp':parent_path},
         }
+        option['KeyConditionExpression'] = '#si = :si'
+        if with_children:
+            option['KeyConditionExpression'] += ' AND begins_with(#pp, :pp)'
+        else:
+            option['KeyConditionExpression'] += ' AND #pp = :pp'
+
         result = table.query(**option)
         if 'Items' not in result or not result['Items']:
             return []
 
-        res = []
-        for item in result['Items']:
-            res.append(self.to_response(item))
+        res = result['Items']
+        if is_nested:
+            res = self.convert_to_nested(res, for_response)
+        elif for_response:
+            res = [ self.to_response(item) for item in res ]
 
         return res
 
@@ -105,10 +138,10 @@ class Category(Base):
             raise ValueError("Argument 'parentId' requires values")
 
         if kwargs['parentId'] == 0:
-            parent_path = 'root'
+            parent_path = '0'
         else:
             parent = self.get_one_by_id(kwargs['parentId'])
-            if parent['parentPath'] == 'root':
+            if parent['parentPath'] == '0':
                 parent_path = str(kwargs['parentId'])
             else:
                 parent_path = '#'.join([parent['parentPath'], str(kwargs['parentId'])])
@@ -127,3 +160,44 @@ class Category(Base):
         }
         table.put_item(Item=item)
         return item
+
+
+    @classmethod
+    def convert_to_nested(self, categories, for_response=False):
+        cates = sorted(categories, key=lambda x: x['parentPath'], reverse=True)
+        set_cate_ids = []
+        res = {}
+
+        for cate in cates:
+            target_key = str(cate['id'])
+
+            # If parent exists at first node of result dict, Added as children
+            pid = cate['parentPath'].split('#')[-1]
+            if pid in res:
+                if 'children' not in res[pid]:
+                    res[pid]['children'] = []
+                res[pid]['children'].append(self.to_response(cate) if for_response else cate)
+                set_cate_ids.append(target_key)
+                if target_key in res.keys():
+                    res.pop(target_key)
+                continue
+
+            # If parent not exists at first node of result dict, Added parent and self
+            for item in cates:
+                # If already set, skip this
+                if item['id'] in set_cate_ids:
+                    continue
+
+                # Added to parent as children
+                key = str(item['id'])
+                if key == pid:
+                    if key not in res:
+                        res[key] = item
+                        res[key]['children'] = []
+                    res[key]['children'].append(self.to_response(cate) if for_response else cate)
+                    set_cate_ids.append(target_key)
+                    if target_key in res.keys():
+                        res.pop(target_key)
+                    break
+
+        return [ val for val in res.values() ]
