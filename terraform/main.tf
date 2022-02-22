@@ -5,6 +5,8 @@ variable "domain_api_dev" {}
 variable "domain_api_prd" {}
 
 provider "aws" {
+  region = var.aws_region
+  alias  = "default"
 }
 
 provider "aws" {
@@ -87,4 +89,57 @@ resource "aws_acm_certificate_validation" "api_prd" {
   provider                = aws.virginia
   certificate_arn         = aws_acm_certificate.api_prd.arn
   validation_record_fqdns = [for record in aws_route53_record.api_prd_acm_c : record.fqdn]
+}
+
+# Cognito
+resource "aws_cognito_user_pool" "prd" {
+  provider                 = aws.default
+  name                     = join("-", [var.prj_prefix, "cognito-user-pool"])
+  auto_verified_attributes = ["email"]
+  alias_attributes         = ["email"]
+  schema {
+    attribute_data_type = "String"
+    name                = "email"
+    required            = true
+  }
+  username_configuration {
+    case_sensitive = false
+  }
+  lifecycle {
+    ignore_changes = [schema]
+  }
+
+  tags = {
+    Name      = join("-", [var.prj_prefix, "cognito", "user", "pool"])
+    ManagedBy = "terraform"
+  }
+}
+
+resource "aws_cognito_user_pool_client" "prd" {
+  name            = join("-", [var.prj_prefix, "web_client"])
+  user_pool_id    = aws_cognito_user_pool.prd.id
+  generate_secret = false
+  explicit_auth_flows = [
+    "ALLOW_ADMIN_USER_PASSWORD_AUTH",
+    "ALLOW_CUSTOM_AUTH",
+    "ALLOW_USER_PASSWORD_AUTH",
+    "ALLOW_REFRESH_TOKEN_AUTH"
+  ]
+}
+
+resource "aws_cognito_identity_pool" "prd" {
+  provider                         = aws.default
+  identity_pool_name               = join("-", [var.prj_prefix, "cognito-identity-pool"])
+  allow_unauthenticated_identities = false
+
+  cognito_identity_providers {
+    client_id               = aws_cognito_user_pool_client.prd.id
+    provider_name           = aws_cognito_user_pool.prd.endpoint
+    server_side_token_check = false
+  }
+
+  tags = {
+    Name      = join("-", [var.prj_prefix, "cognito", "identity", "pool"])
+    ManagedBy = "terraform"
+  }
 }

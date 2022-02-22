@@ -74,7 +74,7 @@ Request [http://127.0.0.1:5000](http://127.0.0.1:5000/hoge)
 sls invoke local --function funcName --data param
 ```
 
-## Deploy AWS Resources for Static Site by Terraform
+## Deploy AWS Resources by Terraform
 
 #### Create AWS S3 Bucket for terraform state and frontend config
 
@@ -133,6 +133,39 @@ terraform init -backend-config="bucket=content-api-config-hoge" -backend-config=
 terraform apply -auto-approve -var-file=./terraform.tfvars
 ```
 
+#### 5. Create Admin User
+
+Create Admin User on Cognito consele
+
+#### 6. Change User Status
+
+```bash
+aws cognito-idp admin-initiate-auth \
+--user-pool-id ap-northeast-1_xxxxxxxxx \
+--client-id xxxxxxxxxxxxxxxxxxxxxxxxxx \
+--auth-flow ADMIN_USER_PASSWORD_AUTH \
+--auth-parameters \
+USERNAME=********,PASSWORD=*********
+
+# Response
+{
+    "ChallengeName": "NEW_PASSWORD_REQUIRED",
+    "Session": "xxxxx....", # Copy this value
+    ...
+}
+
+aws cognito-idp admin-respond-to-auth-challenge \
+--user-pool-id ap-northeast-1_xxxxxxxxx \
+--client-id xxxxxxxxxxxxxxxxxxxxxxxxxx \
+--challenge-name NEW_PASSWORD_REQUIRED \
+--challenge-responses NEW_PASSWORD='your-password',USERNAME=your-username \
+--session "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+```
+
+#### 7. Sign In by Admin User 
+
+Access to https://your-domain.example.com/admin , and Sign In by created user.
 
 ## Create Domains for API
 
