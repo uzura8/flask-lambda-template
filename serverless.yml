@@ -92,6 +92,12 @@ provider:
     BACKUP_VOTE_LOG_COUNT_FOR_ALL: ${file(${self:custom.stageConfigFileName}):backupVoteLogCountForAll}
     BACKUP_VOTE_LOG_COUNT_FOR_EACH_SERVICE: ${file(${self:custom.stageConfigFileName}):backupVoteLogCountForEachService}
     SES_REGION: ${file(./config/stages/common.yml):sesRegion}
+    COGNITO_REGION: ${file(${self:custom.stageConfigFileName}):cognitoRegion}
+    COGNITO_USERPOOL_ID: ${file(${self:custom.stageConfigFileName}):cognitoUserpoolId}
+    COGNITO_APP_CLIENT_ID: ${file(${self:custom.stageConfigFileName}):cognitoAppClientId}
+    COGNITO_CHECK_TOKEN_EXPIRATION: ${file(${self:custom.stageConfigFileName}):cognitoCheckTokenExpiration}
+    COGNITO_JWT_HEADER_NAME: ${file(./config/stages/common.yml):cognitoJwtHeaderName}
+    COGNITO_JWT_HEADER_PREFIX: ${file(./config/stages/common.yml):cognitoJwtHeaderPrefix}
 
 package:
   exclude:

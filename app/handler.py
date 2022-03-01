@@ -1,5 +1,6 @@
 import os
 from flask import Flask, jsonify, request
+from flask_cognito import CognitoAuth
 from werkzeug.routing import Rule
 from app.common.error import InvalidUsage
 from app.common.decimal_encoder import DecimalEncoder
@@ -8,6 +9,7 @@ from app.vote import bp as vote_module
 from app.contact import bp as contact_module
 from app.post import bp as post_module
 from app.category import bp as category_module
+from app.admin import bp as admin_module
 
 cors_accept_origins_str = os.environ.get('CORS_ACCEPT_ORIGINS', '')
 CORS_ACCEPT_ORIGINS = cors_accept_origins_str.split(',') if cors_accept_origins_str else []
@@ -29,6 +31,15 @@ jinja_options.update({
 })
 app.jinja_options = jinja_options
 
+app.config.update({
+    'COGNITO_REGION': os.environ.get('COGNITO_REGION', ''),
+    'COGNITO_USERPOOL_ID': os.environ.get('COGNITO_USERPOOL_ID', ''),
+    'COGNITO_APP_CLIENT_ID': os.environ.get('COGNITO_APP_CLIENT_ID', ''),
+    'COGNITO_CHECK_TOKEN_EXPIRATION': os.environ.get('COGNITO_CHECK_TOKEN_EXPIRATION', True),
+    'COGNITO_JWT_HEADER_NAME': os.environ.get('COGNITO_JWT_HEADER_NAME', 'Authorization'),
+    'COGNITO_JWT_HEADER_PREFIX': os.environ.get('COGNITO_JWT_HEADER_PREFIX', 'Bearer'),
+})
+cogauth = CognitoAuth(app)
 
 # get prefix from environment variable
 APP_ROOT = os.getenv('APP_ROOT')
@@ -86,4 +97,5 @@ app.register_blueprint(vote_module)
 app.register_blueprint(contact_module)
 app.register_blueprint(category_module)
 app.register_blueprint(post_module)
+app.register_blueprint(admin_module)
 app.register_blueprint(root_module)

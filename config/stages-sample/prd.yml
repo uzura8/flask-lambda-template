@@ -15,3 +15,9 @@ backupVoteLogCountForAll: 1000
 backupVoteLogCountForEachService: 500
 backupVoteLogMemorySize: 516
 backupVoteLogEventSchedule: rate(7 days)
+
+# For Admin Console
+cognitoRegion: 'ap-northeast-1'
+cognitoUserpoolId: 'ap-northeast-1_*********'
+cognitoAppClientId: '**************************'
+cognitoCheckTokenExpiration: True # If set Falsae, disable token expiration checking for testing purposes
