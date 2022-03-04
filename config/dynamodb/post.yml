@@ -11,6 +11,9 @@ Properties:
     -
       AttributeName: statusPublishAt
       AttributeType: S
+    -
+      AttributeName: createdAt
+      AttributeType: S
   KeySchema:
     -
       AttributeName: serviceIdSlug
@@ -22,7 +25,7 @@ Properties:
 
   GlobalSecondaryIndexes:
     -
-      IndexName: gsi-list-all
+      IndexName: statusPublishAtGsi
       KeySchema:
       -
         AttributeName: serviceId
@@ -36,9 +39,35 @@ Properties:
           - slug
           - title
           - body
-          - isPublish
           - publishAt
+          - updatedAt
           - serviceId
+          - postStatus
+          - categorySlug
+        ProjectionType: INCLUDE
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 3
+    -
+      IndexName: createdAtGsi
+      KeySchema:
+      -
+        AttributeName: serviceId
+        KeyType: HASH
+      -
+        AttributeName: createdAt
+        KeyType: RANGE
+      Projection:
+        NonKeyAttributes:
+          - id
+          - slug
+          - title
+          - body
+          - publishAt
+          - updatedAt
+          - createdAt
+          - serviceId
+          - postStatus
           - categorySlug
         ProjectionType: INCLUDE
       ProvisionedThroughput:

@@ -1,16 +1,20 @@
-import os
-from flask import Blueprint, jsonify, request
+from flask import jsonify, request
 from app.models.dynamodb import Post, Category
 from app.common.error import InvalidUsage
 from app.common.request import validate_req_params
-from app.validators import ValidatorExtended, NormalizerUtils
-#import time
-
-bp = Blueprint('post', __name__, url_prefix='/posts')
-ACCEPT_SERVICE_IDS = os.environ.get('ACCEPT_SERVICE_IDS', '').split(',')
+from app.validators import NormalizerUtils
+from app.admin import bp, site_before_request, ACCEPT_SERVICE_IDS
+from flask_cognito import cognito_auth_required, current_user, current_cognito_jwt
 
 
-@bp.route('/<string:service_id>', methods=['POST', 'GET'])
+@bp.before_request
+@site_before_request
+def before_request():
+    pass
+
+
+@bp.route('/posts/<string:service_id>', methods=['POST', 'GET'])
+@cognito_auth_required
 def posts(service_id):
     if service_id not in ACCEPT_SERVICE_IDS:
         raise InvalidUsage('ServiceId does not exist', 404)
@@ -22,11 +26,15 @@ def posts(service_id):
         if item:
             raise InvalidUsage('Slug already used', 400)
 
-        #time.sleep(1)
+        cate = Category.get_one_by_slug(service_id, vals['category'])
+        if not cate:
+            raise InvalidUsage('Category not exists', 400)
+
         body = Post.create(service_id, vals)
 
     else:
-        params = {'status': 'publish'}
+        #params = {'status': 'published'}
+        params = {}
         for key in ['count', 'order', 'sinceTime', 'untilTime', 'category']:
             params[key] = request.args.get(key)
         schema = validation_schema_posts_post()
@@ -43,30 +51,30 @@ def posts(service_id):
                 for c in cate['children']:
                     vals['categories'].append(c['slug'])
 
-        body = Post.query_all('statusPublishAtGsi', service_id, vals)
+        body = Post.query_all('createdAtGsi', service_id, vals, True)
 
     return jsonify(body), 200
 
 
-@bp.route('/<string:service_id>/<string:slug>', methods=['POST', 'GET', 'HEAD'])
+@bp.route('/posts/<string:service_id>/<string:slug>', methods=['POST', 'GET', 'HEAD'])
 def post(service_id, slug):
     if service_id not in ACCEPT_SERVICE_IDS:
         raise InvalidUsage('ServiceId does not exist', 404)
 
-    item = Post.get_one_by_slug(service_id, slug, True)
-    if not item:
-        raise InvalidUsage('Not Found', 404)
-
-    if item['postStatus'] != 'publish':
+    with_cate = True if request.method in ['GET', 'POST'] else False
+    saved = Post.get_one_by_slug(service_id, slug, with_cate)
+    if not saved:
         raise InvalidUsage('Not Found', 404)
 
     if request.method == 'POST':
-        pass
+        schema = validation_schema_posts_post()
+        vals = validate_req_params(schema, request.json)
+        saved = Post.update(service_id, slug, vals)
 
     if request.method == 'HEAD':
         return jsonify(), 200
 
-    return jsonify(item), 200
+    return jsonify(saved), 200
 
 
 def validation_schema_posts_post():
@@ -100,22 +108,14 @@ def validation_schema_posts_post():
             'required': False,
             'empty': True,
         },
-        #'publish': {
-        #    'type': 'boolean',
-        #    'coerce': (str, NormalizerUtils.to_bool),
-        #    'required': False,
-        #    'empty': True,
-        #    'default': False,
-        #},
-        # TODO: Delete after
-        #'status': {
-        #    'type': 'string',
-        #    'required': False,
-        #    'allowed': ['publish', 'unpublish'],
-        #    'nullable': True,
-        #    'empty': True,
-        #    'default': 'unpublish',
-        #},
+        'status': {
+            'type': 'string',
+            'required': False,
+            'allowed': ['publish', 'unpublish'],
+            'nullable': True,
+            'empty': True,
+            'default': 'unpublish',
+        },
         'publishAt': {
             'type': 'string',
             'coerce': (NormalizerUtils.trim),

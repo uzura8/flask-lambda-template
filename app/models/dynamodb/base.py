@@ -57,3 +57,23 @@ class Base():
             ReturnConsumedCapacity='TOTAL'
         )
         return res['Responses'][table_name]
+
+
+    @classmethod
+    def delete(self, key_dict):
+        table = self.get_table()
+        res = table.delete_item(
+          Key=key_dict
+        )
+        return res
+
+
+    #@classmethod
+    #def create(self, vals):
+    #    if 'updatedAt' in vals and vals['updatedAt']:
+    #        vals['createdAt'] = vals['updatedAt']
+    #    else:
+    #        vals['createdAt'] = utc_iso(False, True)
+    #    table = self.get_table()
+    #    res = table.put_item(Item=vals)
+    #    return res
