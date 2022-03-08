@@ -56,7 +56,7 @@ def posts(service_id):
     return jsonify(body), 200
 
 
-@bp.route('/posts/<string:service_id>/<string:slug>', methods=['POST', 'GET', 'HEAD'])
+@bp.route('/posts/<string:service_id>/<string:slug>', methods=['POST', 'GET', 'HEAD', 'DELETE'])
 def post(service_id, slug):
     if service_id not in ACCEPT_SERVICE_IDS:
         raise InvalidUsage('ServiceId does not exist', 404)
@@ -70,6 +70,10 @@ def post(service_id, slug):
         schema = validation_schema_posts_post()
         vals = validate_req_params(schema, request.json)
         saved = Post.update(service_id, slug, vals)
+
+    elif request.method == 'DELETE':
+        Post.delete({'serviceIdSlug': '#'.join([service_id, slug])})
+        return jsonify(), 200
 
     if request.method == 'HEAD':
         return jsonify(), 200
