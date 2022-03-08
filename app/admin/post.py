@@ -77,6 +77,25 @@ def post(service_id, slug):
     return jsonify(saved), 200
 
 
+@bp.route('/posts/<string:service_id>/<string:slug>/status', methods=['POST'])
+def post_status(service_id, slug):
+    if service_id not in ACCEPT_SERVICE_IDS:
+        raise InvalidUsage('ServiceId does not exist', 404)
+
+    saved = Post.get_one_by_slug(service_id, slug, True)
+    if not saved:
+        raise InvalidUsage('Not Found', 404)
+
+    schema_all = validation_schema_posts_post()
+    schema = dict(filter(lambda item: item[0] == 'status', schema_all.items()))
+    vals = validate_req_params(schema, request.json)
+    if vals['status'] == saved['postStatus']:
+        raise InvalidUsage('', 400)
+    saved = Post.update(service_id, slug, vals)
+
+    return jsonify(saved), 200
+
+
 def validation_schema_posts_post():
     return {
         'slug': {

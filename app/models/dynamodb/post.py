@@ -110,7 +110,7 @@ class Post(Base):
             return None
 
         item = res['Items'][0]
-        if with_cate and 'categorySlug' in item and item['categorySlug']:
+        if with_cate and item.get('categorySlug'):
             item['category'] = Category.get_one_by_slug(service_id, item['categorySlug'],
                                                         True, False, True)
 
@@ -168,7 +168,7 @@ class Post(Base):
             raise ValueError('service_id is invalid')
 
         time = utc_iso(False, True)
-        saved = self.get_one_by_slug(service_id, slug)
+        saved = self.get_one_by_slug(service_id, slug, True)
         if not saved:
             raise ValueError('Slug is invalid')
 
@@ -190,8 +190,8 @@ class Post(Base):
 
         cate_slug_upd = vals.get('category')
         if cate_slug_upd and cate_slug_upd != saved['categorySlug']:
-            cate = Category.get_one_by_slug(service_id, cate_slug_upd)
-            if not cate:
+            cate_upd = Category.get_one_by_slug(service_id, cate_slug_upd)
+            if not cate_upd:
                 raise ValueError('Category not exists', 400)
         else:
             cate_slug_upd = None
@@ -261,4 +261,12 @@ class Post(Base):
             ExpressionAttributeValues=exp_vals,
             ReturnValues='UPDATED_NEW'
         )
-        return res
+        for attr, val in res['Attributes'].items():
+            if attr not in saved:
+                continue
+            saved[attr] = val
+
+        if cate_slug_upd:
+            saved['category'] = cate_upd
+
+        return saved
