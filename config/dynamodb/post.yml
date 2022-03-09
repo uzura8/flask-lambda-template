@@ -41,6 +41,7 @@ Properties:
           - body
           - publishAt
           - updatedAt
+          - createdAt
           - serviceId
           - postStatus
           - categorySlug

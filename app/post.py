@@ -10,45 +10,35 @@ bp = Blueprint('post', __name__, url_prefix='/posts')
 ACCEPT_SERVICE_IDS = os.environ.get('ACCEPT_SERVICE_IDS', '').split(',')
 
 
-@bp.route('/<string:service_id>', methods=['POST', 'GET'])
+@bp.route('/<string:service_id>', methods=['GET'])
 def posts(service_id):
     if service_id not in ACCEPT_SERVICE_IDS:
         raise InvalidUsage('ServiceId does not exist', 404)
 
-    if request.method == 'POST':
-        schema = validation_schema_posts_post()
-        vals = validate_req_params(schema, request.json)
-        item = Post.get_one_by_slug(service_id, vals['slug'])
-        if item:
-            raise InvalidUsage('Slug already used', 400)
+    params = {}
+    for key in ['count', 'order', 'sinceTime', 'untilTime', 'category']:
+        params[key] = request.args.get(key)
+    schema = validation_schema_posts_post()
+    vals = validate_req_params(schema, params)
+    #vals['status'] = 'publish'
+    cate_slug = vals.get('category')
+    if cate_slug:
+        cate = Category.get_one_by_slug(service_id, cate_slug, False, True, False, False)
+        if not cate:
+            raise InvalidUsage('Category does not exist', 404)
 
-        #time.sleep(1)
-        body = Post.create(service_id, vals)
+        # For category filter
+        vals['categories'] = [cate_slug]
+        if cate['children']:
+            for c in cate['children']:
+                vals['categories'].append(c['slug'])
 
-    else:
-        params = {'status': 'publish'}
-        for key in ['count', 'order', 'sinceTime', 'untilTime', 'category']:
-            params[key] = request.args.get(key)
-        schema = validation_schema_posts_post()
-        vals = validate_req_params(schema, params)
-        cate_slug = vals.get('category')
-        if cate_slug:
-            cate = Category.get_one_by_slug(service_id, cate_slug, False, True, False, False)
-            if not cate:
-                raise InvalidUsage('Category does not exist', 404)
-
-            # For category filter
-            vals['categories'] = [cate_slug]
-            if cate['children']:
-                for c in cate['children']:
-                    vals['categories'].append(c['slug'])
-
-        body = Post.query_all('statusPublishAtGsi', service_id, vals)
+    body = Post.query_all('statusPublishAtGsi', service_id, vals)
 
     return jsonify(body), 200
 
 
-@bp.route('/<string:service_id>/<string:slug>', methods=['POST', 'GET', 'HEAD'])
+@bp.route('/<string:service_id>/<string:slug>', methods=['GET', 'HEAD'])
 def post(service_id, slug):
     if service_id not in ACCEPT_SERVICE_IDS:
         raise InvalidUsage('ServiceId does not exist', 404)
@@ -59,9 +49,6 @@ def post(service_id, slug):
 
     if item['postStatus'] != 'publish':
         raise InvalidUsage('Not Found', 404)
-
-    if request.method == 'POST':
-        pass
 
     if request.method == 'HEAD':
         return jsonify(), 200
@@ -100,22 +87,6 @@ def validation_schema_posts_post():
             'required': False,
             'empty': True,
         },
-        #'publish': {
-        #    'type': 'boolean',
-        #    'coerce': (str, NormalizerUtils.to_bool),
-        #    'required': False,
-        #    'empty': True,
-        #    'default': False,
-        #},
-        # TODO: Delete after
-        #'status': {
-        #    'type': 'string',
-        #    'required': False,
-        #    'allowed': ['publish', 'unpublish'],
-        #    'nullable': True,
-        #    'empty': True,
-        #    'default': 'unpublish',
-        #},
         'publishAt': {
             'type': 'string',
             'coerce': (NormalizerUtils.trim),

@@ -21,6 +21,7 @@ class Post(Base):
         limit = params.get('count', 5)
         cate_slugs = params.get('categories', [])
 
+        is_admin = index_name == 'createdAtGsi'
         sort_key = 'createdAt' if index_name == 'createdAtGsi' else 'publishAt'
         prj_exps = ['title', 'id', 'slug', 'body', 'publishAt', 'updatedAt',
                             'categorySlug', 'postStatus', 'createdAt']
@@ -36,6 +37,14 @@ class Post(Base):
         }
         exp_attr_names['#si'] = 'serviceId'
         exp_attr_vals[':si'] = service_id
+
+        if not is_admin:
+            status = 'publish'
+            current = utc_iso(False, True)
+            if not until_time:
+                until_time = current
+            elif until_time > current:
+                until_time = current
 
         if status:
             key_conds.append('begins_with(#sp, :sp)')
@@ -231,12 +240,15 @@ class Post(Base):
         if status_upd:
             exp_items.append('postStatus=:ps')
             exp_vals[':ps'] = status_upd
-            exp_items.append('statusPublishAt=:spa')
-            exp_vals[':spa'] = '#'.join([status_upd, publish_at_upd])
 
         if publish_at_upd:
             exp_items.append('publishAt=:pa')
             exp_vals[':pa'] = publish_at_upd
+
+        if status_upd or publish_at_upd:
+            exp_items.append('statusPublishAt=:spa')
+            join_item = status_upd if status_upd else saved['postStatus']
+            exp_vals[':spa'] = '#'.join([join_item, publish_at_upd])
 
         attrs = ['title', 'body']
         for attr in attrs:
