@@ -207,10 +207,12 @@ class Post(Base):
         is_published = status_upd and status_upd == 'publish'
 
         publish_at_upd = vals.get('publishAt', '')
-        if publish_at_upd and publish_at_upd != saved['publishAt']:
-            publish_at_upd = iso_offset2utc(vals['publishAt'], True)
-        elif is_published:
-            publish_at_upd = time
+        if publish_at_upd:
+            if publish_at_upd != saved['publishAt']:
+                publish_at_upd = iso_offset2utc(vals['publishAt'], True)
+        else:
+            if is_published and not saved['publishAt']:
+                publish_at_upd = time
 
         table = self.get_table()
         exp_items = []
