@@ -33,7 +33,6 @@ def posts(service_id):
         body = Post.create(service_id, vals)
 
     else:
-        #params = {'status': 'published'}
         params = {}
         for key in ['count', 'order', 'sinceTime', 'untilTime', 'category']:
             params[key] = request.args.get(key)

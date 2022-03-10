@@ -50,21 +50,27 @@ class Post(Base):
             key_conds.append('begins_with(#sp, :sp)')
             exp_attr_names['#sp'] = 'statusPublishAt'
             exp_attr_vals[':sp'] = status
-        option['KeyConditionExpression'] = ' AND '.join(key_conds)
 
-        filter_exp = ''
+        filter_exps = []
         if since_time:
-            filter_exp += '#st > :st'
+            cond = '#st > :st'
             exp_attr_names['#st'] = sort_key
             exp_attr_vals[':st'] = since_time
+            if is_admin:
+                key_conds.append(cond)
+            else:
+                filter_exps.append(cond)
 
         if until_time:
-            if filter_exp:
-                filter_exp += ' AND '
-            filter_exp += '#ut < :ut'
+            cond = '#ut < :ut'
             exp_attr_names['#ut'] = sort_key
             exp_attr_vals[':ut'] = until_time
+            if is_admin:
+                key_conds.append(cond)
+            else:
+                filter_exps.append(cond)
 
+        filter_exp = ''
         if cate_slugs:
             filter_exp_cids = []
             for i, cid in enumerate(cate_slugs):
@@ -72,15 +78,19 @@ class Post(Base):
                 filter_exp_cids.append('#{v} = :{v}'.format(v=val_name))
                 exp_attr_names['#{v}'.format(v=val_name)] = 'categorySlug'
                 exp_attr_vals[':{v}'.format(v=val_name)] = cid
-            if filter_exp:
-                filter_exp = '{} AND ({})'.format(filter_exp, ' OR '.join(filter_exp_cids))
+
+            filter_exps_str = ' AND '.join(filter_exps)
+            filter_exp_cids_str = ' OR '.join(filter_exp_cids)
+            if filter_exps:
+                filter_exp = '%s AND (%s)' % (filter_exps_str, filter_exp_cids_str)
             else:
-                filter_exp = ' OR '.join(filter_exp_cids)
+                filter_exp = filter_exp_cids_str
 
         if filter_exp:
             option['FilterExpression'] = filter_exp
             option['Limit'] += 50
 
+        option['KeyConditionExpression'] = ' AND '.join(key_conds)
         option['ExpressionAttributeNames'] = exp_attr_names
         option['ExpressionAttributeValues'] = exp_attr_vals
         result = table.query(**option)
