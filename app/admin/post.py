@@ -1,3 +1,4 @@
+import json
 from flask import jsonify, request
 from app.models.dynamodb import Post, Category
 from app.common.error import InvalidUsage
@@ -34,23 +35,19 @@ def posts(service_id):
 
     else:
         params = {}
-        for key in ['count', 'order', 'sinceTime', 'untilTime', 'category']:
+        for key in ['limit', 'order']:
             params[key] = request.args.get(key)
-        schema = validation_schema_posts_post()
-        vals = validate_req_params(schema, params)
-        cate_slug = vals.get('category')
-        if cate_slug:
-            cate = Category.get_one_by_slug(service_id, cate_slug, False, True, False, False)
-            if not cate:
-                raise InvalidUsage('Category does not exist', 404)
+        vals = validate_req_params(validation_schema_posts_post(), params)
+        key_name =  'lastKeyCreatedAt'
+        vals['index'] = 'createdAtGsi'
+        last_key = request.args.get('lastKey')
+        if last_key:
+            params = {key_name:json.loads(last_key)}
+            vals_last_key = validate_req_params(validation_schema_posts_post(), params)
+            vals['ExclusiveStartKey'] = vals_last_key[key_name]
 
-            # For category filter
-            vals['categories'] = [cate_slug]
-            if cate['children']:
-                for c in cate['children']:
-                    vals['categories'].append(c['slug'])
-
-        body = Post.query_all('createdAtGsi', service_id, vals, True)
+        hkey = {'name':'serviceId', 'value': service_id}
+        body = Post.query_pager(hkey, vals, True)
 
     return jsonify(body), 200
 
@@ -174,5 +171,26 @@ def validation_schema_posts_post():
             'nullable': True,
             'empty': True,
             'regex': r'\d{4}\-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([\+\-]\d{2}:\d{2}|Z)$',
+        },
+        'lastKeyCreatedAt' : {
+            'type': 'dict',
+            'schema': {
+                'serviceId': {
+                    'type': 'string',
+                    'required': True,
+                    'empty': False,
+                },
+                'serviceIdSlug': {
+                    'type': 'string',
+                    'required': True,
+                    'empty': False,
+                },
+                'createdAt': {
+                    'type': 'string',
+                    'required': True,
+                    'empty': False,
+                    'regex': r'\d{4}\-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([\+\-]\d{2}:\d{2}|Z)$',
+                },
+            }
         },
     }

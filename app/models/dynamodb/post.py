@@ -41,9 +41,7 @@ class Post(Base):
         if not is_admin:
             status = 'publish'
             current = utc_iso(False, True)
-            if not until_time:
-                until_time = current
-            elif until_time > current:
+            if not until_time or until_time > current:
                 until_time = current
 
         if status:
@@ -70,21 +68,24 @@ class Post(Base):
             else:
                 filter_exps.append(cond)
 
-        filter_exp = ''
+        filter_exp_cids = []
         if cate_slugs:
-            filter_exp_cids = []
             for i, cid in enumerate(cate_slugs):
                 val_name = 'cid' + str(i)
                 filter_exp_cids.append('#{v} = :{v}'.format(v=val_name))
                 exp_attr_names['#{v}'.format(v=val_name)] = 'categorySlug'
                 exp_attr_vals[':{v}'.format(v=val_name)] = cid
 
-            filter_exps_str = ' AND '.join(filter_exps)
-            filter_exp_cids_str = ' OR '.join(filter_exp_cids)
-            if filter_exps:
-                filter_exp = '%s AND (%s)' % (filter_exps_str, filter_exp_cids_str)
-            else:
-                filter_exp = filter_exp_cids_str
+        filter_exps_str = ' AND '.join(filter_exps) if filter_exps else ''
+        filter_exp_cids_str = '(%s)' % ' OR '.join(filter_exp_cids) if filter_exp_cids else ''
+
+        filter_exp = ''
+        if filter_exps_str:
+            filter_exp += filter_exps_str
+        if filter_exp_cids_str:
+            if filter_exp:
+                filter_exp += ' AND '
+            filter_exp += filter_exp_cids_str
 
         if filter_exp:
             option['FilterExpression'] = filter_exp
@@ -103,6 +104,51 @@ class Post(Base):
                 items[idx]['category'] = cate
 
         return items
+
+
+    @classmethod
+    def query_pager(self, hkey, params=None, with_cate=False):
+        index = params.get('index')
+        is_desc = params.get('order', 'asc') == 'desc'
+        limit = params.get('limit', 3)
+        start_key = params.get('ExclusiveStartKey')
+
+        table = self.get_table()
+
+        key_cond_exps = []
+        exp_attr_names = {}
+        exp_attr_vals = {}
+        option = {
+            'ScanIndexForward': not is_desc,
+            'Limit': limit,
+        }
+        if index:
+            option['IndexName'] = index
+
+        key_cond_exps.append('#hk = :hv')
+        exp_attr_names['#hk'] = hkey['name']
+        exp_attr_vals[':hv'] = hkey['value']
+
+        option['KeyConditionExpression'] = ' AND '.join(key_cond_exps)
+        option['ExpressionAttributeNames'] = exp_attr_names
+        option['ExpressionAttributeValues'] = exp_attr_vals
+
+        if start_key:
+            option['ExclusiveStartKey'] = start_key
+
+        res = table.query(**option)
+        items = res['Items']
+
+        if with_cate:
+            for idx, item in enumerate(items):
+                cate = Category.get_one_by_slug(hkey['value'], item['categorySlug'],
+                                                            False, False, True)
+                items[idx]['category'] = cate
+
+        return {
+            'items': items,
+            'lastKey': res['LastEvaluatedKey'] if 'LastEvaluatedKey' in res else None,
+        }
 
 
     #@classmethod
@@ -204,7 +250,7 @@ class Post(Base):
                 copied[attr] = val
             copied['slug'] = slug_upd
             create_res = self.create(service_id, copied)
-            delete_res = self.delete({'serviceIdSlug': '#'.join([service_id, slug])})
+            self.delete({'serviceIdSlug': '#'.join([service_id, slug])})
             return create_res
 
         cate_slug_upd = vals.get('category')
