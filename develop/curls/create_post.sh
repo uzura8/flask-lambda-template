@@ -25,8 +25,15 @@ while [ $CNT -lt 30 ];
     #echo 'Number is '$CNT;
     CATE_NO=$(( $CNT % 3 + 1))
     PUBLISH=$(( $CNT % 2))
+
+    if test $PUBLISH -eq 1 ; then
+      STATUS='publish';
+    else
+      STATUS='unpublish';
+    fi
+
     #data='{"title":"お知らせ'${CNT}'", "body":"お知らせ'${CNT}'です。", "category":"cate'0${CATE_NO}'", "slug":"info'${CNT}'"}'
     #echo $data
-    curl -H "Content-Type: application/json" -X POST "${URL}/posts/${SERVICE_ID}" -d '{"title":"お知らせ'${CNT}'", "body":"お知らせ'${CNT}'です。", "category":"cate'0${CATE_NO}'", "slug":"info'${CNT}'", "publish":'$PUBLISH'}'
+    curl -H "Content-Type: application/json" -H "Authorization: Bearer ${AUTH_TOKEN}" -X POST "${URL}/admin/posts/${SERVICE_ID}" -d '{"title":"お知らせ'${CNT}'", "body":"お知らせ'${CNT}'です。", "category":"cate'0${CATE_NO}'", "slug":"info'${CNT}'", "status":"'${STATUS}'"}'
     CNT=$(( CNT + 1 ));
 done
