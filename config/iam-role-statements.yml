@@ -4,6 +4,7 @@
     - dynamodb:Query
     - dynamodb:Scan
     - dynamodb:GetItem
+    - dynamodb:BatchGetItem
     - dynamodb:PutItem
     - dynamodb:UpdateItem
     - dynamodb:DeleteItem
