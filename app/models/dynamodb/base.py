@@ -60,6 +60,26 @@ class Base():
 
 
     @classmethod
+    def get_one(self, hkey_name, hkey_val, is_desc=False, index_name=None):
+        table = self.get_table()
+        option = {
+            'ScanIndexForward': not is_desc,
+            'Limit': 1,
+        }
+        if index_name:
+            option['IndexName'] = index_name
+        exp_attr_names = {}
+        exp_attr_vals = {}
+        exp_attr_names['#hk'] = hkey_name
+        exp_attr_vals[':hv'] = hkey_val
+        option['KeyConditionExpression'] = '#hk = :hv'
+        option['ExpressionAttributeNames'] = exp_attr_names
+        option['ExpressionAttributeValues'] = exp_attr_vals
+        res = table.query(**option)
+        return res['Items'][0] if len(res['Items']) > 0 else None
+
+
+    @classmethod
     def delete(self, key_dict):
         table = self.get_table()
         res = table.delete_item(

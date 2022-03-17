@@ -52,46 +52,54 @@ def posts(service_id):
     return jsonify(body), 200
 
 
-@bp.route('/posts/<string:service_id>/<string:slug>', methods=['POST', 'GET', 'HEAD', 'DELETE'])
-def post(service_id, slug):
+@bp.route('/posts/<string:service_id>/<string:post_id>', methods=['POST', 'GET', 'HEAD', 'DELETE'])
+def post(service_id, post_id):
     if service_id not in ACCEPT_SERVICE_IDS:
         raise InvalidUsage('ServiceId does not exist', 404)
 
-    with_cate = True if request.method in ['GET', 'POST'] else False
-    saved = Post.get_one_by_slug(service_id, slug, with_cate)
-    if not saved:
+    #with_cate = True if request.method in ['GET', 'POST'] else False
+    post = Post.get_one_by_id(post_id, True, service_id)
+    if not post:
         raise InvalidUsage('Not Found', 404)
 
+    if post['serviceId'] != service_id:
+        raise InvalidUsage('serviceId is invalid', 400)
+
+    saved = None
     if request.method == 'POST':
         schema = validation_schema_posts_post()
         vals = validate_req_params(schema, request.json)
-        saved = Post.update(service_id, slug, vals)
+        saved = Post.update(service_id, post_id, vals)
 
     elif request.method == 'DELETE':
-        Post.delete({'serviceIdSlug': '#'.join([service_id, slug])})
+        Post.delete({'postId':post_id})
         return jsonify(), 200
 
     if request.method == 'HEAD':
         return jsonify(), 200
 
-    return jsonify(saved), 200
+    res = saved if saved else post
+    return jsonify(res), 200
 
 
-@bp.route('/posts/<string:service_id>/<string:slug>/status', methods=['POST'])
-def post_status(service_id, slug):
+@bp.route('/posts/<string:service_id>/<string:post_id>/status', methods=['POST'])
+def post_status(service_id, post_id):
     if service_id not in ACCEPT_SERVICE_IDS:
         raise InvalidUsage('ServiceId does not exist', 404)
 
-    saved = Post.get_one_by_slug(service_id, slug, True)
+    saved = Post.get_one_by_id(post_id, True, service_id)
     if not saved:
         raise InvalidUsage('Not Found', 404)
+
+    if saved['serviceId'] != service_id:
+        raise InvalidUsage('serviceId is invalid', 400)
 
     schema_all = validation_schema_posts_post()
     schema = dict(filter(lambda item: item[0] == 'status', schema_all.items()))
     vals = validate_req_params(schema, request.json)
     if vals['status'] == saved['postStatus']:
         raise InvalidUsage('', 400)
-    saved = Post.update(service_id, slug, vals)
+    saved = Post.update(service_id, post_id, vals)
 
     return jsonify(saved), 200
 
@@ -180,7 +188,7 @@ def validation_schema_posts_post():
                     'required': True,
                     'empty': False,
                 },
-                'serviceIdSlug': {
+                'postId': {
                     'type': 'string',
                     'required': True,
                     'empty': False,

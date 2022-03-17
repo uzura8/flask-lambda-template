@@ -3,6 +3,9 @@ Properties:
   TableName: ${self:custom.prjPrefix}-post
   AttributeDefinitions:
     -
+      AttributeName: postId
+      AttributeType: S
+    -
       AttributeName: serviceIdSlug
       AttributeType: S
     -
@@ -16,14 +19,36 @@ Properties:
       AttributeType: S
   KeySchema:
     -
-      AttributeName: serviceIdSlug
+      AttributeName: postId
       KeyType: HASH
-  ProvisionedThroughput:
-    ReadCapacityUnits: 5
-    WriteCapacityUnits: 3
-  #BillingMode: PAY_PER_REQUEST
+  #ProvisionedThroughput:
+  #  ReadCapacityUnits: 5
+  #  WriteCapacityUnits: 3
+  BillingMode: PAY_PER_REQUEST
 
   GlobalSecondaryIndexes:
+    -
+      IndexName: serviceIdSlugGsi
+      KeySchema:
+      -
+        AttributeName: serviceIdSlug
+        KeyType: HASH
+      Projection:
+        NonKeyAttributes:
+          - postId
+          - slug
+          - title
+          - body
+          - publishAt
+          - updatedAt
+          - createdAt
+          - serviceId
+          - postStatus
+          - categorySlug
+        ProjectionType: INCLUDE
+      #ProvisionedThroughput:
+      #  ReadCapacityUnits: 5
+      #  WriteCapacityUnits: 3
     -
       IndexName: statusPublishAtGsi
       KeySchema:
@@ -35,7 +60,7 @@ Properties:
         KeyType: RANGE
       Projection:
         NonKeyAttributes:
-          - id
+          - postId
           - slug
           - title
           - body
@@ -46,9 +71,9 @@ Properties:
           - postStatus
           - categorySlug
         ProjectionType: INCLUDE
-      ProvisionedThroughput:
-        ReadCapacityUnits: 5
-        WriteCapacityUnits: 3
+      #ProvisionedThroughput:
+      #  ReadCapacityUnits: 5
+      #  WriteCapacityUnits: 3
     -
       IndexName: createdAtGsi
       KeySchema:
@@ -60,7 +85,7 @@ Properties:
         KeyType: RANGE
       Projection:
         NonKeyAttributes:
-          - id
+          - postId
           - slug
           - title
           - body
@@ -71,6 +96,6 @@ Properties:
           - postStatus
           - categorySlug
         ProjectionType: INCLUDE
-      ProvisionedThroughput:
-        ReadCapacityUnits: 5
-        WriteCapacityUnits: 3
+      #ProvisionedThroughput:
+      #  ReadCapacityUnits: 5
+      #  WriteCapacityUnits: 3

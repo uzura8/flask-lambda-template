@@ -23,7 +23,7 @@ class Post(Base):
 
         is_admin = index_name == 'createdAtGsi'
         sort_key = 'createdAt' if index_name == 'createdAtGsi' else 'publishAt'
-        prj_exps = ['title', 'id', 'slug', 'body', 'publishAt', 'updatedAt',
+        prj_exps = ['title', 'postId', 'slug', 'body', 'publishAt', 'updatedAt',
                             'categorySlug', 'postStatus', 'createdAt']
         exp_attr_names = {}
         exp_attr_vals = {}
@@ -165,20 +165,26 @@ class Post(Base):
 
 
     @classmethod
-    def get_one_by_slug(self, service_id, slug, with_cate=False):
-        table = self.get_table()
-        res = table.query(
-            ProjectionExpression='title, id, slug, body, publishAt, updatedAt, categorySlug, postStatus',
-            KeyConditionExpression=Key('serviceIdSlug').eq('#'.join([service_id, slug])),
-        )
-        if 'Items' not in res or not res['Items']:
+    def get_one_by_id(self, post_id, with_cate=False, service_id=None):
+        item = self.get_one('postId', post_id)
+        if not item:
             return None
 
-        item = res['Items'][0]
         if with_cate and item.get('categorySlug'):
             item['category'] = Category.get_one_by_slug(service_id, item['categorySlug'],
                                                         True, False, True)
+        return item
 
+
+    @classmethod
+    def get_one_by_slug(self, service_id, slug, with_cate=False):
+        item = self.get_one('serviceIdSlug', '#'.join([service_id, slug]), True, 'serviceIdSlugGsi')
+        if not item:
+            return None
+
+        if with_cate and item.get('categorySlug'):
+            item['category'] = Category.get_one_by_slug(service_id, item['categorySlug'],
+                                                        True, False, True)
         return item
 
 
@@ -210,7 +216,7 @@ class Post(Base):
 
         table = self.get_table()
         item = {
-            #'id': new_uuid(),
+            'postId': new_uuid(),
             'createdAt': time,
             'updatedAt': time,
             'serviceId': service_id,
@@ -228,12 +234,12 @@ class Post(Base):
 
 
     @classmethod
-    def update(self, service_id, slug, vals):
+    def update(self, service_id, post_id, vals):
         if service_id not in self.ACCEPT_SERVICE_IDS:
             raise ValueError('service_id is invalid')
 
         time = utc_iso(False, True)
-        saved = self.get_one_by_slug(service_id, slug, True)
+        saved = self.get_one('postId', post_id, True)
         if not saved:
             raise ValueError('Slug is invalid')
 
@@ -243,15 +249,6 @@ class Post(Base):
                 raise ValueError('Slug already used')
         else:
             slug_upd = None
-
-        if slug_upd:
-            copied = saved
-            for attr, val in vals.items():
-                copied[attr] = val
-            copied['slug'] = slug_upd
-            create_res = self.create(service_id, copied)
-            self.delete({'serviceIdSlug': '#'.join([service_id, slug])})
-            return create_res
 
         cate_slug_upd = vals.get('category')
         if cate_slug_upd and cate_slug_upd != saved['categorySlug']:
@@ -325,7 +322,7 @@ class Post(Base):
         table = self.get_table()
         res = table.update_item(
             Key={
-                'serviceIdSlug': '#'.join([service_id, slug]),
+                'postId': post_id,
             },
             UpdateExpression='SET ' +  ', '.join(exp_items),
             ExpressionAttributeValues=exp_vals,
@@ -338,5 +335,8 @@ class Post(Base):
 
         if cate_slug_upd:
             saved['category'] = cate_upd
+        else:
+            saved['category'] = Category.get_one_by_slug(service_id, saved['categorySlug'],
+                                                        True, False, True)
 
         return saved
