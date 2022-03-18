@@ -14,3 +14,5 @@ def site_before_request(f):
 
 
 from . import post
+from . import category
+from . import tag

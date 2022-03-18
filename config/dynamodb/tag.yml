@@ -1,0 +1,21 @@
+Type: 'AWS::DynamoDB::Table'
+Properties:
+  TableName: ${self:custom.prjPrefix}-tag
+  AttributeDefinitions:
+    -
+      AttributeName: serviceId
+      AttributeType: S
+    -
+      AttributeName: slug
+      AttributeType: S
+  KeySchema:
+    -
+      AttributeName: serviceId
+      KeyType: HASH
+    -
+      AttributeName: slug
+      KeyType: RANGE
+  BillingMode: PAY_PER_REQUEST
+  #ProvisionedThroughput:
+  #  ReadCapacityUnits: 5
+  #  WriteCapacityUnits: 3
