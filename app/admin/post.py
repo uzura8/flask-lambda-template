@@ -31,7 +31,8 @@ def posts(service_id):
         if not cate:
             raise InvalidUsage('Category not exists', 400)
 
-        body = Post.create(service_id, vals)
+        vals['serviceId'] = service_id
+        body = Post.create(vals)
 
     else:
         params = {}

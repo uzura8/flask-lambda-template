@@ -166,7 +166,7 @@ class Post(Base):
 
     @classmethod
     def get_one_by_id(self, post_id, with_cate=False, service_id=None):
-        item = self.get_one('postId', post_id)
+        item = self.get_one_by_pkey('postId', post_id)
         if not item:
             return None
 
@@ -178,7 +178,7 @@ class Post(Base):
 
     @classmethod
     def get_one_by_slug(self, service_id, slug, with_cate=False):
-        item = self.get_one('serviceIdSlug', '#'.join([service_id, slug]), True, 'serviceIdSlugGsi')
+        item = self.get_one_by_pkey('serviceIdSlug', '#'.join([service_id, slug]), True, 'serviceIdSlugGsi')
         if not item:
             return None
 
@@ -189,11 +189,11 @@ class Post(Base):
 
 
     @classmethod
-    def create(self, service_id, kwargs):
-        if service_id not in self.ACCEPT_SERVICE_IDS:
-            raise ValueError('service_id is invalid')
+    def create(self, vals):
+        if vals.get('serviceId') not in self.ACCEPT_SERVICE_IDS:
+            raise ValueError('serviceId is invalid')
 
-        status = kwargs.get('status') or kwargs.get('postStatus')
+        status = vals.get('status') or vals.get('postStatus')
         if status not in ['publish', 'unpublish']:
             raise ValueError('status is invalid')
         is_publish = status == 'publish'
@@ -201,31 +201,31 @@ class Post(Base):
         time = utc_iso(False, True)
 
         publish_at = ''
-        if kwargs.get('publishAt'):
-            publish_at = iso_offset2utc(kwargs['publishAt'], True)
+        if vals.get('publishAt'):
+            publish_at = iso_offset2utc(vals['publishAt'], True)
         elif is_publish:
             publish_at = time
 
         required_attrs = ['slug', 'category', 'title']
         for attr in required_attrs:
-            if attr not in kwargs or len(kwargs[attr].strip()) == 0:
+            if attr not in vals or len(vals[attr].strip()) == 0:
                 raise ValueError("Argument '%s' requires values" % attr)
 
-        slug = kwargs['slug']
-        cate_slug = kwargs['category']
+        slug = vals['slug']
+        cate_slug = vals['category']
 
         table = self.get_table()
         item = {
             'postId': new_uuid(),
             'createdAt': time,
             'updatedAt': time,
-            'serviceId': service_id,
+            'serviceId': vals['serviceId'],
             'slug': slug,
             'publishAt': publish_at,
             'categorySlug': cate_slug,
-            'title': kwargs['title'],
-            'body': kwargs['body'],
-            'serviceIdSlug': '#'.join([service_id, slug]),
+            'title': vals['title'],
+            'body': vals['body'],
+            'serviceIdSlug': '#'.join([vals['serviceId'], slug]),
             'postStatus': status,
             'statusPublishAt': '#'.join([status, publish_at]),
         }
@@ -239,7 +239,7 @@ class Post(Base):
             raise ValueError('service_id is invalid')
 
         time = utc_iso(False, True)
-        saved = self.get_one('postId', post_id, True)
+        saved = self.get_one_by_pkey('postId', post_id, True)
         if not saved:
             raise ValueError('Slug is invalid')
 

@@ -1,5 +1,7 @@
 import os
 import boto3
+from app.common.date import utc_iso
+from app.common.string import new_uuid
 
 
 class Base():
@@ -60,7 +62,56 @@ class Base():
 
 
     @classmethod
-    def get_one(self, hkey_name, hkey_val, is_desc=False, index_name=None):
+    def get_all_by_pkey(self, pkeys, params, index_name=None):
+        table = self.get_table()
+        option = {'ScanIndexForward': not params.get('is_desc', False)}
+
+        if params.get('limit'):
+            option['limit'] = params['limit']
+
+        if index_name:
+            option['IndexName'] = index_name
+
+        key_cond_exp = '#pk = :pk'
+        exp_attr_names = {'#pk': pkeys['key']}
+        exp_attr_vals = {':pk': pkeys['val']}
+
+        option['KeyConditionExpression'] = key_cond_exp
+        option['ExpressionAttributeNames'] = exp_attr_names
+        option['ExpressionAttributeValues'] = exp_attr_vals
+        res = table.query(**option)
+
+        return res.get('Items')
+
+
+    @classmethod
+    def get_one(self, keys, is_desc=False, index_name=None):
+        table = self.get_table()
+        option = {
+            'ScanIndexForward': not is_desc,
+            'Limit': 1,
+        }
+        if index_name:
+            option['IndexName'] = index_name
+
+        key_cond_exps = ['#pk = :pk']
+        exp_attr_names = {'#pk': keys['p']['key']}
+        exp_attr_vals = {':pk': keys['p']['val']}
+
+        if keys.get('s'):
+            exp_attr_names['#sk'] = keys['s']['key']
+            exp_attr_vals[':sk'] = keys['s']['val']
+            key_cond_exps.append('#sk = :sk')
+
+        option['KeyConditionExpression'] = ' AND '.join(key_cond_exps)
+        option['ExpressionAttributeNames'] = exp_attr_names
+        option['ExpressionAttributeValues'] = exp_attr_vals
+        res = table.query(**option)
+        return res['Items'][0] if len(res['Items']) > 0 else None
+
+
+    @classmethod
+    def get_one_by_pkey(self, hkey_name, hkey_val, is_desc=False, index_name=None):
         table = self.get_table()
         option = {
             'ScanIndexForward': not is_desc,
@@ -88,12 +139,16 @@ class Base():
         return res
 
 
-    #@classmethod
-    #def create(self, vals):
-    #    if 'updatedAt' in vals and vals['updatedAt']:
-    #        vals['createdAt'] = vals['updatedAt']
-    #    else:
-    #        vals['createdAt'] = utc_iso(False, True)
-    #    table = self.get_table()
-    #    res = table.put_item(Item=vals)
-    #    return res
+    @classmethod
+    def create(self, vals, uuid_name=None):
+        if vals.get('updatedAt'):
+            vals['createdAt'] = vals['updatedAt']
+        else:
+            vals['createdAt'] = utc_iso(False, True)
+
+        if uuid_name:
+            vals[uuid_name] = new_uuid()
+
+        table = self.get_table()
+        res = table.put_item(Item=vals)
+        return res

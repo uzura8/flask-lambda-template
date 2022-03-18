@@ -9,26 +9,16 @@ bp = Blueprint('category', __name__, url_prefix='/categories')
 ACCEPT_SERVICE_IDS = os.environ.get('ACCEPT_SERVICE_IDS', '').split(',')
 
 
-@bp.route('/<string:service_id>', methods=['POST', 'GET'])
+@bp.route('/<string:service_id>', methods=['GET'])
 def handle_list(service_id):
     if service_id not in ACCEPT_SERVICE_IDS:
         raise InvalidUsage('ServiceId does not exist', 404)
 
-    if request.method == 'POST':
-        vals = validate_req_params(validation_schema(), request.json)
-        item = Category.get_one_by_slug(service_id, vals['slug'])
-        if item:
-            raise InvalidUsage('Slug already used', 400)
-
-        body = Category.create(service_id, vals)
-
-    else:
-        body = Category.get_all_by_service_id(service_id)
-
+    body = Category.get_all_by_service_id(service_id)
     return jsonify(body), 200
 
 
-@bp.route('/<string:service_id>/<string:slug>', methods=['POST', 'GET', 'HEAD'])
+@bp.route('/<string:service_id>/<string:slug>', methods=['GET', 'HEAD'])
 def handle_detail(service_id, slug):
     if service_id not in ACCEPT_SERVICE_IDS:
         raise InvalidUsage('ServiceId does not exist', 404)
@@ -43,9 +33,6 @@ def handle_detail(service_id, slug):
                                 vals['withParents'], vals['withChildren'], True)
     if not item:
         raise InvalidUsage('Not Found', 404)
-
-    if request.method == 'POST':
-        pass
 
     if request.method == 'HEAD':
         return jsonify(), 200

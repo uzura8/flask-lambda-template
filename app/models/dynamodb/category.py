@@ -125,28 +125,29 @@ class Category(Base):
 
 
     @classmethod
-    def create(self, service_id, kwargs):
+    def create(self, vals):
+        service_id = vals.get('serviceId')
         if service_id not in self.ACCEPT_SERVICE_IDS:
-            raise ValueError('service_id is invalid')
+            raise ValueError('serviceId is invalid')
 
         required_attrs = ['slug', 'label']
         for attr in required_attrs:
-            if attr not in kwargs or len(kwargs[attr].strip()) == 0:
+            if attr not in vals or len(vals[attr].strip()) == 0:
                 raise ValueError("Argument '%s' requires values" % attr)
 
-        if 'parentId' not in kwargs or kwargs['parentId'] is None:
+        if 'parentId' not in vals or vals['parentId'] is None:
             raise ValueError("Argument 'parentId' requires values")
 
-        if kwargs['parentId'] == 0:
+        if vals['parentId'] == 0:
             parent_path = '0'
         else:
-            parent = self.get_one_by_id(kwargs['parentId'])
+            parent = self.get_one_by_id(vals['parentId'])
             if parent['parentPath'] == '0':
-                parent_path = str(kwargs['parentId'])
+                parent_path = str(vals['parentId'])
             else:
-                parent_path = '#'.join([parent['parentPath'], str(kwargs['parentId'])])
+                parent_path = '#'.join([parent['parentPath'], str(vals['parentId'])])
 
-        slug = kwargs['slug']
+        slug = vals['slug']
         cate_id = SiteConfig.increament_number(service_id, 'category_id')
 
         table = self.get_table()
@@ -154,7 +155,7 @@ class Category(Base):
             'id': cate_id,
             'serviceId': service_id,
             'slug': slug,
-            'label': kwargs['label'],
+            'label': vals['label'],
             'parentPath': parent_path,
             'serviceIdSlug': '#'.join([service_id, slug]),
         }
