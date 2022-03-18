@@ -36,4 +36,5 @@ while [ $CNT -lt 30 ];
     #echo $data
     curl -H "Content-Type: application/json" -H "Authorization: Bearer ${AUTH_TOKEN}" -X POST "${URL}/admin/posts/${SERVICE_ID}" -d '{"title":"お知らせ'${CNT}'", "body":"お知らせ'${CNT}'です。", "category":"cate'0${CATE_NO}'", "slug":"info'${CNT}'", "status":"'${STATUS}'"}'
     CNT=$(( CNT + 1 ));
+    sleep 1;
 done

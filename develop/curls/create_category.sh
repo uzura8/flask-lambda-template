@@ -8,13 +8,13 @@ fi
 
 SERVICE_ID="hoge"
 
-curl -H "Content-Type: application/json" -X POST "${URL}/categories/${SERVICE_ID}" -d '{"label":"ルート01", "slug":"root", "parentId":"0"}'
-curl -H "Content-Type: application/json" -X POST "${URL}/categories/${SERVICE_ID}" -d '{"label":"東北", "slug":"tohoku", "parentId":1}'
-curl -H "Content-Type: application/json" -X POST "${URL}/categories/${SERVICE_ID}" -d '{"label":"関東", "slug":"kanto", "parentId":1}'
-curl -H "Content-Type: application/json" -X POST "${URL}/categories/${SERVICE_ID}" -d '{"label":"東京", "slug":"tokyo", "parentId":3}'
-curl -H "Content-Type: application/json" -X POST "${URL}/categories/${SERVICE_ID}" -d '{"label":"神奈川", "slug":"kanagawa", "parentId":3}'
-curl -H "Content-Type: application/json" -X POST "${URL}/categories/${SERVICE_ID}" -d '{"label":"多摩市", "slug":"tama-shi", "parentId":4}'
+curl -H "Content-Type: application/json" -H "Authorization: Bearer ${AUTH_TOKEN}" -X POST "${URL}/admin/categories/${SERVICE_ID}" -d '{"label":"ルート01", "slug":"root", "parentId":"0"}'
+curl -H "Content-Type: application/json" -H "Authorization: Bearer ${AUTH_TOKEN}" -X POST "${URL}/admin/categories/${SERVICE_ID}" -d '{"label":"東北", "slug":"tohoku", "parentId":1}'
+curl -H "Content-Type: application/json" -H "Authorization: Bearer ${AUTH_TOKEN}" -X POST "${URL}/admin/categories/${SERVICE_ID}" -d '{"label":"関東", "slug":"kanto", "parentId":1}'
+curl -H "Content-Type: application/json" -H "Authorization: Bearer ${AUTH_TOKEN}" -X POST "${URL}/admin/categories/${SERVICE_ID}" -d '{"label":"東京", "slug":"tokyo", "parentId":3}'
+curl -H "Content-Type: application/json" -H "Authorization: Bearer ${AUTH_TOKEN}" -X POST "${URL}/admin/categories/${SERVICE_ID}" -d '{"label":"神奈川", "slug":"kanagawa", "parentId":3}'
+curl -H "Content-Type: application/json" -H "Authorization: Bearer ${AUTH_TOKEN}" -X POST "${URL}/admin/categories/${SERVICE_ID}" -d '{"label":"多摩市", "slug":"tama-shi", "parentId":4}'
 
-curl -H "Content-Type: application/json" -X POST "${URL}/categories/${SERVICE_ID}" -d '{"label":"カテゴリ01", "slug":"cate01", "parentId":1}'
-curl -H "Content-Type: application/json" -X POST "${URL}/categories/${SERVICE_ID}" -d '{"label":"カテゴリ02", "slug":"cate02", "parentId":1}'
-curl -H "Content-Type: application/json" -X POST "${URL}/categories/${SERVICE_ID}" -d '{"label":"カテゴリ03", "slug":"cate03", "parentId":7}'
+curl -H "Content-Type: application/json" -H "Authorization: Bearer ${AUTH_TOKEN}" -X POST "${URL}/admin/categories/${SERVICE_ID}" -d '{"label":"カテゴリ01", "slug":"cate01", "parentId":1}'
+curl -H "Content-Type: application/json" -H "Authorization: Bearer ${AUTH_TOKEN}" -X POST "${URL}/admin/categories/${SERVICE_ID}" -d '{"label":"カテゴリ02", "slug":"cate02", "parentId":1}'
+curl -H "Content-Type: application/json" -H "Authorization: Bearer ${AUTH_TOKEN}" -X POST "${URL}/admin/categories/${SERVICE_ID}" -d '{"label":"カテゴリ03", "slug":"cate03", "parentId":7}'
