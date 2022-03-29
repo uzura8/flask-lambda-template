@@ -27,16 +27,17 @@ def posts(service_id):
         if item:
             raise InvalidUsage('Slug already used', 400)
 
-        cate = Category.get_one_by_slug(service_id, vals['category'])
-        if not cate:
-            raise InvalidUsage('Category not exists', 400)
+        if vals.get('category'):
+            cate = Category.get_one_by_slug(service_id, vals['category'])
+            if not cate:
+                raise InvalidUsage('Category not exists', 400)
 
         vals['serviceId'] = service_id
         body = Post.create(vals)
 
     else:
         params = {}
-        for key in ['limit', 'order']:
+        for key in ['count', 'order']:
             params[key] = request.args.get(key)
         vals = validate_req_params(validation_schema_posts_post(), params)
         key_name =  'lastKeyCreatedAt'
@@ -157,7 +158,7 @@ def validation_schema_posts_post():
             'required': False,
             'min': 1,
             'max': 50,
-            'default': 5,
+            'default': 20,
         },
         'order': {
             'type': 'string',

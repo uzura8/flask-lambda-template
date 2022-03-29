@@ -24,9 +24,9 @@ class Category(Base):
             'ExpressionAttributeValues': {':si':service_id},
         }
         result = table.query(**option)
-        if 'Items' not in result or not result['Items']:
+        items = result.get('Items')
+        if not items:
             return []
-        items = result['Items']
         return self.convert_to_nested(items)
 
 

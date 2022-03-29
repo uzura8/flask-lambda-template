@@ -66,8 +66,8 @@ class Base():
         table = self.get_table()
         option = {'ScanIndexForward': not params.get('is_desc', False)}
 
-        if params.get('limit'):
-            option['limit'] = params['limit']
+        if params.get('count'):
+            option['limit'] = params['count']
 
         if index_name:
             option['IndexName'] = index_name

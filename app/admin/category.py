@@ -26,7 +26,7 @@ def handle_categories(service_id):
             raise InvalidUsage('Slug already used', 400)
 
         vals['serviceId'] = service_id
-        body = Category.create(vals, 'tagId')
+        body = Category.create(vals)
 
     else:
         body = Category.get_all_by_service_id(service_id)

@@ -9,7 +9,6 @@ from app.validators import ValidatorExtended, NormalizerUtils
 bp = Blueprint('post', __name__, url_prefix='/posts')
 ACCEPT_SERVICE_IDS = os.environ.get('ACCEPT_SERVICE_IDS', '').split(',')
 
-
 @bp.route('/<string:service_id>', methods=['GET'])
 def posts(service_id):
     if service_id not in ACCEPT_SERVICE_IDS:

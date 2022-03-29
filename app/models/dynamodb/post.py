@@ -18,7 +18,7 @@ class Post(Base):
         until_time = params.get('untilTime', '')
         since_time = params.get('sinceTime', '')
         is_desc = params.get('order', 'asc') == 'desc'
-        limit = params.get('count', 5)
+        limit = params.get('count', 20)
         cate_slugs = params.get('categories', [])
 
         is_admin = index_name == 'createdAtGsi'
@@ -110,7 +110,7 @@ class Post(Base):
     def query_pager(self, hkey, params=None, with_cate=False):
         index = params.get('index')
         is_desc = params.get('order', 'asc') == 'desc'
-        limit = params.get('limit', 3)
+        limit = params.get('count', 20)
         start_key = params.get('ExclusiveStartKey')
 
         table = self.get_table()
@@ -206,7 +206,7 @@ class Post(Base):
         elif is_publish:
             publish_at = time
 
-        required_attrs = ['slug', 'category', 'title']
+        required_attrs = ['slug', 'title']
         for attr in required_attrs:
             if attr not in vals or len(vals[attr].strip()) == 0:
                 raise ValueError("Argument '%s' requires values" % attr)
