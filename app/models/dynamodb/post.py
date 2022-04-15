@@ -3,6 +3,7 @@ from app.common.date import utc_iso, iso_offset2utc
 from app.common.string import new_uuid
 from app.models.dynamodb.base import Base
 from app.models.dynamodb.category import Category
+from app.models.dynamodb.post_tag import PostTag
 
 
 class Post(Base):
@@ -165,26 +166,32 @@ class Post(Base):
 
 
     @classmethod
-    def get_one_by_id(self, post_id, with_cate=False, service_id=None):
+    def get_one_by_id(self, post_id, with_relations=False, for_response=True):
         item = self.get_one_by_pkey('postId', post_id)
         if not item:
             return None
 
-        if with_cate and item.get('categorySlug'):
-            item['category'] = Category.get_one_by_slug(service_id, item['categorySlug'],
-                                                        True, False, True)
+        if with_relations:
+            if item.get('categorySlug'):
+                item['category'] = Category.get_one_by_slug(item['serviceId'],
+                                        item['categorySlug'], True, False, True)
+            item['tags'] = PostTag.get_all_by_post_id(post_id, True, for_response)
+
         return item
 
 
     @classmethod
-    def get_one_by_slug(self, service_id, slug, with_cate=False):
+    def get_one_by_slug(self, service_id, slug, with_cate=False, for_response=True):
         item = self.get_one_by_pkey('serviceIdSlug', '#'.join([service_id, slug]), True, 'serviceIdSlugGsi')
         if not item:
             return None
 
         if with_cate and item.get('categorySlug'):
-            item['category'] = Category.get_one_by_slug(service_id, item['categorySlug'],
-                                                        True, False, True)
+            if item.get('categorySlug'):
+                item['category'] = Category.get_one_by_slug(service_id,
+                                    item['categorySlug'], True, False, True)
+            item['tags'] = PostTag.get_all_by_post_id(item['postId'], True, for_response)
+
         return item
 
 
@@ -301,7 +308,8 @@ class Post(Base):
         if status_upd or publish_at_upd:
             exp_items.append('statusPublishAt=:spa')
             join_item = status_upd if status_upd else saved['postStatus']
-            exp_vals[':spa'] = '#'.join([join_item, publish_at_upd])
+            publish_at = publish_at_upd if publish_at_upd else saved['publishAt']
+            exp_vals[':spa'] = '#'.join([join_item, publish_at])
 
         attrs = ['title', 'body']
         for attr in attrs:

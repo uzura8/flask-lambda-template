@@ -62,11 +62,11 @@ class Base():
 
 
     @classmethod
-    def get_all_by_pkey(self, pkeys, params, index_name=None):
+    def get_all_by_pkey(self, pkeys, params=None, index_name=None):
         table = self.get_table()
-        option = {'ScanIndexForward': not params.get('is_desc', False)}
+        option = {'ScanIndexForward': not (params and  params.get('is_desc', False))}
 
-        if params.get('count'):
+        if params and params.get('count'):
             option['limit'] = params['count']
 
         if index_name:
@@ -151,4 +151,25 @@ class Base():
 
         table = self.get_table()
         res = table.put_item(Item=vals)
-        return res
+        return vals
+
+
+    @classmethod
+    def batch_save(self, items, pkeys=None, is_overwrite=False):
+        table = self.get_table()
+        overwrite_by_pkeys = pkeys if is_overwrite and pkeys else []
+        with table.batch_writer(overwrite_by_pkeys=overwrite_by_pkeys) as batch:
+            for item in items:
+                #target_keys = {k: v for k, v in item.items() if k in pkeys or not pkeys}
+                target_keys = {k: v for k, v in item.items()}
+                batch.put_item(target_keys)
+
+
+    @classmethod
+    def batch_delete(self, items, pkeys=None):
+        table = self.get_table()
+        with table.batch_writer() as batch:
+            for item in items:
+                #target_keys = {k: v for k, v in item.items() if k in pkeys or not pkeys}
+                target_keys = {k: v for k, v in item.items()}
+                batch.delete_item(target_keys)

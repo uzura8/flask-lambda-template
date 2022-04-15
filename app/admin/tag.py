@@ -23,13 +23,13 @@ def handle_tags(service_id):
         vals = validate_req_params(validation_schema(), request.json)
         item = Tag.get_one({
             'p': {'key':'serviceId', 'val':service_id},
-            's': {'key':'slug', 'val':vals['slug']},
-        })
+            's': {'key':'label', 'val':vals['label']},
+        }, False, 'TagsByServiceIdGsi')
         if item:
-            raise InvalidUsage('Slug already used', 400)
+            raise InvalidUsage('Label already used', 400)
 
         vals['serviceId'] = service_id
-        body = Tag.create(vals)
+        body = Tag.create(vals, 'tagId')
 
     else:
         body = Tag.get_all_by_service_id(service_id)
@@ -39,18 +39,11 @@ def handle_tags(service_id):
 
 def validation_schema():
     return {
-        'slug': {
-            'type': 'string',
-            'coerce': (str, NormalizerUtils.trim),
-            'required': True,
-            'empty': False,
-            'maxlength': 128,
-            'regex': r'^[0-9a-z\-]+$',
-        },
         'label': {
             'type': 'string',
             'coerce': (NormalizerUtils.trim),
             'required': True,
             'empty': False,
+            'maxlength': 128,
         },
     }
