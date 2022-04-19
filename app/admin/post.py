@@ -99,6 +99,12 @@ def post_detail(service_id, post_id):
                 for tag_id in res['current_ids']:
                     keys.append({'tagId':tag_id})
                 tags = Tag.batch_get_items(keys)
+        else:
+            post_tags = PostTag.get_all_by_post_id(post['postId'], False, False)
+            if post_tags:
+                del_tags = [ {'tagId':pt['tagId'],'postId':pt['postId']} for pt in post_tags ]
+                PostTag.batch_delete(del_tags)
+
         saved['tags'] = tags
 
     elif request.method == 'DELETE':
