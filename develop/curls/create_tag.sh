@@ -10,6 +10,6 @@ SERVICE_ID="hoge"
 
 echo $AUTH_TOKEN
 
-curl -H "Content-Type: application/json" -H "Authorization: Bearer ${AUTH_TOKEN}" -X POST "${URL}/admin/tags/${SERVICE_ID}" -d '{"label":"タグ01", "slug":"tag01"}'
-curl -H "Content-Type: application/json" -H "Authorization: Bearer ${AUTH_TOKEN}" -X POST "${URL}/admin/tags/${SERVICE_ID}" -d '{"label":"タグ02", "slug":"tag02"}'
-curl -H "Content-Type: application/json" -H "Authorization: Bearer ${AUTH_TOKEN}" -X POST "${URL}/admin/tags/${SERVICE_ID}" -d '{"label":"タグ03", "slug":"tag03"}'
+curl -H "Content-Type: application/json" -H "Authorization: Bearer ${AUTH_TOKEN}" -X POST "${URL}/admin/tags/${SERVICE_ID}" -d '{"label":"タグ01"}'
+curl -H "Content-Type: application/json" -H "Authorization: Bearer ${AUTH_TOKEN}" -X POST "${URL}/admin/tags/${SERVICE_ID}" -d '{"label":"タグ02"}'
+curl -H "Content-Type: application/json" -H "Authorization: Bearer ${AUTH_TOKEN}" -X POST "${URL}/admin/tags/${SERVICE_ID}" -d '{"label":"タグ03"}'
