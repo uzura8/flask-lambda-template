@@ -163,7 +163,16 @@ aws cognito-idp admin-respond-to-auth-challenge \
 
 ```
 
-#### 7. Sign In by Admin User 
+#### 7. Set Admin Role for user
+
+```bash
+aws cognito-idp admin-update-user-attributes \
+--user-pool-id ap-northeast-1_xxxxxxxxx \
+--username your-user-name \
+--user-attributes Name="custom:role",Value="admin"
+```
+
+#### 8. Sign In by Admin User
 
 Access to https://your-domain.example.com/admin , and Sign In by created user.
 

@@ -102,6 +102,18 @@ resource "aws_cognito_user_pool" "prd" {
     name                = "email"
     required            = true
   }
+  schema {
+    attribute_data_type      = "String"
+    name                     = "role"
+    developer_only_attribute = true
+    required                 = false
+    #mutable                  = true
+
+    string_attribute_constraints {
+      max_length = "64"
+      #min_length = "1"
+    }
+  }
   username_configuration {
     case_sensitive = false
   }
@@ -138,6 +150,16 @@ resource "aws_cognito_identity_pool" "prd" {
     provider_name           = aws_cognito_user_pool.prd.endpoint
     server_side_token_check = false
   }
+
+  read_attributes = [
+    "email",
+    "custom:role",
+  ]
+
+  write_attributes = [
+    "email",
+    "custom:role",
+  ]
 
   tags = {
     Name      = join("-", [var.prj_prefix, "cognito", "identity", "pool"])
