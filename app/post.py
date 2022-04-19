@@ -1,13 +1,13 @@
 import os
 from flask import Blueprint, jsonify, request
-from app.models.dynamodb import Post, Category
+from app.models.dynamodb import Post, Category, Tag
 from app.common.error import InvalidUsage
 from app.common.request import validate_req_params
-from app.validators import ValidatorExtended, NormalizerUtils
-#import time
+from app.validators import NormalizerUtils
 
 bp = Blueprint('post', __name__, url_prefix='/posts')
 ACCEPT_SERVICE_IDS = os.environ.get('ACCEPT_SERVICE_IDS', '').split(',')
+
 
 @bp.route('/<string:service_id>', methods=['GET'])
 def posts(service_id):
@@ -15,12 +15,15 @@ def posts(service_id):
         raise InvalidUsage('ServiceId does not exist', 404)
 
     params = {}
-    for key in ['count', 'order', 'sinceTime', 'untilTime', 'category']:
+    for key in ['count', 'order', 'sinceTime', 'untilTime', 'category', 'tag']:
         params[key] = request.args.get(key)
     schema = validation_schema_posts_post()
     vals = validate_req_params(schema, params)
     #vals['status'] = 'publish'
+
     cate_slug = vals.get('category')
+    tag_label = vals.get('tag')
+    tag_id = None
     if cate_slug:
         cate = Category.get_one_by_slug(service_id, cate_slug, False, True, False, False)
         if not cate:
@@ -31,8 +34,18 @@ def posts(service_id):
         if cate['children']:
             for c in cate['children']:
                 vals['categories'].append(c['slug'])
+    elif tag_label:
+        tag = Tag.get_one({
+            'p': {'key':'serviceId' ,'val':service_id},
+            's': {'key':'label' ,'val':tag_label},
+        }, False, 'TagsByServiceIdGsi')
+        if tag:
+            tag_id = tag['tagId']
 
-    body = Post.query_all('statusPublishAtGsi', service_id, vals)
+    if tag_id:
+        body = Post.query_all_by_tag_id(tag_id, vals)
+    else:
+        body = Post.query_all('statusPublishAtGsi', service_id, vals)
 
     return jsonify(body), 200
 
@@ -85,6 +98,14 @@ def validation_schema_posts_post():
             'nullable': True,
             'required': False,
             'empty': True,
+        },
+        'tag': {
+            'type': 'string',
+            'coerce': (NormalizerUtils.trim),
+            'nullable': True,
+            'required': False,
+            'empty': True,
+            'maxlength': 100,
         },
         'publishAt': {
             'type': 'string',

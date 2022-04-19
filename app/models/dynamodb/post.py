@@ -1,3 +1,4 @@
+from typing import TYPE_CHECKING
 from boto3.dynamodb.conditions import Key
 from app.common.date import utc_iso, iso_offset2utc
 from app.common.string import new_uuid
@@ -178,6 +179,16 @@ class Post(Base):
             item['tags'] = PostTag.get_all_by_post_id(post_id, True, for_response)
 
         return item
+
+
+    @classmethod
+    def query_all_by_tag_id(self, tag_id, params):
+        items = PostTag.query_all_by_tag_id(tag_id, params)
+        keys = [ {'postId':d['postId']} for d in items ]
+        posts = Post.batch_get_items(keys)
+        is_desc = params.get('order', 'asc') == 'desc'
+        sort_key = 'publishAt'
+        return sorted(posts, key=lambda x: x[sort_key], reverse=is_desc)
 
 
     @classmethod

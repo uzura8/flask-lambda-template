@@ -46,22 +46,6 @@ class Base():
 
 
     @classmethod
-    def batch_get_items(self, keys):
-        dynamodb = self.connect_dynamodb()
-        table_name = self.get_table_name()
-        res = dynamodb.batch_get_item(
-            RequestItems={
-                table_name: {
-                    'Keys': keys,
-                    'ConsistentRead': True
-                }
-            },
-            ReturnConsumedCapacity='TOTAL'
-        )
-        return res['Responses'][table_name]
-
-
-    @classmethod
     def get_all_by_pkey(self, pkeys, params=None, index_name=None):
         table = self.get_table()
         option = {'ScanIndexForward': not (params and  params.get('is_desc', False))}
@@ -152,6 +136,22 @@ class Base():
         table = self.get_table()
         res = table.put_item(Item=vals)
         return vals
+
+
+    @classmethod
+    def batch_get_items(self, keys):
+        dynamodb = self.connect_dynamodb()
+        table_name = self.get_table_name()
+        res = dynamodb.batch_get_item(
+            RequestItems={
+                table_name: {
+                    'Keys': keys,
+                    'ConsistentRead': True
+                }
+            },
+            ReturnConsumedCapacity='TOTAL'
+        )
+        return res['Responses'][table_name]
 
 
     @classmethod

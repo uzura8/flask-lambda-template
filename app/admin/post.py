@@ -128,6 +128,7 @@ def post_status(service_id, post_id):
         raise InvalidUsage('ServiceId does not exist', 404)
 
     saved = Post.get_one_by_id(post_id, True)
+    tags = saved['tags']
     if not saved:
         raise InvalidUsage('Not Found', 404)
 
@@ -140,11 +141,13 @@ def post_status(service_id, post_id):
     if vals['status'] == saved['postStatus']:
         raise InvalidUsage('', 400)
     saved = Post.update(service_id, post_id, vals)
-    update_post_tags_status_publish_at(saved['postId'], saved['statusPublishAt'])
+    saved['tags'] = tags
+    update_post_tags_status_publish_at(saved['postId'], saved['statusPublishAt'],
+                                        saved['publishAt'])
     return jsonify(saved), 200
 
 
-def update_post_tags_status_publish_at(post_id, status_publish_at):
+def update_post_tags_status_publish_at(post_id, status_publish_at, publish_at):
     post_tags = PostTag.get_all_by_pkey({'key':'postId', 'val':post_id})
     if not post_tags:
         return
@@ -155,6 +158,7 @@ def update_post_tags_status_publish_at(post_id, status_publish_at):
             'postId': post_id,
             'tagId': post_tag['tagId'],
             'statusPublishAt': status_publish_at,
+            'publishAt': publish_at,
         })
     PostTag.batch_save(vals, ['postId', 'tagId'], True)
     return {
@@ -219,6 +223,7 @@ def update_post_tags(service_id, post, req_tags, is_update_status_publish_at=Fal
             'postId': post['postId'],
             'tagId': save_tag_id,
             'statusPublishAt': post['statusPublishAt'],
+            'publishAt': post['publishAt'],
         })
     PostTag.batch_save(save_tags, pkeys, is_update_status_publish_at)
     return {
