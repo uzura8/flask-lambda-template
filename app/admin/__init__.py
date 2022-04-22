@@ -30,3 +30,4 @@ from . import user
 from . import post
 from . import category
 from . import tag
+from . import account
