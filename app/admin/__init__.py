@@ -25,6 +25,7 @@ def admin_role_required(f):
     return decorated_function
 
 
+from . import service
 from . import user
 from . import post
 from . import category

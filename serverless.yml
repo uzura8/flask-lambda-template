@@ -144,6 +144,7 @@ resources:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: ${self:custom.s3BucketName}
+    ServiceDynamoDBTable: ${file(./config/dynamodb/service.yml)}
     SiteConfigDynamoDBTable: ${file(./config/dynamodb/site-config.yml)}
     VoteLogDynamoDBTable: ${file(./config/dynamodb/vote-log.yml)}
     VoteCountDynamoDBTable: ${file(./config/dynamodb/vote-count.yml)}

@@ -46,6 +46,15 @@ class Base():
 
 
     @classmethod
+    def scan(self, options=None):
+        if not options:
+            options = {}
+        table = self.get_table()
+        res = table.scan(**options)
+        return res.get('Items', [])
+
+
+    @classmethod
     def get_all_by_pkey(self, pkeys, params=None, index_name=None):
         table = self.get_table()
         option = {'ScanIndexForward': not (params and  params.get('is_desc', False))}
@@ -134,7 +143,7 @@ class Base():
             vals[uuid_name] = new_uuid()
 
         table = self.get_table()
-        res = table.put_item(Item=vals)
+        table.put_item(Item=vals)
         return vals
 
 
