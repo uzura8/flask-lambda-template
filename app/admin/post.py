@@ -1,11 +1,12 @@
 import json
 from flask import jsonify, request
-from app.models.dynamodb import Post, Category, Tag, PostTag
+from flask_cognito import cognito_auth_required
+from app.models.dynamodb import Post, Tag, PostTag, ModelInvalidParamsException
 from app.common.error import InvalidUsage
 from app.common.request import validate_req_params
+from app.common.string import validate_uuid
 from app.validators import NormalizerUtils
-from app.admin import bp, site_before_request, ACCEPT_SERVICE_IDS
-from flask_cognito import cognito_auth_required, current_user, current_cognito_jwt
+from app.admin import bp, site_before_request, check_acl_service_id
 
 
 @bp.before_request
@@ -17,24 +18,22 @@ def before_request():
 @bp.route('/posts/<string:service_id>', methods=['POST', 'GET'])
 @cognito_auth_required
 def post_list(service_id):
-    if service_id not in ACCEPT_SERVICE_IDS:
-        raise InvalidUsage('ServiceId does not exist', 404)
+    check_acl_service_id(service_id)
 
     post = None
     if request.method == 'POST':
         schema = validation_schema_posts_post()
         vals = validate_req_params(schema, request.json)
-        item = Post.get_one_by_slug(service_id, vals['slug'])
-        if item:
-            raise InvalidUsage('Slug already used', 400)
-
-        if vals.get('category'):
-            cate = Category.get_one_by_slug(service_id, vals['category'])
-            if not cate:
-                raise InvalidUsage('Category not exists', 400)
-
         vals['serviceId'] = service_id
-        post = Post.create(vals)
+
+        try:
+            post = Post.create(vals)
+
+        except ModelInvalidParamsException as e:
+            raise InvalidUsage(e.message, 400)
+
+        except Exception as e:
+            raise InvalidUsage('Server Error', 500)
 
         tags = []
         if vals.get('tags', []):
@@ -65,23 +64,27 @@ def post_list(service_id):
     return jsonify(post), 200
 
 
-@bp.route('/posts/<string:service_id>/<string:post_id>', methods=['POST', 'GET', 'HEAD', 'DELETE'])
-def post_detail(service_id, post_id):
-    if service_id not in ACCEPT_SERVICE_IDS:
-        raise InvalidUsage('ServiceId does not exist', 404)
-
-    post = Post.get_one_by_id(post_id, True)
-    if not post:
-        raise InvalidUsage('Not Found', 404)
-
-    if post['serviceId'] != service_id:
-        raise InvalidUsage('serviceId is invalid', 400)
+@bp.route('/posts/<string:service_id>/<string:identifer>', methods=['POST', 'GET', 'HEAD', 'DELETE'])
+@cognito_auth_required
+def post_detail(service_id, identifer):
+    check_acl_service_id(service_id)
+    post = get_post_by_identifer(service_id, identifer)
+    post_id = post['postId']
 
     saved = None
     if request.method == 'POST':
         schema = validation_schema_posts_post()
         vals = validate_req_params(schema, request.json)
-        saved = Post.update(service_id, post_id, vals)
+        vals['serviceId'] = service_id
+
+        try:
+            saved = Post.update(post_id, vals)
+
+        except ModelInvalidParamsException as e:
+            raise InvalidUsage(e.message, 400)
+
+        except Exception as e:
+            raise InvalidUsage('Server Error', 500)
 
         is_upd_status_publish_at = False
         if not saved:
@@ -93,7 +96,7 @@ def post_detail(service_id, post_id):
 
         tags = []
         if vals.get('tags', []):
-            res = update_post_tags(service_id, saved, vals['tags'], is_upd_status_publish_at)
+            res = update_post_tags(saved, vals['tags'], is_upd_status_publish_at)
             if res.get('current_ids'):
                 keys = []
                 for tag_id in res['current_ids']:
@@ -122,13 +125,14 @@ def post_detail(service_id, post_id):
     return jsonify(res), 200
 
 
-@bp.route('/posts/<string:service_id>/<string:post_id>/status', methods=['POST'])
-def post_status(service_id, post_id):
-    if service_id not in ACCEPT_SERVICE_IDS:
-        raise InvalidUsage('ServiceId does not exist', 404)
-
-    saved = Post.get_one_by_id(post_id, True)
+@bp.route('/posts/<string:service_id>/<string:identifer>/status', methods=['POST'])
+@cognito_auth_required
+def post_status(service_id, identifer):
+    check_acl_service_id(service_id)
+    saved = get_post_by_identifer(service_id, identifer)
+    post_id = saved['postId']
     tags = saved['tags']
+
     if not saved:
         raise InvalidUsage('Not Found', 404)
 
@@ -138,13 +142,40 @@ def post_status(service_id, post_id):
     schema_all = validation_schema_posts_post()
     schema = dict(filter(lambda item: item[0] == 'status', schema_all.items()))
     vals = validate_req_params(schema, request.json)
+    vals['serviceId'] = service_id
+
     if vals['status'] == saved['postStatus']:
-        raise InvalidUsage('', 400)
-    saved = Post.update(service_id, post_id, vals)
+        raise InvalidUsage('Status is same value', 400)
+
+    try:
+        saved = Post.update(post_id, vals)
+
+    except ModelInvalidParamsException as e:
+        raise InvalidUsage(e.message, 400)
+
+    except Exception as e:
+        raise InvalidUsage('Server Error', 500)
+
     saved['tags'] = tags
     update_post_tags_status_publish_at(saved['postId'], saved['statusPublishAt'],
                                         saved['publishAt'])
     return jsonify(saved), 200
+
+
+def get_post_by_identifer(service_id, identifer):
+    is_uuid = validate_uuid(identifer)
+    if is_uuid:
+        post = Post.get_one_by_id(identifer, True)
+    else:
+        post = Post.get_one_by_slug(service_id, identifer, True)
+
+    if not post:
+        raise InvalidUsage('Not Found', 404)
+
+    if is_uuid and post['serviceId'] != service_id:
+        raise InvalidUsage('PostId is invalid', 400)
+
+    return post
 
 
 def update_post_tags_status_publish_at(post_id, status_publish_at, publish_at):
@@ -166,7 +197,8 @@ def update_post_tags_status_publish_at(post_id, status_publish_at, publish_at):
     }
 
 
-def update_post_tags(service_id, post, req_tags, is_update_status_publish_at=False):
+def update_post_tags(post, req_tags, is_update_status_publish_at=False):
+    service_id = post['serviceId']
     new_tag_labels = []
     upd_tag_ids = []
     for req_tag in req_tags:
@@ -243,6 +275,7 @@ def validation_schema_posts_post():
             'empty': False,
             'maxlength': 128,
             'regex': r'^[0-9a-z\-]+$',
+            'valid_ulid': False,
         },
         'title': {
             'type': 'string',

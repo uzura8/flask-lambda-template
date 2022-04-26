@@ -24,6 +24,15 @@ def new_uuid(fmt='ulid'):
     return str(uuid.uuid4()).replace('-', '').lower()
 
 
+def validate_uuid(val, fmt='ulid'):
+    if fmt == 'ulid':
+        pattern = '^[0-9a-z]{26}$'
+    elif fmt == 'uuidv4':
+        pattern = '^[0-9a-f]{36}$'
+
+    return re.match(pattern, val)
+
+
 def validate_email(email):
     email = email.strip()
     if not email:

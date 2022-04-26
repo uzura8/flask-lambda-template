@@ -6,3 +6,9 @@ class Service(Base):
     table_name = 'service'
     response_attr = [
     ]
+
+
+    @classmethod
+    def check_exists(self, service_id):
+        item = self.get_one({'p': {'key':'serviceId', 'val':service_id}})
+        return bool(item)

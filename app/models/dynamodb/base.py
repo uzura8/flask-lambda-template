@@ -182,3 +182,7 @@ class Base():
                 #target_keys = {k: v for k, v in item.items() if k in pkeys or not pkeys}
                 target_keys = {k: v for k, v in item.items()}
                 batch.delete_item(target_keys)
+
+
+class ModelInvalidParamsException(Exception):
+    pass

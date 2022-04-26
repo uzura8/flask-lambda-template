@@ -2,9 +2,10 @@ from typing import TYPE_CHECKING
 from boto3.dynamodb.conditions import Key
 from app.common.date import utc_iso, iso_offset2utc
 from app.common.string import new_uuid
-from app.models.dynamodb.base import Base
+from app.models.dynamodb.base import Base, ModelInvalidParamsException
 from app.models.dynamodb.category import Category
 from app.models.dynamodb.post_tag import PostTag
+from app.models.dynamodb.service import Service
 
 
 class Post(Base):
@@ -208,12 +209,25 @@ class Post(Base):
 
     @classmethod
     def create(self, vals):
-        if vals.get('serviceId') not in self.ACCEPT_SERVICE_IDS:
-            raise ValueError('serviceId is invalid')
+        service_id = vals.get('serviceId')
+        if not service_id:
+            raise ModelInvalidParamsException('serviceId is required')
+
+        if not Service.check_exists(service_id):
+            raise ModelInvalidParamsException('serviceId not exists')
+
+        item = Post.get_one_by_slug(service_id, vals['slug'])
+        if item:
+            raise ModelInvalidParamsException('Slug already used')
+
+        if vals.get('category'):
+            cate = Category.get_one_by_slug(service_id, vals['category'])
+            if not cate:
+                raise ModelInvalidParamsException('Category not exists')
 
         status = vals.get('status') or vals.get('postStatus')
         if status not in ['publish', 'unpublish']:
-            raise ValueError('status is invalid')
+            raise ModelInvalidParamsException('status is invalid')
         is_publish = status == 'publish'
 
         time = utc_iso(False, True)
@@ -227,7 +241,7 @@ class Post(Base):
         required_attrs = ['slug', 'title']
         for attr in required_attrs:
             if attr not in vals or len(vals[attr].strip()) == 0:
-                raise ValueError("Argument '%s' requires values" % attr)
+                raise ModelInvalidParamsException("Argument '%s' requires values" % attr)
 
         slug = vals['slug']
         cate_slug = vals['category']
@@ -237,13 +251,13 @@ class Post(Base):
             'postId': new_uuid(),
             'createdAt': time,
             'updatedAt': time,
-            'serviceId': vals['serviceId'],
+            'serviceId': service_id,
             'slug': slug,
             'publishAt': publish_at,
             'categorySlug': cate_slug,
             'title': vals['title'],
             'body': vals['body'],
-            'serviceIdSlug': '#'.join([vals['serviceId'], slug]),
+            'serviceIdSlug': '#'.join([service_id, slug]),
             'postStatus': status,
             'statusPublishAt': '#'.join([status, publish_at]),
         }
@@ -252,19 +266,18 @@ class Post(Base):
 
 
     @classmethod
-    def update(self, service_id, post_id, vals):
-        if service_id not in self.ACCEPT_SERVICE_IDS:
-            raise ValueError('service_id is invalid')
-
+    def update(self, post_id, vals):
         time = utc_iso(False, True)
         saved = self.get_one_by_pkey('postId', post_id, True)
         if not saved:
-            raise ValueError('Slug is invalid')
+            raise ModelInvalidParamsException('postId is invalid')
+
+        service_id = saved['serviceId']
 
         slug_upd = vals.get('slug')
         if slug_upd and slug_upd != saved['slug']:
             if Post.get_one_by_slug(service_id, slug_upd):
-                raise ValueError('Slug already used')
+                raise ModelInvalidParamsException('Slug already used')
         else:
             slug_upd = None
 
@@ -272,14 +285,14 @@ class Post(Base):
         if cate_slug_upd and cate_slug_upd != saved['categorySlug']:
             cate_upd = Category.get_one_by_slug(service_id, cate_slug_upd)
             if not cate_upd:
-                raise ValueError('Category not exists', 400)
+                raise ModelInvalidParamsException('Category not exists', 400)
         else:
             cate_slug_upd = None
 
         status_upd = vals.get('status')
         if status_upd:
             if status_upd not in ['publish', 'unpublish']:
-                raise ValueError('status is invalid')
+                raise ModelInvalidParamsException('status is invalid')
 
             if status_upd == saved['postStatus']:
                 status_upd = None

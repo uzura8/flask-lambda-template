@@ -25,6 +25,12 @@ def admin_role_required(f):
     return decorated_function
 
 
+def check_acl_service_id(service_id):
+    alloweds = current_cognito_jwt.get('custom:acceptServiceIds', '').split(',')
+    if service_id not in alloweds:
+        raise InvalidUsage('Forbidden', 403)
+
+
 from . import service
 from . import user
 from . import post
