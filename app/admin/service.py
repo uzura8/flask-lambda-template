@@ -29,6 +29,23 @@ def service_list():
     return jsonify(services), 200
 
 
+@bp.route('/services/<string:service_id>', methods=['POST', 'GET'])
+@cognito_auth_required
+@admin_role_required
+def service_detail(service_id):
+    key = {'p': {'key':'serviceId', 'val':service_id}}
+    service = Service.get_one(key)
+    if not service:
+        raise InvalidUsage('ServiceId does not exist', 404)
+
+    if request.method == 'POST':
+        vals = validate_req_params(validation_schema_services(), request.json, ['label'])
+        updated = Service.updated(key, vals, True)
+        return jsonify(updated), 200
+    else:
+        return jsonify(service), 200
+
+
 def validation_schema_services():
     return {
         'serviceId': {

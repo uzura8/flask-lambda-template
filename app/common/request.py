@@ -2,11 +2,14 @@ from app.common.error import InvalidUsage
 from app.validators import ValidatorExtended
 
 
-def validate_req_params(schema, params=None):
+def validate_req_params(schema, params=None, accept_keys=None):
     target_schema = {}
     target_vals = {}
     if params:
         for key, val in params.items():
+            if accept_keys and key not in accept_keys:
+                raise InvalidUsage('Field {} is not accepted'.format(key), 400)
+
             if key in schema:
                 target_schema[key] = schema[key]
                 target_vals[key] = val
