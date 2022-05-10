@@ -1,6 +1,6 @@
 import json
 from flask import jsonify, request
-from flask_cognito import cognito_auth_required
+from flask_cognito import cognito_auth_required, current_cognito_jwt
 from app.models.dynamodb import Post, Tag, PostTag, ModelInvalidParamsException
 from app.common.error import InvalidUsage
 from app.common.request import validate_req_params
@@ -25,6 +25,7 @@ def post_list(service_id):
         schema = validation_schema_posts_post()
         vals = validate_req_params(schema, request.json)
         vals['serviceId'] = service_id
+        vals['createdBy'] = current_cognito_jwt.get('cognito:username', '')
 
         try:
             post = Post.create(vals)
@@ -76,6 +77,7 @@ def post_detail(service_id, identifer):
         schema = validation_schema_posts_post()
         vals = validate_req_params(schema, request.json)
         vals['serviceId'] = service_id
+        vals['updatedBy'] = current_cognito_jwt.get('cognito:username', '')
 
         try:
             saved = Post.update(post_id, vals)

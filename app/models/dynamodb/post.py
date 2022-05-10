@@ -250,7 +250,8 @@ class Post(Base):
         item = {
             'postId': new_uuid(),
             'createdAt': time,
-            'updatedAt': time,
+            'createdBy': vals.get('createdBy'),
+            #'updatedAt': time,
             'serviceId': service_id,
             'slug': slug,
             'publishAt': publish_at,
@@ -350,6 +351,9 @@ class Post(Base):
         updated_at = time
         exp_items.append('updatedAt=:ua')
         exp_vals[':ua'] = updated_at
+
+        exp_items.append('updatedBy=:ub')
+        exp_vals[':ub'] = vals.get('updatedBy')
 
         table = self.get_table()
         res = table.update_item(
