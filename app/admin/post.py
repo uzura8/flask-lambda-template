@@ -37,7 +37,7 @@ def post_list(service_id):
 
         tags = []
         if vals.get('tags', []):
-            res = update_post_tags(service_id, post, vals['tags'])
+            res = update_post_tags(post, vals['tags'])
             if res.get('current_ids'):
                 keys = []
                 for tag_id in res['current_ids']:
