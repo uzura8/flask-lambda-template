@@ -258,6 +258,7 @@ class Post(Base):
             'categorySlug': cate_slug,
             'title': vals['title'],
             'body': vals['body'],
+            'bodyFormat': vals['bodyFormat'],
             'serviceIdSlug': '#'.join([service_id, slug]),
             'postStatus': status,
             'statusPublishAt': '#'.join([status, publish_at]),
@@ -336,7 +337,7 @@ class Post(Base):
             publish_at = publish_at_upd if publish_at_upd else saved['publishAt']
             exp_vals[':spa'] = '#'.join([join_item, publish_at])
 
-        attrs = ['title', 'body']
+        attrs = ['title', 'body', 'bodyFormat', 'updatedBy']
         for attr in attrs:
             val = vals.get(attr)
             if val is None or val == saved.get(attr):
@@ -351,9 +352,6 @@ class Post(Base):
         updated_at = time
         exp_items.append('updatedAt=:ua')
         exp_vals[':ua'] = updated_at
-
-        exp_items.append('updatedBy=:ub')
-        exp_vals[':ub'] = vals.get('updatedBy')
 
         table = self.get_table()
         res = table.update_item(

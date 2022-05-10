@@ -285,6 +285,13 @@ def validation_schema_posts_post():
             'required': True,
             'empty': False,
         },
+        'bodyFormat': {
+            'type': 'string',
+            'coerce': (NormalizerUtils.trim),
+            'required': True,
+            'empty': False,
+            'allowed': ['html', 'text', 'markdown'],
+        },
         'body': {
             'type': 'string',
             'coerce': (NormalizerUtils.rtrim),
