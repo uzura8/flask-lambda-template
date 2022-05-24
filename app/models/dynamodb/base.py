@@ -9,7 +9,6 @@ class Base():
 
     IS_LOCAL = bool(os.environ.get('IS_LOCAL'))
     PRJ_PREFIX = os.environ['PRJ_PREFIX']
-    ACCEPT_SERVICE_IDS = os.environ.get('ACCEPT_SERVICE_IDS', '').split(',')
 
 
     @classmethod

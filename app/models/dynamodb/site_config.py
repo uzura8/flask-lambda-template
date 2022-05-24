@@ -1,5 +1,5 @@
 from boto3.dynamodb.conditions import Key
-from app.models.dynamodb.base import Base
+from app.models.dynamodb import Base, Service
 from app.common.date import utc_iso
 
 
@@ -24,7 +24,7 @@ class SiteConfig(Base):
 
     @classmethod
     def save(self, service_id, name, val):
-        if service_id not in self.ACCEPT_SERVICE_IDS:
+        if not Service.check_exists(service_id):
             raise ValueError('service_id is invalid')
 
         time = utc_iso(False, True)
@@ -62,7 +62,7 @@ class SiteConfig(Base):
 
     @classmethod
     def increament_number(self, service_id, name):
-        if service_id not in self.ACCEPT_SERVICE_IDS:
+        if not Service.check_exists(service_id):
             raise ValueError('service_id is invalid')
 
         item = self.get_one_by_name(service_id, name)

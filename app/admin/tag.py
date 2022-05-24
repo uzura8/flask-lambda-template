@@ -1,9 +1,9 @@
 from flask import jsonify, request
-from app.models.dynamodb import Tag
+from app.models.dynamodb import Tag, Service
 from app.common.error import InvalidUsage
 from app.common.request import validate_req_params
 from app.validators import NormalizerUtils
-from app.admin import bp, site_before_request, ACCEPT_SERVICE_IDS
+from app.admin import bp, site_before_request
 from flask_cognito import cognito_auth_required, current_user, current_cognito_jwt
 
 
@@ -16,7 +16,7 @@ def before_request():
 @bp.route('/tags/<string:service_id>', methods=['POST', 'GET'])
 @cognito_auth_required
 def handle_tags(service_id):
-    if service_id not in ACCEPT_SERVICE_IDS:
+    if not Service.check_exists(service_id):
         raise InvalidUsage('ServiceId does not exist', 404)
 
     if request.method == 'POST':

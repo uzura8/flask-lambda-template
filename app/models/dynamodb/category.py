@@ -1,5 +1,5 @@
 from boto3.dynamodb.conditions import Key
-from app.models.dynamodb import Base, SiteConfig
+from app.models.dynamodb import Base, SiteConfig, Service
 
 
 class Category(Base):
@@ -127,7 +127,7 @@ class Category(Base):
     @classmethod
     def create(self, vals):
         service_id = vals.get('serviceId')
-        if service_id not in self.ACCEPT_SERVICE_IDS:
+        if not Service.check_exists(service_id):
             raise ValueError('serviceId is invalid')
 
         required_attrs = ['slug', 'label']

@@ -1,17 +1,16 @@
 import os
 from flask import Blueprint, jsonify, request
-from app.models.dynamodb import Post, Category, Tag
+from app.models.dynamodb import Post, Category, Tag, Service
 from app.common.error import InvalidUsage
 from app.common.request import validate_req_params
 from app.validators import NormalizerUtils
 
 bp = Blueprint('post', __name__, url_prefix='/posts')
-ACCEPT_SERVICE_IDS = os.environ.get('ACCEPT_SERVICE_IDS', '').split(',')
 
 
 @bp.route('/<string:service_id>', methods=['GET'])
 def posts(service_id):
-    if service_id not in ACCEPT_SERVICE_IDS:
+    if not Service.check_exists(service_id):
         raise InvalidUsage('ServiceId does not exist', 404)
 
     params = {}
@@ -52,7 +51,7 @@ def posts(service_id):
 
 @bp.route('/<string:service_id>/<string:slug>', methods=['GET', 'HEAD'])
 def post(service_id, slug):
-    if service_id not in ACCEPT_SERVICE_IDS:
+    if not Service.check_exists(service_id):
         raise InvalidUsage('ServiceId does not exist', 404)
 
     item = Post.get_one_by_slug(service_id, slug, True)
