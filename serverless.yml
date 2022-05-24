@@ -16,6 +16,9 @@ custom:
   prjPrefix: ${self:service}-${self:provider.stage}
   stageConfigFileName: ./config/stages/${self:provider.stage}.yml
   s3BucketName: ${self:custom.prjPrefix}-bucket
+  awsAccontId: ${file(./config/stages/common.yml):awsAccountId}
+  cognitoRegion: ${file(${self:custom.stageConfigFileName}):cognitoRegion}
+  cognitoUserpoolId: ${file(${self:custom.stageConfigFileName}):cognitoUserpoolId}
   wsgi:
     app: app/handler.app
     packRequirements: false
@@ -93,7 +96,7 @@ provider:
     BACKUP_VOTE_LOG_COUNT_FOR_EACH_SERVICE: ${file(${self:custom.stageConfigFileName}):backupVoteLogCountForEachService}
     SES_REGION: ${file(./config/stages/common.yml):sesRegion}
     COGNITO_REGION: ${file(${self:custom.stageConfigFileName}):cognitoRegion}
-    COGNITO_USERPOOL_ID: ${file(${self:custom.stageConfigFileName}):cognitoUserpoolId}
+    COGNITO_USERPOOL_ID: ${self:custom.cognitoUserpoolId}
     COGNITO_APP_CLIENT_ID: ${file(${self:custom.stageConfigFileName}):cognitoAppClientId}
     COGNITO_CHECK_TOKEN_EXPIRATION: ${file(${self:custom.stageConfigFileName}):cognitoCheckTokenExpiration}
     COGNITO_JWT_HEADER_NAME: ${file(./config/stages/common.yml):cognitoJwtHeaderName}

@@ -9,8 +9,10 @@ from app.common.request import validate_req_params
 from app.common.error import InvalidUsage
 from app.admin import bp, site_before_request, admin_role_required
 
-cognito = boto3.client('cognito-idp')
+COGNITO_REGION = os.environ.get('COGNITO_REGION', '')
 COGNITO_USERPOOL_ID = os.environ.get('COGNITO_USERPOOL_ID', '')
+
+cognito = boto3.client('cognito-idp', COGNITO_REGION)
 
 
 @bp.before_request
