@@ -267,7 +267,6 @@ def update_post_tags(post, req_tags, is_update_status_publish_at=False):
     }
 
 
-
 def validation_schema_posts_post():
     return {
         'slug': {

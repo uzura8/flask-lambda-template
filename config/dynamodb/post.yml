@@ -39,6 +39,8 @@ Properties:
           - slug
           - title
           - body
+          - bodyHtml
+          - bodyText
           - publishAt
           - updatedAt
           - createdAt
@@ -64,6 +66,8 @@ Properties:
           - slug
           - title
           - body
+          - bodyHtml
+          - bodyText
           - publishAt
           - updatedAt
           - createdAt
@@ -89,6 +93,8 @@ Properties:
           - slug
           - title
           - body
+          - bodyHtml
+          - bodyText
           - publishAt
           - updatedAt
           - createdAt

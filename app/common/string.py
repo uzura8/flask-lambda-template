@@ -45,3 +45,17 @@ def validate_email(email):
 
 def validate_url(url):
     return re.match('^https?://[\w\-\.\!~\*\'\(\);\/\?\:@&=+\$,%#]+$', url)
+
+
+def nl2br(text):
+    return text.replace('\n', '<br>\n')
+
+
+def url2link(text):
+    ptn = r'(https?://[0-9a-zA-Z\-\.\!~\*\'\(\);\/\?\:@&=+\$,%#]+)'
+    return re.sub(ptn, r'<a href="\1" target="_blank">\1</a>', text)
+
+
+def strip_html_tags(text):
+    reg_obj = re.compile(r'<[^>]*?>')
+    return reg_obj.sub('', text)

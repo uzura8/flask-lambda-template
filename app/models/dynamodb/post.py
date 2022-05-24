@@ -1,7 +1,8 @@
+import mistletoe
 from typing import TYPE_CHECKING
 from boto3.dynamodb.conditions import Key
 from app.common.date import utc_iso, iso_offset2utc
-from app.common.string import new_uuid
+from app.common.string import new_uuid, nl2br, url2link, strip_html_tags
 from app.models.dynamodb.base import Base, ModelInvalidParamsException
 from app.models.dynamodb.category import Category
 from app.models.dynamodb.post_tag import PostTag
@@ -26,7 +27,7 @@ class Post(Base):
 
         is_admin = index_name == 'createdAtGsi'
         sort_key = 'createdAt' if index_name == 'createdAtGsi' else 'publishAt'
-        prj_exps = ['title', 'postId', 'slug', 'body', 'publishAt', 'updatedAt',
+        prj_exps = ['title', 'postId', 'slug', 'bodyText', 'bodyHtml', 'publishAt', 'updatedAt',
                             'categorySlug', 'postStatus', 'createdAt']
         exp_attr_names = {}
         exp_attr_vals = {}
@@ -246,6 +247,10 @@ class Post(Base):
         slug = vals['slug']
         cate_slug = vals['category']
 
+        body_raw = vals['body']
+        body_format = vals['bodyFormat']
+        body_html, body_text = self.conv_body_to_each_format(body_raw, body_format)
+
         table = self.get_table()
         item = {
             'postId': new_uuid(),
@@ -257,8 +262,10 @@ class Post(Base):
             'publishAt': publish_at,
             'categorySlug': cate_slug,
             'title': vals['title'],
-            'body': vals['body'],
-            'bodyFormat': vals['bodyFormat'],
+            'body': body_raw,
+            'bodyHtml': body_html,
+            'bodyText': body_text,
+            'bodyFormat': body_format,
             'serviceIdSlug': '#'.join([service_id, slug]),
             'postStatus': status,
             'statusPublishAt': '#'.join([status, publish_at]),
@@ -338,6 +345,7 @@ class Post(Base):
             exp_vals[':spa'] = '#'.join([join_item, publish_at])
 
         attrs = ['title', 'body', 'bodyFormat', 'updatedBy']
+        upd_attrs = []
         for attr in attrs:
             val = vals.get(attr)
             if val is None or val == saved.get(attr):
@@ -345,9 +353,17 @@ class Post(Base):
 
             exp_items.append('%s=:%s' % (attr, attr))
             exp_vals[':' + attr] = val
+            upd_attrs.append(attr)
 
         if not exp_items:
             return
+
+        if 'body' in upd_attrs or 'bodyFormat' in upd_attrs:
+            body_html, body_text = self.conv_body_to_each_format(vals['body'], vals['bodyFormat'])
+            exp_items.append('%s=:%s' % ('bodyHtml', 'bodyHtml'))
+            exp_items.append('%s=:%s' % ('bodyText', 'bodyText'))
+            exp_vals[':bodyHtml'] = body_html
+            exp_vals[':bodyText'] = body_text
 
         updated_at = time
         exp_items.append('updatedAt=:ua')
@@ -374,3 +390,18 @@ class Post(Base):
                                                         True, False, True)
 
         return saved
+
+    @staticmethod
+    def conv_body_to_each_format(body_raw, body_format):
+        body_html = ''
+        body_text = ''
+        if body_format == 'markdown':
+            body_html = mistletoe.markdown(body_raw)
+            body_text = body_raw
+        elif body_format == 'text':
+            body_html = nl2br(url2link(body_raw))
+            body_text = body_raw
+        else:
+            body_html = body_raw
+            body_text = strip_html_tags(body_raw)
+        return body_html, body_text
