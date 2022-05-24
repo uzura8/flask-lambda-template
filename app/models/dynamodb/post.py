@@ -186,6 +186,9 @@ class Post(Base):
     @classmethod
     def query_all_by_tag_id(self, tag_id, params):
         items = PostTag.query_all_by_tag_id(tag_id, params)
+        if not items:
+            return []
+
         keys = [ {'postId':d['postId']} for d in items ]
         posts = Post.batch_get_items(keys)
         is_desc = params.get('order', 'asc') == 'desc'
