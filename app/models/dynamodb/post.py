@@ -1,5 +1,4 @@
 import mistletoe
-from typing import TYPE_CHECKING
 from boto3.dynamodb.conditions import Key
 from app.common.date import utc_iso, iso_offset2utc
 from app.common.string import new_uuid, nl2br, url2link, strip_html_tags

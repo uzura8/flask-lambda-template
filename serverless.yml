@@ -101,6 +101,7 @@ provider:
     COGNITO_CHECK_TOKEN_EXPIRATION: ${file(${self:custom.stageConfigFileName}):cognitoCheckTokenExpiration}
     COGNITO_JWT_HEADER_NAME: ${file(./config/stages/common.yml):cognitoJwtHeaderName}
     COGNITO_JWT_HEADER_PREFIX: ${file(./config/stages/common.yml):cognitoJwtHeaderPrefix}
+    COMMENT_DEFAULT_PUBLISH_STATUS: ${file(${self:custom.stageConfigFileName}):commentDefaultPublishStatus}
 
 package:
   exclude:
@@ -154,5 +155,6 @@ resources:
     ContactDynamoDBTable: ${file(./config/dynamodb/contact.yml)}
     CategoryDynamoDBTable: ${file(./config/dynamodb/category.yml)}
     PostDynamoDBTable: ${file(./config/dynamodb/post.yml)}
+    CommentDynamoDBTable: ${file(./config/dynamodb/comment.yml)}
     TagDynamoDBTable: ${file(./config/dynamodb/tag.yml)}
     PostTagDynamoDBTable: ${file(./config/dynamodb/post-tag.yml)}

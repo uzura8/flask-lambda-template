@@ -8,7 +8,7 @@ from app.root import bp as root_module
 from app.vote import bp as vote_module
 from app.contact import bp as contact_module
 from app.post import bp as post_module
-#from app.comment import bp as comment_module
+from app.comment import bp as comment_module
 from app.category import bp as category_module
 from app.tag import bp as tag_module
 from app.admin import bp as admin_module
@@ -100,6 +100,6 @@ app.register_blueprint(contact_module)
 app.register_blueprint(category_module)
 app.register_blueprint(tag_module)
 app.register_blueprint(post_module)
-#app.register_blueprint(comment_module)
+app.register_blueprint(comment_module)
 app.register_blueprint(admin_module)
 app.register_blueprint(root_module)

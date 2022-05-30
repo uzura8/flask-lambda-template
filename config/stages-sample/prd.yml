@@ -10,6 +10,8 @@ acceptServiceIds: "hoge,fuga"
 acceptTypes: "like,dislike"
 appMemorySize: 256
 
+commentDefaultPublishStatus: "unpublish"
+
 backupVoteLogThresholdDaysOlderThan: 14 # Days
 backupVoteLogCountForAll: 1000
 backupVoteLogCountForEachService: 500
