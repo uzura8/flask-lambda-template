@@ -1,11 +1,9 @@
-import os
-import mistletoe
-from boto3.dynamodb.conditions import Key
-from app.common.date import utc_iso, iso_offset2utc
+from app.common.date import utc_iso
 from app.common.string import new_uuid
-from app.models.dynamodb import Base, Service, ModelInvalidParamsException
+from app.models.dynamodb import Base, ModelInvalidParamsException
+from app.models.dynamodb.service import Service
+from app.models.dynamodb.comment_count import CommentCount
 
-COMMENT_DEFAULT_PUBLISH_STATUS = os.environ.get('COMMENT_DEFAULT_PUBLISH_STATUS', False)
 
 
 class Comment(Base):
@@ -87,7 +85,6 @@ class Comment(Base):
         if not Service.check_exists(service_id):
             raise ModelInvalidParamsException('serviceId not exists')
 
-        status = COMMENT_DEFAULT_PUBLISH_STATUS
         time = utc_iso(False, True)
 
         required_attrs = ['contentId']
@@ -96,6 +93,7 @@ class Comment(Base):
                 raise ModelInvalidParamsException("Argument '%s' requires values" % attr)
         content_id = vals['contentId']
 
+        status = vals['status']
         table = self.get_table()
         item = {
             'commentId': new_uuid(),
@@ -109,4 +107,6 @@ class Comment(Base):
             'statusCreatedAt': '#'.join([status, time]),
         }
         table.put_item(Item=item)
+        CommentCount.update_count(service_id, content_id, status, time)
+
         return item

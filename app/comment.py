@@ -1,11 +1,24 @@
 import os
 from flask import Blueprint, jsonify, request
-from app.models.dynamodb import Comment, Service, ModelInvalidParamsException
+from app.models.dynamodb import Comment, CommentCount, Service, ModelInvalidParamsException
 from app.common.error import InvalidUsage
 from app.common.request import validate_req_params
 from app.validators import NormalizerUtils
 
 bp = Blueprint('comment', __name__, url_prefix='/comments')
+
+COMMENT_DEFAULT_PUBLISH_STATUS = os.environ.get('COMMENT_DEFAULT_PUBLISH_STATUS', False)
+
+
+@bp.route('/<string:service_id>/counts', methods=['GET'])
+def comment_counts(service_id):
+    if not Service.check_exists(service_id):
+        raise InvalidUsage('ServiceId does not exist', 404)
+
+    keys = {'p': {'key':'serviceId', 'val':service_id}}
+    items = CommentCount.get_all(keys)
+    body = conv_res_obj_for_all_count(items)
+    return jsonify(body), 200
 
 
 @bp.route('/<string:service_id>/<string:content_id>', methods=['GET', 'POST'])
@@ -20,6 +33,7 @@ def comments(service_id, content_id):
         schema = validation_schema_comments()
         vals = validate_req_params(schema, request.json)
         vals['serviceId'] = service_id
+        vals['status'] = COMMENT_DEFAULT_PUBLISH_STATUS
 
         try:
             res_body = Comment.create(vals)
@@ -47,6 +61,22 @@ def comments(service_id, content_id):
         res_body = Comment.query_all_publish(service_id, content_id, vals)
 
     return jsonify(res_body), 200
+
+
+def conv_res_obj_for_all_count(items):
+    res_body = {
+        'items': [],
+        'totalCount': 0,
+    }
+
+    if items:
+        res_body['items'] = items
+        count = 0
+        for item in items:
+            count += item['commentCount']
+        res_body['totalCount'] = count
+
+    return res_body
 
 
 def validation_schema_comments():

@@ -156,5 +156,6 @@ resources:
     CategoryDynamoDBTable: ${file(./config/dynamodb/category.yml)}
     PostDynamoDBTable: ${file(./config/dynamodb/post.yml)}
     CommentDynamoDBTable: ${file(./config/dynamodb/comment.yml)}
+    CommentCountDynamoDBTable: ${file(./config/dynamodb/comment-count.yml)}
     TagDynamoDBTable: ${file(./config/dynamodb/tag.yml)}
     PostTagDynamoDBTable: ${file(./config/dynamodb/post-tag.yml)}

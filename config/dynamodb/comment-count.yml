@@ -1,0 +1,38 @@
+Type: 'AWS::DynamoDB::Table'
+Properties:
+  TableName: ${self:custom.prjPrefix}-comment-count
+  AttributeDefinitions:
+    -
+      AttributeName: serviceId
+      AttributeType: S
+    -
+      AttributeName: contentId
+      AttributeType: S
+    -
+      AttributeName: contentIdPublishStatus
+      AttributeType: S
+  KeySchema:
+    -
+      AttributeName: serviceId
+      KeyType: HASH
+    -
+      AttributeName: contentIdPublishStatus
+      KeyType: RANGE
+  #ProvisionedThroughput:
+  #  ReadCapacityUnits: 8
+  #  WriteCapacityUnits: 8
+  BillingMode: PAY_PER_REQUEST
+  LocalSecondaryIndexes:
+    -
+      IndexName: ServiceIdContentIdLsi
+      KeySchema:
+      -
+        AttributeName: serviceId
+        KeyType: HASH
+      -
+        AttributeName: contentId
+        KeyType: RANGE
+      Projection:
+        NonKeyAttributes:
+        - commentCount
+        ProjectionType: INCLUDE
