@@ -18,13 +18,13 @@ Properties:
     -
       AttributeName: contentIdType
       KeyType: RANGE
-  ProvisionedThroughput:
-    ReadCapacityUnits: 8
-    WriteCapacityUnits: 8
-  #BillingMode: PAY_PER_REQUEST
+  #ProvisionedThroughput:
+  #  ReadCapacityUnits: 8
+  #  WriteCapacityUnits: 8
+  BillingMode: PAY_PER_REQUEST
   LocalSecondaryIndexes:
     -
-      IndexName: ${self:custom.prjPrefix}-vote-count-lsi
+      IndexName: ServiceIdContentIdLsi
       KeySchema:
       -
         AttributeName: serviceId

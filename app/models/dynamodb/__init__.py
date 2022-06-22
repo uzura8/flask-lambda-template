@@ -6,6 +6,8 @@ from .comment import Comment
 from .category import Category
 from .tag import Tag
 from .post_tag import PostTag
+from .vote_count import VoteCount
+from .vote_log import VoteLog
 
 __all__ = [
     'Base',
@@ -17,4 +19,6 @@ __all__ = [
     'Category',
     'Tag',
     'PostTag',
+    'VoteCount',
+    'VoteLog',
 ]

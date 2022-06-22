@@ -54,6 +54,48 @@ class Base():
 
 
     @classmethod
+    def get_all(self, keys, is_desc=False, index_name=None, limit=0, projections=None):
+        table = self.get_table()
+        option = {
+            'ScanIndexForward': not is_desc,
+        }
+        if limit:
+            option['Limit'] = limit
+
+        if projections:
+            if isinstance(projections, list):
+                projections = ', '.join(projections)
+            option['ProjectionExpression'] = projections
+
+        if index_name:
+            option['IndexName'] = index_name
+
+        if not keys.get('p'):
+            raise ModelInvalidParamsException("'p' is required on keys")
+
+        key_cond_exps = ['#pk = :pk']
+        exp_attr_names = {'#pk': keys['p']['key']}
+        exp_attr_vals = {':pk': keys['p']['val']}
+
+        if keys.get('s'):
+            exp_attr_names['#sk'] = keys['s']['key']
+            exp_attr_vals[':sk'] = keys['s']['val']
+            key_cond_exps.append('#sk = :sk')
+
+        option['KeyConditionExpression'] = ' AND '.join(key_cond_exps)
+        option['ExpressionAttributeNames'] = exp_attr_names
+        option['ExpressionAttributeValues'] = exp_attr_vals
+        res = table.query(**option)
+        return res['Items'] if len(res['Items']) > 0 else []
+
+
+    @classmethod
+    def get_one(self, keys, is_desc=False, index_name=None):
+        items = self.get_all(keys, is_desc, index_name, 1)
+        return items[0] if len(items) > 0 else None
+
+
+    @classmethod
     def get_all_by_pkey(self, pkeys, params=None, index_name=None):
         table = self.get_table()
         option = {'ScanIndexForward': not (params and  params.get('is_desc', False))}
@@ -74,32 +116,6 @@ class Base():
         res = table.query(**option)
 
         return res.get('Items')
-
-
-    @classmethod
-    def get_one(self, keys, is_desc=False, index_name=None):
-        table = self.get_table()
-        option = {
-            'ScanIndexForward': not is_desc,
-            'Limit': 1,
-        }
-        if index_name:
-            option['IndexName'] = index_name
-
-        key_cond_exps = ['#pk = :pk']
-        exp_attr_names = {'#pk': keys['p']['key']}
-        exp_attr_vals = {':pk': keys['p']['val']}
-
-        if keys.get('s'):
-            exp_attr_names['#sk'] = keys['s']['key']
-            exp_attr_vals[':sk'] = keys['s']['val']
-            key_cond_exps.append('#sk = :sk')
-
-        option['KeyConditionExpression'] = ' AND '.join(key_cond_exps)
-        option['ExpressionAttributeNames'] = exp_attr_names
-        option['ExpressionAttributeValues'] = exp_attr_vals
-        res = table.query(**option)
-        return res['Items'][0] if len(res['Items']) > 0 else None
 
 
     @classmethod

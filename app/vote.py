@@ -1,107 +1,105 @@
-import re
 import os
 from flask import Blueprint, jsonify, request
-from boto3.dynamodb.conditions import Key
-from dynamodb import dynamodb
-from app.common.date import utc_iso
+from app.models.dynamodb import VoteCount, VoteLog, Service
 from app.common.error import InvalidUsage
+from app.validators import NormalizerUtils
+from app.common.request import validate_req_params
 
 bp = Blueprint('vote', __name__, url_prefix='/votes')
 
-PRJ_PREFIX = os.environ['PRJ_PREFIX']
-VOTE_LOG_TABLE = '-'.join([PRJ_PREFIX, 'vote-log'])
-VOTE_COUNT_TABLE = '-'.join([PRJ_PREFIX, 'vote-count'])
-ACCEPT_SERVICE_IDS = os.environ.get('ACCEPT_SERVICE_IDS', '').split(',')
 ACCEPT_TYPES = os.environ.get('ACCEPT_TYPES', '').split(',')
 
 
 @bp.route('/<string:service_id>', methods=['GET'])
 def get_vote_by_service(service_id):
-    if service_id not in ACCEPT_SERVICE_IDS:
+    if not Service.check_exists(service_id):
         raise InvalidUsage('ServiceId does not exist', 404)
 
-    table = dynamodb.Table(VOTE_COUNT_TABLE)
-    res = table.query(
-        ProjectionExpression='serviceId, contentId, voteType, voteCount, updatedAt',
-        KeyConditionExpression=Key('serviceId').eq(service_id)
-    )
-    body = conv_res_obj_for_all_votes(res)
+    params = {}
+    for key in ['contentIds']:
+        params[key] = request.args.get(key)
+    vals = validate_req_params(validation_schema_vote(), params)
+
+    if vals.get('contentIds'):
+        body = VoteCount.query_all_by_contentIds(service_id, vals['contentIds'])
+    else:
+        keys = {'p': {'key':'serviceId', 'val':service_id}}
+        items = VoteCount.get_all(keys)
+        body = conv_res_obj_for_all_votes(items)
     return jsonify(body), 200
 
 
 @bp.route('/<string:service_id>/<string:content_id>', methods=['POST', 'GET'])
 def vote_by_service_and_content(service_id, content_id):
-    if service_id not in ACCEPT_SERVICE_IDS:
+    if not Service.check_exists(service_id):
         raise InvalidUsage('ServiceId does not exist', 404)
 
-    if not validate_content_id(content_id):
-        raise InvalidUsage('ContentId is invalid', 404)
+    params = {'contentId':content_id}
+    vals = validate_req_params(validation_schema_vote(), params)
 
     if request.method == 'POST':
         vote_type = request.json.get('type', 'like').strip()
         if vote_type not in ACCEPT_TYPES:
             raise InvalidUsage('Type is invalid', 400)
 
-        time = utc_iso(True, True)
-        content_id_type = '-'.join([content_id, vote_type])
-
-        table = dynamodb.Table(VOTE_LOG_TABLE)
         item = {
             'serviceId': service_id,
-            'contentId': content_id,
+            'contentId': vals['contentId'],
             'voteType': vote_type,
-            'createdAt': time,
             'ip': request.remote_addr,
             'ua': request.headers.get('User-Agent', ''),
         }
-        table.put_item(Item=item)
+        VoteLog.create(item)
+        VoteCount.update_count(service_id, vals['contentId'], vote_type)
 
-        table = dynamodb.Table(VOTE_COUNT_TABLE)
-        table.update_item(
-            Key={
-                'serviceId': service_id,
-                'contentIdType': content_id_type,
-            },
-            UpdateExpression="""
-                ADD voteCount :incr
-                SET updatedAt = :time, contentId = :contId, voteType = :voteType
-            """,
-            ExpressionAttributeValues={
-                ':incr': 1,
-                ':time': time,
-                ':contId': content_id,
-                ':voteType': vote_type,
-            }
-        )
+    keys = {
+        'p': {'key':'serviceId', 'val':service_id},
+        's': {'key':'contentId', 'val':vals['contentId']},
+    }
+    proj_exps = 'serviceId, contentId, voteType, voteCount, updatedAt'
+    items = VoteCount.get_all(keys, False, 'ServiceIdContentIdLsi', 0, proj_exps)
 
-    table = dynamodb.Table(VOTE_COUNT_TABLE)
-    res = table.query(
-        IndexName=VOTE_COUNT_TABLE + '-lsi',
-        ProjectionExpression='serviceId, contentId, voteType, voteCount, updatedAt',
-        KeyConditionExpression=Key('serviceId').eq(service_id) & Key('contentId').eq(content_id)
-    )
-    items = res['Items'] if 'Items' in res and res['Items'] else []
     return jsonify(items), 200
 
 
-def validate_content_id(target):
-    target = target.strip()
-    ptn = r'^[0-9a-z_]{4,36}$'
-    res = re.match(ptn, target)
-    return res is not None
-
-
-def conv_res_obj_for_all_votes(ddb_res):
+def conv_res_obj_for_all_votes(items):
     res_body = {
         'items': [],
         'totalCount': 0,
     }
 
-    if 'Items' in ddb_res and ddb_res['Items']:
-        res_body['items'] = ddb_res['Items']
+    if items:
+        res_body['items'] = items
         count = 0
-        for item in ddb_res['Items']:
+        for item in items:
             count += item['voteCount']
         res_body['totalCount'] = count
 
     return res_body
+
+
+def validation_schema_vote():
+    return {
+        'contentId': {
+            'type': 'string',
+            'coerce': (str, NormalizerUtils.trim),
+            'required': True,
+            'empty': False,
+            'minlength': 4,
+            'maxlength': 36,
+            'regex': r'^[0-9a-z_]+$',
+        },
+        'contentIds': {
+            'type': 'list',
+            'coerce': (NormalizerUtils.split),
+            'required': False,
+            'empty': True,
+            'default': [],
+            'schema': {
+                'type': 'string',
+                'minlength': 4,
+                'maxlength': 36,
+                'regex': r'^[0-9a-z_]+$',
+            }
+        },
+    }
