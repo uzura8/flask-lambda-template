@@ -12,12 +12,6 @@ appMemorySize: 128
 
 commentDefaultPublishStatus: "unpublish"
 
-backupVoteLogThresholdDaysOlderThan: 1 # Days
-backupVoteLogCountForAll: 10
-backupVoteLogCountForEachService: 5
-backupVoteLogMemorySize: 128
-backupVoteLogEventSchedule: rate(3 minutes)
-
 # For Admin Console
 cognitoRegion: 'ap-northeast-1'
 cognitoUserpoolId: 'ap-northeast-1_*********'

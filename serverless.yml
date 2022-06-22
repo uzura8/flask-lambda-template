@@ -136,11 +136,11 @@ functions:
       - http: ANY /
       - http: ANY /{proxy+}
     provisionedConcurrency: 2
-  backupVoteLog:
-    handler: app/backup_vote_log.main
-    memorySize: ${file(${self:custom.stageConfigFileName}):backupVoteLogMemorySize}
-    events:
-      - schedule: ${file(${self:custom.stageConfigFileName}):backupVoteLogEventSchedule}
+  #backupVoteLog:
+  #  handler: app/backup_vote_log.main
+  #  memorySize: ${file(${self:custom.stageConfigFileName}):backupVoteLogMemorySize}
+  #  events:
+  #    - schedule: ${file(${self:custom.stageConfigFileName}):backupVoteLogEventSchedule}
 
 resources:
   Resources:
