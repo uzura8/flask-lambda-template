@@ -15,7 +15,6 @@ custom:
   defaultStage: dev
   prjPrefix: ${self:service}-${self:provider.stage}
   stageConfigFileName: ./config/stages/${self:provider.stage}.yml
-  s3BucketName: ${self:custom.prjPrefix}-bucket
   awsAccontId: ${file(./config/stages/common.yml):awsAccountId}
   cognitoRegion: ${file(${self:custom.stageConfigFileName}):cognitoRegion}
   cognitoUserpoolId: ${file(${self:custom.stageConfigFileName}):cognitoUserpoolId}
@@ -87,7 +86,6 @@ provider:
   environment:
     PRJ_PREFIX: ${self:custom.prjPrefix}
     APP_ROOT: /${self:custom.customDomain.basePath}
-    S3_BUCKET: ${self:custom.s3BucketName}
     CORS_ACCEPT_ORIGINS: ${file(${self:custom.stageConfigFileName}):corsAcceptOrigins}
     ACCEPT_SERVICE_IDS: ${file(${self:custom.stageConfigFileName}):acceptServiceIds}
     ACCEPT_TYPES: ${file(${self:custom.stageConfigFileName}):acceptTypes}
@@ -144,10 +142,6 @@ functions:
 
 resources:
   Resources:
-    Bucket:
-      Type: AWS::S3::Bucket
-      Properties:
-        BucketName: ${self:custom.s3BucketName}
     ServiceDynamoDBTable: ${file(./config/dynamodb/service.yml)}
     SiteConfigDynamoDBTable: ${file(./config/dynamodb/site-config.yml)}
     VoteLogDynamoDBTable: ${file(./config/dynamodb/vote-log.yml)}
