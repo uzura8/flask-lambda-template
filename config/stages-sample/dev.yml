@@ -11,6 +11,8 @@ acceptTypes: "like,dislike"
 appMemorySize: 128
 
 commentDefaultPublishStatus: "unpublish"
+commentImportS3BucketName: "content-api-resources-dev"
+commentImportS3BucketPath: "/hoge/comments/csv"
 
 # For Admin Console
 cognitoRegion: 'ap-northeast-1'

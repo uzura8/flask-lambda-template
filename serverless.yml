@@ -15,6 +15,8 @@ custom:
   defaultStage: dev
   prjPrefix: ${self:service}-${self:provider.stage}
   stageConfigFileName: ./config/stages/${self:provider.stage}.yml
+  commentImportS3BucketName: ${file(${self:custom.stageConfigFileName}):commentImportS3BucketName}
+  commentImportS3BucketPath: ${file(${self:custom.stageConfigFileName}):commentImportS3BucketPath}
   awsAccontId: ${file(./config/stages/common.yml):awsAccountId}
   cognitoRegion: ${file(${self:custom.stageConfigFileName}):cognitoRegion}
   cognitoUserpoolId: ${file(${self:custom.stageConfigFileName}):cognitoUserpoolId}
@@ -100,6 +102,8 @@ provider:
     COGNITO_JWT_HEADER_NAME: ${file(./config/stages/common.yml):cognitoJwtHeaderName}
     COGNITO_JWT_HEADER_PREFIX: ${file(./config/stages/common.yml):cognitoJwtHeaderPrefix}
     COMMENT_DEFAULT_PUBLISH_STATUS: ${file(${self:custom.stageConfigFileName}):commentDefaultPublishStatus}
+    COMMENT_IMPORT_S3_BUCKET_NAME: ${self:custom.commentImportS3BucketName}
+    COMMENT_IMPORT_S3_BUCKET_PATH: ${self:custom.commentImportS3BucketPath}
 
 package:
   exclude:
@@ -134,6 +138,17 @@ functions:
       - http: ANY /
       - http: ANY /{proxy+}
     provisionedConcurrency: 2
+
+  commentImporter:
+    handler: app/comment_importer.handler
+    events:
+      - s3:
+        bucket: ${self:custom.commentImportS3BucketName}
+        event: "s3:ObjectCreated:*"
+        rules:
+          - prefix: ${self:custom.commentImportS3BucketPath}/
+          - suffix: .csv
+        existing: true # If use existing bucket, set true
   #backupVoteLog:
   #  handler: app/backup_vote_log.main
   #  memorySize: ${file(${self:custom.stageConfigFileName}):backupVoteLogMemorySize}
