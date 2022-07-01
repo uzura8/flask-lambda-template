@@ -39,7 +39,7 @@ def vote_by_service_and_content(service_id, content_id):
 
     if request.method == 'POST':
         vote_type = request.json.get('type', 'like').strip()
-        if vote_type not in ACCEPT_TYPES:
+        if not vote_type:
             raise InvalidUsage('Type is invalid', 400)
 
         item = {
@@ -87,7 +87,7 @@ def validation_schema_vote():
             'empty': False,
             'minlength': 4,
             'maxlength': 36,
-            'regex': r'^[0-9a-z_]+$',
+            'regex': r'^[0-9a-z_\-]+$',
         },
         'contentIds': {
             'type': 'list',
@@ -97,9 +97,11 @@ def validation_schema_vote():
             'default': [],
             'schema': {
                 'type': 'string',
+                'required': False,
+                'empty': True,
                 'minlength': 4,
                 'maxlength': 36,
-                'regex': r'^[0-9a-z_]+$',
+                'regex': r'^[0-9a-z_\-]+$',
             }
         },
     }

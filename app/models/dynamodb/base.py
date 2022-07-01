@@ -2,6 +2,7 @@ import os
 import boto3
 from app.common.date import utc_iso
 from app.common.string import new_uuid
+#from app.common.log import output_log
 
 
 class Base():
@@ -90,8 +91,8 @@ class Base():
 
 
     @classmethod
-    def get_one(self, keys, is_desc=False, index_name=None):
-        items = self.get_all(keys, is_desc, index_name, 1)
+    def get_one(self, keys, is_desc=False, index_name=None, projections=None):
+        items = self.get_all(keys, is_desc, index_name, 1, projections)
         return items[0] if len(items) > 0 else None
 
 
@@ -149,10 +150,11 @@ class Base():
 
     @classmethod
     def create(self, vals, uuid_name=None):
-        if vals.get('updatedAt'):
-            vals['createdAt'] = vals['updatedAt']
-        else:
-            vals['createdAt'] = utc_iso(False, True)
+        if not vals.get('createdAt'):
+            if vals.get('updatedAt'):
+                vals['createdAt'] = vals['updatedAt']
+            else:
+                vals['createdAt'] = utc_iso(False, True)
 
         if uuid_name:
             vals[uuid_name] = new_uuid()
@@ -163,7 +165,7 @@ class Base():
 
 
     @classmethod
-    def updated(self, query_keys, vals, is_update_time=False):
+    def update(self, query_keys, vals, is_update_time=False):
         table = self.get_table()
 
         if is_update_time:
@@ -177,12 +179,47 @@ class Base():
         for key_type,key_dict in query_keys.items():
             key_name = key_dict['key']
             update_keys[key_name] = key_dict['val']
-        table.update_item(
+        res = table.update_item(
             Key=update_keys,
             AttributeUpdates=update_attrs,
         )
         items = self.get_one(query_keys)
+        #output_log({
+        #    'func':'base.update',
+        #    'name':__name__,
+        #    'update_keys': update_keys,
+        #    'update_attrs': update_attrs,
+        #    'res': res,
+        #    'items': items,
+        #})
         return items
+
+
+    @classmethod
+    def update_pk_value(self, current_keys, update_vals, is_update_time=False):
+        item = self.get_one(current_keys)
+        for attr, val in update_vals.items():
+            item[attr] = val
+
+        if is_update_time:
+            item['updatedAt'] = utc_iso(False, True)
+
+        key_dict = {}
+        pkey = current_keys['p']['key']
+        key_dict[pkey] = current_keys['p']['val']
+        if 's' in current_keys:
+            skey = current_keys['s']['key']
+            key_dict[skey] = current_keys['s']['val']
+
+        #output_log({
+        #    'name':__name__,
+        #    'func':'update_pk_value',
+        #    'current_keys': current_keys,
+        #    'key_dict': key_dict,
+        #    'item': item,
+        #})
+        self.delete(key_dict)
+        return self.create(item)
 
 
     @classmethod

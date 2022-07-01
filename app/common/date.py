@@ -38,3 +38,17 @@ def utime2udate_iso(unixtime, conv_tz_spec=False):
         date_utc = date_utc.replace('+00:00', 'Z')
 
     return date_utc
+
+
+def str2dt(date_str, date_format='%Y/%m/%d %H:%M:%S', ajust_to_zeropadding_fmt=False):
+    if ajust_to_zeropadding_fmt:
+        items = date_str.split(' ')
+        y, m, d = items[0].split('/')
+        date_str = '%s %s' % ('/'.join([y, m.zfill(2), d.zfill(2)]), items[1])
+
+    return datetime.strptime(date_str, date_format)
+
+
+def date_to_zfill(date_str):
+    y, m, d = date_str.split('/')
+    return '/'.join([y.zfill(2), m.zfill(2), d.zfill(2)])

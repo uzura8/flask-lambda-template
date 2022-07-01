@@ -16,7 +16,8 @@ def comment_counts(service_id):
         raise InvalidUsage('ServiceId does not exist', 404)
 
     keys = {'p': {'key':'serviceId', 'val':service_id}}
-    items = CommentCount.get_all(keys)
+    prj_attrs = ['publishStatus', 'commentCount', 'serviceId', 'contentId', 'updatedAt']
+    items = CommentCount.get_all(keys, False, None, 0, prj_attrs)
     body = conv_res_obj_for_all_count(items)
     return jsonify(body), 200
 
@@ -33,7 +34,9 @@ def comments(service_id, content_id):
         schema = validation_schema_comments()
         vals = validate_req_params(schema, request.json)
         vals['serviceId'] = service_id
-        vals['status'] = COMMENT_DEFAULT_PUBLISH_STATUS
+        vals['publishStatus'] = COMMENT_DEFAULT_PUBLISH_STATUS
+        vals['ip'] = request.remote_addr
+        vals['ua'] = request.headers.get('User-Agent', '')
 
         try:
             res_body = Comment.create(vals)
@@ -47,17 +50,11 @@ def comments(service_id, content_id):
             raise InvalidUsage('Server Error', 500)
     else:
         params = {}
-        for key in ['count', 'order', 'sinceTime', 'untilTime', 'category']:
+        for key in ['count', 'order', 'sinceTime', 'untilTime']:
             params[key] = request.args.get(key)
         params['contentId'] = content_id
         schema = validation_schema_comments()
         vals = validate_req_params(schema, params)
-        #vals['status'] = comment_default_publish_status
-
-        cate_slug = vals.get('category')
-        if cate_slug:
-            pass
-
         res_body = Comment.query_all_publish(service_id, content_id, vals)
 
     return jsonify(res_body), 200
@@ -97,21 +94,13 @@ def validation_schema_comments():
             'empty': True,
             'default': '',
         },
-        'category': {
-            'type': 'string',
-            'coerce': (NormalizerUtils.trim),
-            'nullable': True,
-            'required': False,
-            'empty': True,
-            'regex': r'^[0-9a-z_\-]{4,64}$',
-        },
         'count': {
             'type': 'integer',
             'coerce': int,
             'required': False,
             'min': 1,
-            'max': 50,
-            'default': 5,
+            'max': 100,
+            'default': 10,
         },
         'order': {
             'type': 'string',

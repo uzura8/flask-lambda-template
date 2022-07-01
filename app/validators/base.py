@@ -63,4 +63,4 @@ class NormalizerUtils():
     to_bool_int = lambda v: 1 if v.lower() in ('true', '1') else 0
     trim = lambda v: v.strip() if type(v) is str else v
     rtrim = lambda v: v.rstrip() if type(v) is str else v
-    split = lambda v, dlt=',': v.split(dlt)
+    split = lambda v, dlt=',': v.split(dlt) if v else []

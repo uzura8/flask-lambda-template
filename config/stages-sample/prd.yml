@@ -7,12 +7,14 @@ logsRestApiLevel: ERROR # Optional configuration which specifies the log level t
 logsRestApiFullExecutionData: true # Optional configuration which specifies whether or not to log full requests/responses for execution logging. Defaults to true.
 acceptServiceIds: "hoge,fuga"
 
-acceptTypes: "like,dislike"
 appMemorySize: 256
 
 commentDefaultPublishStatus: "unpublish"
+commentImportTimeout: 300 # s
+commentImportMemorySize: 256 # MB
 commentImportS3BucketName: "content-api-resources-prd"
-commentImportS3BucketPath: "/hoge/comments/csv"
+commentImportS3BucketPath: "comments"
+commentImportS3BucketSizeLimit: 3 # MB
 
 # For Admin Console
 cognitoRegion: 'ap-northeast-1'

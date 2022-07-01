@@ -1,6 +1,7 @@
 service: ${file(./config/stages/common.yml):service}
 
 plugins:
+  - serverless-deployment-bucket
   - serverless-python-requirements
   - serverless-wsgi
   - serverless-dynamodb-local
@@ -25,6 +26,10 @@ custom:
     packRequirements: false
   pythonRequirements:
     dockerizePip: non-linux
+  deploymentBucket:
+    versioning: true
+    accelerate: true
+    blockPublicAccess: true
   dynamodb:
     start:
       migrate: true
@@ -78,6 +83,9 @@ provider:
   iam:
     role:
       statements: ${file(./config/iam-role-statements.yml)}
+  deploymentBucket:
+    name: ${self:service}-deployment-bucket
+    serverSideEncryption: AES256
   logs:
     restApi:
       accessLogging: ${file(${self:custom.stageConfigFileName}):logsRestApiAccessLogging}
@@ -90,10 +98,9 @@ provider:
     APP_ROOT: /${self:custom.customDomain.basePath}
     CORS_ACCEPT_ORIGINS: ${file(${self:custom.stageConfigFileName}):corsAcceptOrigins}
     ACCEPT_SERVICE_IDS: ${file(${self:custom.stageConfigFileName}):acceptServiceIds}
-    ACCEPT_TYPES: ${file(${self:custom.stageConfigFileName}):acceptTypes}
-    BACKUP_VOTE_LOG_THRESHOLD_DAYS_OLDER_THAN : ${file(${self:custom.stageConfigFileName}):backupVoteLogThresholdDaysOlderThan}
-    BACKUP_VOTE_LOG_COUNT_FOR_ALL: ${file(${self:custom.stageConfigFileName}):backupVoteLogCountForAll}
-    BACKUP_VOTE_LOG_COUNT_FOR_EACH_SERVICE: ${file(${self:custom.stageConfigFileName}):backupVoteLogCountForEachService}
+    COMMENT_IMPORTER_COLUMN_CONVERSION_TABLE: ${file(./config/stages/common.yml):commentImporterColumnConversionTable}
+    COMMENT_IMPORTER_CONTENT_LIST: ${file(./config/stages/common.yml):commentImporterContentList}
+    COMMENT_IMPORTER_SIZE_LIMIT: ${file(${self:custom.stageConfigFileName}):commentImportS3BucketSizeLimit}
     SES_REGION: ${file(./config/stages/common.yml):sesRegion}
     COGNITO_REGION: ${file(${self:custom.stageConfigFileName}):cognitoRegion}
     COGNITO_USERPOOL_ID: ${self:custom.cognitoUserpoolId}
@@ -102,8 +109,6 @@ provider:
     COGNITO_JWT_HEADER_NAME: ${file(./config/stages/common.yml):cognitoJwtHeaderName}
     COGNITO_JWT_HEADER_PREFIX: ${file(./config/stages/common.yml):cognitoJwtHeaderPrefix}
     COMMENT_DEFAULT_PUBLISH_STATUS: ${file(${self:custom.stageConfigFileName}):commentDefaultPublishStatus}
-    COMMENT_IMPORT_S3_BUCKET_NAME: ${self:custom.commentImportS3BucketName}
-    COMMENT_IMPORT_S3_BUCKET_PATH: ${self:custom.commentImportS3BucketPath}
 
 package:
   exclude:
@@ -141,19 +146,18 @@ functions:
 
   commentImporter:
     handler: app/comment_importer.handler
+    memorySize: ${file(${self:custom.stageConfigFileName}):commentImportMemorySize}
+    timeout: ${file(${self:custom.stageConfigFileName}):commentImportTimeout}
     events:
       - s3:
-        bucket: ${self:custom.commentImportS3BucketName}
-        event: "s3:ObjectCreated:*"
-        rules:
-          - prefix: ${self:custom.commentImportS3BucketPath}/
-          - suffix: .csv
-        existing: true # If use existing bucket, set true
-  #backupVoteLog:
-  #  handler: app/backup_vote_log.main
-  #  memorySize: ${file(${self:custom.stageConfigFileName}):backupVoteLogMemorySize}
-  #  events:
-  #    - schedule: ${file(${self:custom.stageConfigFileName}):backupVoteLogEventSchedule}
+          bucket: ${self:custom.commentImportS3BucketName}
+          events:
+            - "s3:ObjectCreated:*"
+          rules:
+            - prefix: ${self:custom.commentImportS3BucketPath}/
+            - suffix: .csv
+          existing: true # If use existing bucket, set true
+          forceDeploy: true
 
 resources:
   Resources:

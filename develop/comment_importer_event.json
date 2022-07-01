@@ -1,0 +1,34 @@
+{
+  "Records": [
+    {
+      "eventVersion": "2.1",
+      "eventSource": "aws:s3",
+      "awsRegion": "us-east-1",
+      "eventTime": "2022-06-22T09:34:43.957Z",
+      "eventName": "ObjectCreated:Put",
+      "userIdentity": {"principalId": "A3CWLVM9F0SIPM"},
+      "requestParameters": {"sourceIPAddress": "152.165.126.155"},
+      "responseElements": {
+        "x-amz-request-id": "0GNXHKAMZ26C2TED",
+        "x-amz-id-2": "jrIzz7FSNVcLfW1hMMtrSE0UJNC9bzHsQ60fZ5VB280QnSnHHdZjwbA8p1tztffPPuoJvemAqPRB0EV5ZJKVYFZVg9t83C3mxaDBZah41n4="
+      },
+      "s3": {
+        "s3SchemaVersion": "1.0",
+        "configurationId": "63535d7b-53de-4b20-acfb-e072c1654e49",
+        "bucket": {
+          "name": "pr-sls-content-resources-dev",
+          "ownerIdentity": {
+            "principalId": "A3CWLVM9F0SIPM"
+          },
+          "arn": "arn:aws:s3:::pr-sls-content-resources-dev"
+        },
+        "object": {
+          "key": "comments/hoge/answer_2006.csv",
+          "size": 1049,
+          "eTag": "eb34bab5a7e43f73c778487f0fcb8223",
+          "sequencer": "0062B2E233DCB39D54"
+        }
+      }
+    }
+  ]
+}

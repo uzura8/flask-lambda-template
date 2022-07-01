@@ -25,7 +25,7 @@ Properties:
 
   GlobalSecondaryIndexes:
     -
-      IndexName: statusCreatedAtGsi
+      IndexName: commentStatusCreatedAtGsi
       KeySchema:
       -
         AttributeName: serviceIdContentId
@@ -42,11 +42,10 @@ Properties:
           - createdAt
           - updatedAt
           - publishStatus
-          - category
-          - customAttrs
+          - profiles
         ProjectionType: INCLUDE
     -
-      IndexName: createdAtGsi
+      IndexName: commentCreatedAtGsi
       KeySchema:
       -
         AttributeName: serviceId
@@ -63,6 +62,5 @@ Properties:
           - createdAt
           - updatedAt
           - publishStatus
-          - category
-          - customAttrs
+          - profiles
         ProjectionType: INCLUDE
