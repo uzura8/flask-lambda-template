@@ -98,9 +98,11 @@ provider:
     APP_ROOT: /${self:custom.customDomain.basePath}
     CORS_ACCEPT_ORIGINS: ${file(${self:custom.stageConfigFileName}):corsAcceptOrigins}
     ACCEPT_SERVICE_IDS: ${file(${self:custom.stageConfigFileName}):acceptServiceIds}
+    DEBUG_LOG_ENABLED: ${file(${self:custom.stageConfigFileName}):debugLogEnabled}
     COMMENT_IMPORTER_COLUMN_CONVERSION_TABLE: ${file(./config/stages/common.yml):commentImporterColumnConversionTable}
     COMMENT_IMPORTER_CONTENT_LIST: ${file(./config/stages/common.yml):commentImporterContentList}
     COMMENT_IMPORTER_SIZE_LIMIT: ${file(${self:custom.stageConfigFileName}):commentImportS3BucketSizeLimit}
+    COMMENT_IMPORTER_ROWS_COUNT_LIMIT: ${file(${self:custom.stageConfigFileName}):commentImportCsvRowsCountLimit}
     SES_REGION: ${file(./config/stages/common.yml):sesRegion}
     COGNITO_REGION: ${file(${self:custom.stageConfigFileName}):cognitoRegion}
     COGNITO_USERPOOL_ID: ${self:custom.cognitoUserpoolId}

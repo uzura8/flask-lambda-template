@@ -15,6 +15,7 @@ commentImportMemorySize: 256 # MB
 commentImportS3BucketName: "content-api-resources-dev"
 commentImportS3BucketPath: "comments"
 commentImportS3BucketSizeLimit: 3 # MB
+commentImportCsvRowsCountLimit: 1000 # Stop execution to import comments from csv, if run over this value
 
 # For Admin Console
 cognitoRegion: 'us-east-1'

@@ -11,7 +11,9 @@ from app.models.dynamodb import Comment, CommentCount, Service, ModelInvalidPara
 COMMENT_IMPORTER_COLUMN_CONVERSION_TABLE =\
     os.environ.get('COMMENT_IMPORTER_COLUMN_CONVERSION_TABLE', '')
 COMMENT_IMPORTER_CONTENT_LIST = os.environ.get('COMMENT_IMPORTER_CONTENT_LIST', '')
-COMMENT_IMPORTER_SIZE_LIMIT = os.environ.get('COMMENT_IMPORTER_SIZE_LIMIT', 1) # MB
+COMMENT_IMPORTER_SIZE_LIMIT = int(os.environ.get('COMMENT_IMPORTER_SIZE_LIMIT', 1)) # MB
+COMMENT_IMPORTER_ROWS_COUNT_LIMIT = int(os.environ.get('COMMENT_IMPORTER_ROWS_COUNT_LIMIT', 1000))
+DEBUG_LOG_ENABLED = bool(os.environ.get('DEBUG_LOG_ENABLED', False))
 
 
 class CommentImporter:
@@ -22,9 +24,12 @@ class CommentImporter:
     file_size_limit = 0
     saved_comment_ids = []
     update_attrs = ['publishStatus', 'body', 'contentId', 'profiles']
+    debug_log_enabled = False
 
 
     def __init__(self, service_id):
+        self.debug_log_enabled = DEBUG_LOG_ENABLED
+
         if not Service.check_exists(service_id):
             raise InvalidValueError('ServiceId does not exist')
 
@@ -43,7 +48,7 @@ class CommentImporter:
             raise InvalidValueError(msg)
         self.content_list = content_list_dict[self.service_id]
 
-        self.file_size_limit = int(COMMENT_IMPORTER_SIZE_LIMIT) * 1024 * 1024
+        self.file_size_limit = COMMENT_IMPORTER_SIZE_LIMIT * 1024 * 1024
 
 
     def __del__(self):
@@ -52,11 +57,17 @@ class CommentImporter:
 
     def main(self, bucket_name, obj_key, file_size):
         self.check_file_size_limit(file_size)
+
+        self.set_saved_comment_ids()
         s3obj = self.s3.Object(bucket_name, obj_key).get()
         stream = io.TextIOWrapper(io.BytesIO(s3obj['Body'].read()), encoding='sjis')
-        self.set_saved_comment_ids()
-        for rec in csv.DictReader(stream):
-            item = self.conv_to_save_item(rec)
+        for idx, row in enumerate(csv.DictReader(stream)):
+            if idx >= COMMENT_IMPORTER_ROWS_COUNT_LIMIT:
+                output_log('Stop import for over rows count limit: %s' \
+                            % COMMENT_IMPORTER_ROWS_COUNT_LIMIT)
+                break
+
+            item = self.conv_to_save_item(row)
             self.save_comment(item)
 
 
@@ -142,13 +153,13 @@ class CommentImporter:
 
             upd_vals[upd_attr] = vals[upd_attr]
 
-        output_log({
+        self.debug_log({
             'func':'update_comment-10',
             'vals': vals,
             'upd_vals': upd_vals,
         })
         if len(upd_vals) == 0:
-            output_log({
+            self.debug_log({
                 'func':'update_comment-0',
                 'commentId': comment_id,
                 'msg': 'Skipped for updated item not exists',
@@ -162,12 +173,10 @@ class CommentImporter:
 
         # Update comment count
         sid = self.service_id
-        if 'contentId' in upd_vals and 'publishStatus' in upd_vals:
+        if 'contentId' in upd_vals:
             CommentCount.update_count(sid, saved['contentId'], saved['publishStatus'], True)
-            CommentCount.update_count(sid, upd_vals['contentId'], upd_vals['publishStatus'])
-        elif 'contentId' in upd_vals:
-            CommentCount.update_count(sid, saved['contentId'], saved['publishStatus'], True)
-            CommentCount.update_count(sid, upd_vals['contentId'], saved['publishStatus'])
+            ## Already updated count by Comment.update_pk_value
+            #CommentCount.update_count(sid, upd_vals['contentId'], saved['publishStatus'])
         elif 'publishStatus' in upd_vals:
             CommentCount.update_count(sid, saved['contentId'], saved['publishStatus'], True)
             CommentCount.update_count(sid, saved['contentId'], upd_vals['publishStatus'])
@@ -189,6 +198,13 @@ class CommentImporter:
     def check_file_size_limit(self, file_size):
         if int(file_size) > self.file_size_limit:
             raise InvalidValueError('File size is over limit: %s' % file_size)
+
+
+    def debug_log(self, msg, level='info'):
+        if not self.debug_log_enabled:
+            return
+
+        output_log(msg, level)
 
 
     @staticmethod
