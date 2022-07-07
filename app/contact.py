@@ -1,10 +1,10 @@
 import os
 import json
 import datetime
-import pytz
 import configparser
+import pytz
 from flask import current_app, Blueprint, jsonify, request, render_template
-from dynamodb import dynamodb
+from app.models.dynamodb import Contact, Service
 from app.common.email import send_email_on_ses
 from app.common.date import utc_iso
 from app.common.error import InvalidUsage
@@ -14,14 +14,13 @@ from app.forms.contact import Contact as ContactForm
 bp = Blueprint('contact', __name__, url_prefix='/contacts')
 
 PRJ_PREFIX = os.environ['PRJ_PREFIX']
-CONTACT_TABLE = '-'.join([PRJ_PREFIX, 'contact'])
 ACCEPT_SERVICE_IDS = os.environ.get('ACCEPT_SERVICE_IDS', '').split(',')
 SES_REGION = os.environ.get('SES_REGION')
 
 
 @bp.route('/<string:service_id>', methods=['POST'])
 def contats(service_id):
-    if service_id not in ACCEPT_SERVICE_IDS:
+    if not Service.check_exists(service_id):
         raise InvalidUsage('ServiceId does not exist', 404)
 
     config = set_service_ini(service_id)
@@ -47,8 +46,7 @@ def contats(service_id):
     vals['subject'] = config['subject']
     vals['ip'] = request.remote_addr
     vals['ua'] = request.headers.get('User-Agent')
-    table = dynamodb.Table(CONTACT_TABLE)
-    table.put_item(Item=vals)
+    Contact.create(vals)
     body = vals
 
     types = form.contact_type.choices
@@ -105,21 +103,19 @@ def validate_timezone(req_tz, def_tz):
 
 
 def create_code(service_id):
-    table = dynamodb.Table(CONTACT_TABLE)
     code = None
     service_id_code = None
-    res_count = None
+    useable_code = None
     loop_count = 0
     loop_max = 5
-    while res_count is None or res_count > 0:
+    while useable_code is None:
         code = random_str(6, True)
         service_id_code = '_'.join([service_id, code])
-        res = table.get_item(
-            Key={'serviceIdCode': service_id_code}
-        )
-        res_count = len(res['Item']) if 'Item' in res else 0
-        loop_count += 1
+        item = Contact.get_one({'p': {'key':'serviceIdCode', 'val':service_id_code}})
+        if not item:
+            useable_code = code
 
+        loop_count += 1
         if loop_count > loop_max:
             raise InvalidUsage('Create code error', 404)
 

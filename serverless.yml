@@ -97,7 +97,6 @@ provider:
     PRJ_PREFIX: ${self:custom.prjPrefix}
     APP_ROOT: /${self:custom.customDomain.basePath}
     CORS_ACCEPT_ORIGINS: ${file(${self:custom.stageConfigFileName}):corsAcceptOrigins}
-    ACCEPT_SERVICE_IDS: ${file(${self:custom.stageConfigFileName}):acceptServiceIds}
     DEBUG_LOG_ENABLED: ${file(${self:custom.stageConfigFileName}):debugLogEnabled}
     COMMENT_IMPORTER_COLUMN_CONVERSION_TABLE: ${file(./config/stages/common.yml):commentImporterColumnConversionTable}
     COMMENT_IMPORTER_CONTENT_LIST: ${file(./config/stages/common.yml):commentImporterContentList}

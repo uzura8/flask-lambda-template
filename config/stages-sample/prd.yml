@@ -5,7 +5,6 @@ logsRestApiAccessLogging: false # Optional configuration which enables or disabl
 logsRestApiExecutionLogging: false # Optional configuration which enables or disables execution logging. Defaults to true.
 logsRestApiLevel: ERROR # Optional configuration which specifies the log level to use for execution logging. May be set to either INFO or ERROR.
 logsRestApiFullExecutionData: true # Optional configuration which specifies whether or not to log full requests/responses for execution logging. Defaults to true.
-acceptServiceIds: "hoge,fuga"
 debugLogEnabled: false
 
 appMemorySize: 256

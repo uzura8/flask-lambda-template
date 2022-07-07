@@ -9,6 +9,7 @@ from .tag import Tag
 from .post_tag import PostTag
 from .vote_count import VoteCount
 from .vote_log import VoteLog
+from .contact import Contact
 
 __all__ = [
     'Base',
@@ -23,4 +24,5 @@ __all__ = [
     'PostTag',
     'VoteCount',
     'VoteLog',
+    'Contact',
 ]
