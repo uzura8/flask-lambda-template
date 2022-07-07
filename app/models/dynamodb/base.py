@@ -2,7 +2,6 @@ import os
 import boto3
 from app.common.date import utc_iso
 from app.common.string import new_uuid
-#from app.common.log import output_log
 
 
 class Base():
@@ -184,14 +183,6 @@ class Base():
             AttributeUpdates=update_attrs,
         )
         items = self.get_one(query_keys)
-        #output_log({
-        #    'func':'base.update',
-        #    'name':__name__,
-        #    'update_keys': update_keys,
-        #    'update_attrs': update_attrs,
-        #    'res': res,
-        #    'items': items,
-        #})
         return items
 
 
@@ -211,13 +202,6 @@ class Base():
             skey = current_keys['s']['key']
             key_dict[skey] = current_keys['s']['val']
 
-        #output_log({
-        #    'name':__name__,
-        #    'func':'update_pk_value',
-        #    'current_keys': current_keys,
-        #    'key_dict': key_dict,
-        #    'item': item,
-        #})
         self.delete(key_dict)
         return self.create(item)
 

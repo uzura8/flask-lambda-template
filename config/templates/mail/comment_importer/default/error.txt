@@ -1,0 +1,10 @@
+Comment import error
+
+## Import from
+[[ inputs.bucket_path ]]
+
+## Error
+[[ inputs.error_msg ]]
+
+Please contact the system administrator.
+

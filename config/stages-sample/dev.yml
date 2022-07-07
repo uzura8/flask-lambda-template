@@ -16,6 +16,7 @@ commentImportS3BucketName: "content-api-resources-dev"
 commentImportS3BucketPath: "comments"
 commentImportS3BucketSizeLimit: 3 # MB
 commentImportCsvRowsCountLimit: 1000 # Stop execution to import comments from csv, if run over this value
+commentImporterNoticeEmails: '{"hoge": {"to":"admin@example.com", "from":"admin@example.com", "from_name":"System Administrator"}}'
 
 # For Admin Console
 cognitoRegion: 'us-east-1'

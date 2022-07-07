@@ -102,6 +102,7 @@ provider:
     COMMENT_IMPORTER_CONTENT_LIST: ${file(./config/stages/common.yml):commentImporterContentList}
     COMMENT_IMPORTER_SIZE_LIMIT: ${file(${self:custom.stageConfigFileName}):commentImportS3BucketSizeLimit}
     COMMENT_IMPORTER_ROWS_COUNT_LIMIT: ${file(${self:custom.stageConfigFileName}):commentImportCsvRowsCountLimit}
+    COMMENT_IMPORTER_NOTICE_EMAILS: ${file(${self:custom.stageConfigFileName}):commentImporterNoticeEmails}
     SES_REGION: ${file(./config/stages/common.yml):sesRegion}
     COGNITO_REGION: ${file(${self:custom.stageConfigFileName}):cognitoRegion}
     COGNITO_USERPOOL_ID: ${self:custom.cognitoUserpoolId}

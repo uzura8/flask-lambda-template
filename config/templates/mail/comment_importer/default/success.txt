@@ -1,0 +1,9 @@
+Comment imported.
+
+## Import from
+[[ inputs.bucket_path ]]
+
+## Result
+* Created count: [[ inputs.saved_counts.created ]]
+* Updatesd count: [[ inputs.saved_counts.updated ]]
+
