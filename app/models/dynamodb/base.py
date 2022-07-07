@@ -34,9 +34,9 @@ class Base():
 
 
     @classmethod
-    def to_response(self, item):
+    def to_res(self, item):
         res = {}
-        for i in self.response_attr:
+        for i in self.res_attr:
             k = i['key']
             l = i['label']
             if k in item:
@@ -235,7 +235,7 @@ class Base():
             },
             ReturnConsumedCapacity='TOTAL'
         )
-        return res['Responses'][table_name]
+        return res['ress'][table_name]
 
 
     @classmethod
@@ -257,6 +257,27 @@ class Base():
                 #target_keys = {k: v for k, v in item.items() if k in pkeys or not pkeys}
                 target_keys = {k: v for k, v in item.items()}
                 batch.delete_item(target_keys)
+
+
+    @classmethod
+    def truncate(self):
+        table = self.get_table()
+        delete_items = []
+        params   = {}
+        while True:
+            res = table.scan(**params)
+            delete_items.extend(res['Items'])
+            if ('LastEvaluatedKey' in res):
+                params['ExclusiveStartKey'] = res['LastEvaluatedKey']
+            else:
+                break
+
+        key_names = [ x['AttributeName'] for x in table.key_schema ]
+        delete_keys = [ { k:v for k,v in x.items() if k in key_names } for x in delete_items ]
+
+        with table.batch_writer() as batch:
+            for key in delete_keys:
+                batch.delete_item(Key = key)
 
 
 class ModelInvalidParamsException(Exception):

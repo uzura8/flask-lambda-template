@@ -159,6 +159,12 @@ functions:
           existing: true # If use existing bucket, set true
           forceDeploy: true
 
+  commentTruncater:
+    handler: app/comment_truncater.handler
+    memorySize: ${file(${self:custom.stageConfigFileName}):commentImportMemorySize}
+    timeout: ${file(${self:custom.stageConfigFileName}):commentImportTimeout}
+    maximumRetryAttempts: 1
+
 resources:
   Resources:
     ServiceDynamoDBTable: ${file(./config/dynamodb/service.yml)}

@@ -5,6 +5,7 @@
     - dynamodb:Scan
     - dynamodb:GetItem
     - dynamodb:BatchGetItem
+    - dynamodb:BatchWriteItem
     - dynamodb:PutItem
     - dynamodb:UpdateItem
     - dynamodb:DeleteItem
