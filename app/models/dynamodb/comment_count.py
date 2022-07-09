@@ -9,7 +9,7 @@ class CommentCount(Base):
 
 
     @classmethod
-    def update_count(self, service_id, content_id, publish_status, time=None):
+    def update_count(self, service_id, content_id, publish_status, is_decr=False, time=None):
         table = self.get_table()
 
         if not time:
@@ -25,7 +25,7 @@ class CommentCount(Base):
                 SET updatedAt = :time, contentId = :contId, publishStatus = :pstatus
             """,
             ExpressionAttributeValues={
-                ':incr': 1,
+                ':incr': -1 if is_decr else 1,
                 ':time': time,
                 ':contId': content_id,
                 ':pstatus': publish_status,

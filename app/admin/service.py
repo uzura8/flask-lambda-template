@@ -40,7 +40,7 @@ def service_detail(service_id):
 
     if request.method == 'POST':
         vals = validate_req_params(validation_schema_services(), request.json, ['label'])
-        updated = Service.updated(key, vals, True)
+        updated = Service.update(key, vals, True)
         return jsonify(updated), 200
     else:
         return jsonify(service), 200

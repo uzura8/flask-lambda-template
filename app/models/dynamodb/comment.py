@@ -8,19 +8,27 @@ from app.models.dynamodb.comment_count import CommentCount
 
 class Comment(Base):
     table_name = 'comment'
-    response_attr = [
+    response_attr = []
+    projection_attrs = [
+        'commentId',
+        'serviceId',
+        'contentId',
+        'createdAt',
+        'body',
+        'profiles',
     ]
 
 
     @classmethod
-    def query_all_publish(self, service_id, content_id, params):
-        index_name = 'statusCreatedAtGsi'
+    def query_all_publish(self, service_id, content_id, params, prj_attrs=[]):
+        index_name = 'commentStatusCreatedAtGsi'
         table = self.get_table()
         until_time = params.get('untilTime', '')
         since_time = params.get('sinceTime', '')
         is_desc = params.get('order', 'asc') == 'desc'
-        limit = params.get('count', 20)
-        category = params.get('category')
+        limit = params.get('count', 10)
+        if not prj_attrs:
+            prj_attrs = self.projection_attrs
 
         sort_key = 'createdAt'
         exp_attr_names = {}
@@ -30,6 +38,7 @@ class Comment(Base):
             'IndexName': index_name,
             'ScanIndexForward': not is_desc,
             'Limit': limit,
+            'ProjectionExpression': ','.join(prj_attrs),
         }
         exp_attr_names['#si'] = 'serviceIdContentId'
         exp_attr_vals[':si'] = '#'.join([service_id, content_id])
@@ -49,12 +58,6 @@ class Comment(Base):
             cond = '#ut < :ut'
             exp_attr_names['#ut'] = sort_key
             exp_attr_vals[':ut'] = until_time
-            filter_exps.append(cond)
-
-        if category:
-            cond = '#ct = :ct'
-            exp_attr_names['#ct'] = 'category'
-            exp_attr_vals[':ct'] = category
             filter_exps.append(cond)
 
         filter_exps_str = ' AND '.join(filter_exps) if filter_exps else ''
@@ -82,10 +85,15 @@ class Comment(Base):
         if not service_id:
             raise ModelInvalidParamsException('serviceId is required')
 
-        if not Service.check_exists(service_id):
-            raise ModelInvalidParamsException('serviceId not exists')
+        #if not Service.check_exists(service_id):
+        #    raise ModelInvalidParamsException('serviceId not exists')
 
-        time = utc_iso(False, True)
+        if not vals.get('commentId'):
+            vals['commentId'] = new_uuid()
+
+        if not vals.get('createdAt'):
+            vals['createdAt'] = utc_iso(False, True)
+        time = vals['createdAt']
 
         required_attrs = ['contentId']
         for attr in required_attrs:
@@ -93,20 +101,22 @@ class Comment(Base):
                 raise ModelInvalidParamsException("Argument '%s' requires values" % attr)
         content_id = vals['contentId']
 
-        status = vals['status']
+        status = vals['publishStatus']
         table = self.get_table()
         item = {
-            'commentId': new_uuid(),
+            'commentId': vals['commentId'],
             'serviceId': service_id,
             'contentId': content_id,
             'serviceIdContentId': '#'.join([service_id, content_id]),
-            'createdAt': time,
+            'createdAt': vals['createdAt'],
             'body': vals['body'],
+            'profiles': vals['profiles'] if vals.get('profiles') else None,
             'publishStatus': status,
-            'category': vals['category'],
             'statusCreatedAt': '#'.join([status, time]),
+            'ip': vals.get('ip', ''),
+            'ua': vals.get('ua', ''),
         }
         table.put_item(Item=item)
-        CommentCount.update_count(service_id, content_id, status, time)
+        CommentCount.update_count(service_id, content_id, status, False, time)
 
         return item

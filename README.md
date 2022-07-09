@@ -221,6 +221,12 @@ Request https://xxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com/dev
 serverless invoke local --function backupVoteLog
 ```
 
+### Truncate Comemnt Table
+
+```bash
+serverless invoke --function commentTruncater --stage dev
+```
+
 
 ### Performance Test
 

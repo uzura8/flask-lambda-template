@@ -1,6 +1,7 @@
 service: ${file(./config/stages/common.yml):service}
 
 plugins:
+  - serverless-deployment-bucket
   - serverless-python-requirements
   - serverless-wsgi
   - serverless-dynamodb-local
@@ -15,6 +16,8 @@ custom:
   defaultStage: dev
   prjPrefix: ${self:service}-${self:provider.stage}
   stageConfigFileName: ./config/stages/${self:provider.stage}.yml
+  commentImportS3BucketName: ${file(${self:custom.stageConfigFileName}):commentImportS3BucketName}
+  commentImportS3BucketPath: ${file(${self:custom.stageConfigFileName}):commentImportS3BucketPath}
   awsAccontId: ${file(./config/stages/common.yml):awsAccountId}
   cognitoRegion: ${file(${self:custom.stageConfigFileName}):cognitoRegion}
   cognitoUserpoolId: ${file(${self:custom.stageConfigFileName}):cognitoUserpoolId}
@@ -23,6 +26,10 @@ custom:
     packRequirements: false
   pythonRequirements:
     dockerizePip: non-linux
+  deploymentBucket:
+    versioning: true
+    accelerate: true
+    blockPublicAccess: true
   dynamodb:
     start:
       migrate: true
@@ -76,6 +83,9 @@ provider:
   iam:
     role:
       statements: ${file(./config/iam-role-statements.yml)}
+  deploymentBucket:
+    name: ${self:service}-deployment-bucket
+    serverSideEncryption: AES256
   logs:
     restApi:
       accessLogging: ${file(${self:custom.stageConfigFileName}):logsRestApiAccessLogging}
@@ -87,11 +97,11 @@ provider:
     PRJ_PREFIX: ${self:custom.prjPrefix}
     APP_ROOT: /${self:custom.customDomain.basePath}
     CORS_ACCEPT_ORIGINS: ${file(${self:custom.stageConfigFileName}):corsAcceptOrigins}
-    ACCEPT_SERVICE_IDS: ${file(${self:custom.stageConfigFileName}):acceptServiceIds}
-    ACCEPT_TYPES: ${file(${self:custom.stageConfigFileName}):acceptTypes}
-    BACKUP_VOTE_LOG_THRESHOLD_DAYS_OLDER_THAN : ${file(${self:custom.stageConfigFileName}):backupVoteLogThresholdDaysOlderThan}
-    BACKUP_VOTE_LOG_COUNT_FOR_ALL: ${file(${self:custom.stageConfigFileName}):backupVoteLogCountForAll}
-    BACKUP_VOTE_LOG_COUNT_FOR_EACH_SERVICE: ${file(${self:custom.stageConfigFileName}):backupVoteLogCountForEachService}
+    DEBUG_LOG_ENABLED: ${file(${self:custom.stageConfigFileName}):debugLogEnabled}
+    COMMENT_IMPORTER_COLUMN_CONVERSION_TABLE: ${file(./config/stages/common.yml):commentImporterColumnConversionTable}
+    COMMENT_IMPORTER_CONTENT_LIST: ${file(./config/stages/common.yml):commentImporterContentList}
+    COMMENT_IMPORTER_SIZE_LIMIT: ${file(${self:custom.stageConfigFileName}):commentImportS3BucketSizeLimit}
+    COMMENT_IMPORTER_ROWS_COUNT_LIMIT: ${file(${self:custom.stageConfigFileName}):commentImportCsvRowsCountLimit}
     SES_REGION: ${file(./config/stages/common.yml):sesRegion}
     COGNITO_REGION: ${file(${self:custom.stageConfigFileName}):cognitoRegion}
     COGNITO_USERPOOL_ID: ${self:custom.cognitoUserpoolId}
@@ -134,11 +144,27 @@ functions:
       - http: ANY /
       - http: ANY /{proxy+}
     provisionedConcurrency: 2
-  #backupVoteLog:
-  #  handler: app/backup_vote_log.main
-  #  memorySize: ${file(${self:custom.stageConfigFileName}):backupVoteLogMemorySize}
-  #  events:
-  #    - schedule: ${file(${self:custom.stageConfigFileName}):backupVoteLogEventSchedule}
+
+  commentImporter:
+    handler: app/comment_importer.handler
+    memorySize: ${file(${self:custom.stageConfigFileName}):commentImportMemorySize}
+    timeout: ${file(${self:custom.stageConfigFileName}):commentImportTimeout}
+    events:
+      - s3:
+          bucket: ${self:custom.commentImportS3BucketName}
+          events:
+            - "s3:ObjectCreated:*"
+          rules:
+            - prefix: ${self:custom.commentImportS3BucketPath}/
+            - suffix: .csv
+          existing: true # If use existing bucket, set true
+          forceDeploy: true
+
+  commentTruncater:
+    handler: app/comment_truncater.handler
+    memorySize: ${file(${self:custom.stageConfigFileName}):commentImportMemorySize}
+    timeout: ${file(${self:custom.stageConfigFileName}):commentImportTimeout}
+    maximumRetryAttempts: 1
 
 resources:
   Resources:

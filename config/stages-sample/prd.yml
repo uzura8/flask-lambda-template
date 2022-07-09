@@ -5,12 +5,17 @@ logsRestApiAccessLogging: false # Optional configuration which enables or disabl
 logsRestApiExecutionLogging: false # Optional configuration which enables or disables execution logging. Defaults to true.
 logsRestApiLevel: ERROR # Optional configuration which specifies the log level to use for execution logging. May be set to either INFO or ERROR.
 logsRestApiFullExecutionData: true # Optional configuration which specifies whether or not to log full requests/responses for execution logging. Defaults to true.
-acceptServiceIds: "hoge,fuga"
+debugLogEnabled: false
 
-acceptTypes: "like,dislike"
 appMemorySize: 256
 
 commentDefaultPublishStatus: "unpublish"
+commentImportTimeout: 300 # s
+commentImportMemorySize: 256 # MB
+commentImportS3BucketName: "content-api-resources-prd"
+commentImportS3BucketPath: "comments"
+commentImportS3BucketSizeLimit: 3 # MB
+commentImportCsvRowsCountLimit: 1000 # Stop execution to import comments from csv, if run over this value
 
 # For Admin Console
 cognitoRegion: 'ap-northeast-1'
