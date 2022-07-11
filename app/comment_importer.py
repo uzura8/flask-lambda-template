@@ -119,6 +119,9 @@ class CommentImporter:
         if not local_id:
             raise InvalidValueError('Failed to get localId')
 
+        if 'publishStatus' not in vals:
+            vals['publishStatus'] = 'publish'
+
         vals['statusCreatedAt'] = '#'.join([vals['publishStatus'], vals['createdAt']])
         vals['profiles'] = profiles
         vals['serviceId'] = self.service_id
