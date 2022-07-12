@@ -1,21 +1,19 @@
 variable "prj_prefix" {}
-variable "aws_region" {}
 variable "route53_zone_id" {}
 variable "domain_api_dev" {}
 variable "domain_api_prd" {}
 
 provider "aws" {
-  region = var.aws_region
-  alias  = "default"
-}
-
-provider "aws" {
-  region = "us-east-1"
-  alias  = "virginia"
 }
 
 terraform {
   backend "s3" {
+  }
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 3.74.2"
+    }
   }
 }
 
@@ -27,7 +25,6 @@ locals {
 }
 
 resource "aws_acm_certificate" "api_dev" {
-  provider          = aws.virginia
   domain_name       = local.fqdn.api_dev
   validation_method = "DNS"
 
@@ -37,7 +34,6 @@ resource "aws_acm_certificate" "api_dev" {
   }
 }
 resource "aws_acm_certificate" "api_prd" {
-  provider          = aws.virginia
   domain_name       = local.fqdn.api_prd
   validation_method = "DNS"
 
@@ -81,19 +77,16 @@ resource "aws_route53_record" "api_prd_acm_c" {
 
 ## Related ACM Certification and CNAME record
 resource "aws_acm_certificate_validation" "api_dev" {
-  provider                = aws.virginia
   certificate_arn         = aws_acm_certificate.api_dev.arn
   validation_record_fqdns = [for record in aws_route53_record.api_dev_acm_c : record.fqdn]
 }
 resource "aws_acm_certificate_validation" "api_prd" {
-  provider                = aws.virginia
   certificate_arn         = aws_acm_certificate.api_prd.arn
   validation_record_fqdns = [for record in aws_route53_record.api_prd_acm_c : record.fqdn]
 }
 
 # Cognito
 resource "aws_cognito_user_pool" "prd" {
-  provider                 = aws.default
   name                     = join("-", [var.prj_prefix, "cognito-user-pool"])
   auto_verified_attributes = ["email"]
   alias_attributes         = ["email"]
@@ -141,7 +134,6 @@ resource "aws_cognito_user_pool_client" "prd" {
 }
 
 resource "aws_cognito_identity_pool" "prd" {
-  provider                         = aws.default
   identity_pool_name               = join("-", [var.prj_prefix, "cognito-identity-pool"])
   allow_unauthenticated_identities = false
 
@@ -151,15 +143,15 @@ resource "aws_cognito_identity_pool" "prd" {
     server_side_token_check = false
   }
 
-  read_attributes = [
-    "email",
-    "custom:role",
-  ]
+  #read_attributes = [
+  #  "email",
+  #  "custom:role",
+  #]
 
-  write_attributes = [
-    "email",
-    "custom:role",
-  ]
+  #write_attributes = [
+  #  "email",
+  #  "custom:role",
+  #]
 
   tags = {
     Name      = join("-", [var.prj_prefix, "cognito", "identity", "pool"])

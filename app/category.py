@@ -31,7 +31,8 @@ def handle_detail(service_id, slug):
     item = Category.get_one_by_slug(service_id, vals['slug'],
                                 vals['withParents'], vals['withChildren'], True)
     if not item:
-        raise InvalidUsage('Not Found', 404)
+        item = []
+        #raise InvalidUsage('Not Found', 404)
 
     if request.method == 'HEAD':
         return jsonify(), 200
