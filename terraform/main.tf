@@ -1,9 +1,12 @@
 variable "prj_prefix" {}
+variable "aws_region_default" {}
 variable "route53_zone_id" {}
 variable "domain_api_dev" {}
 variable "domain_api_prd" {}
 
 provider "aws" {
+  region = var.aws_region_default
+  alias  = "default"
 }
 
 terraform {
@@ -25,6 +28,7 @@ locals {
 }
 
 resource "aws_acm_certificate" "api_dev" {
+  provider          = aws.default
   domain_name       = local.fqdn.api_dev
   validation_method = "DNS"
 
@@ -34,6 +38,7 @@ resource "aws_acm_certificate" "api_dev" {
   }
 }
 resource "aws_acm_certificate" "api_prd" {
+  provider          = aws.default
   domain_name       = local.fqdn.api_prd
   validation_method = "DNS"
 
@@ -77,16 +82,19 @@ resource "aws_route53_record" "api_prd_acm_c" {
 
 ## Related ACM Certification and CNAME record
 resource "aws_acm_certificate_validation" "api_dev" {
+  provider                = aws.default
   certificate_arn         = aws_acm_certificate.api_dev.arn
   validation_record_fqdns = [for record in aws_route53_record.api_dev_acm_c : record.fqdn]
 }
 resource "aws_acm_certificate_validation" "api_prd" {
+  provider                = aws.default
   certificate_arn         = aws_acm_certificate.api_prd.arn
   validation_record_fqdns = [for record in aws_route53_record.api_prd_acm_c : record.fqdn]
 }
 
 # Cognito
 resource "aws_cognito_user_pool" "prd" {
+  provider                 = aws.default
   name                     = join("-", [var.prj_prefix, "cognito-user-pool"])
   auto_verified_attributes = ["email"]
   alias_attributes         = ["email"]
@@ -121,6 +129,7 @@ resource "aws_cognito_user_pool" "prd" {
 }
 
 resource "aws_cognito_user_pool_client" "prd" {
+  provider        = aws.default
   name            = join("-", [var.prj_prefix, "web_client"])
   user_pool_id    = aws_cognito_user_pool.prd.id
   generate_secret = false
@@ -134,6 +143,7 @@ resource "aws_cognito_user_pool_client" "prd" {
 }
 
 resource "aws_cognito_identity_pool" "prd" {
+  provider                         = aws.default
   identity_pool_name               = join("-", [var.prj_prefix, "cognito-identity-pool"])
   allow_unauthenticated_identities = false
 

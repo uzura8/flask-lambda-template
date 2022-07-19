@@ -1,6 +1,6 @@
 service: content-api
 awsAccountId: 'Your-AWS-Acconnt-ID'
-defaultRegion: 'us-east-1'
+defaultRegion: 'ap-northeast-1'
 sesRegion: 'us-west-2'
 cognitoJwtHeaderName: 'Authorization'
 cognitoJwtHeaderPrefix: 'Bearer'

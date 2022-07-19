@@ -133,11 +133,43 @@ terraform init -backend-config="bucket=content-api-config-hoge" -backend-config=
 terraform apply -auto-approve -var-file=./terraform.tfvars
 ```
 
-#### 5. Create Admin User
+#### 5. Save default ServiceId on DynamoDB
+
+1. Opne DynamoDB page on AWS console
+2. Click Tables > Explore items
+3. Select "your-prefix-stage-service"
+4. Click "Create item"
+5. Select "JSON"
+6. Input below, and create
+
+```bash
+{
+  "serviceId": {
+    "S": "hoge"
+  },
+  "label": {
+    "S": "ほげ"
+  }
+}
+````
+
+#### 6. Create Admin User
 
 Create Admin User on Cognito consele
 
-#### 6. Change User Status
+#### 7. Add Custom Attributes
+
+```bash
+aws cognito-idp add-custom-attributes \
+--user-pool-id ap-northeast-1_xxxxxxxxx \
+--custom-attributes Name="role",AttributeDataType="String"
+
+aws cognito-idp add-custom-attributes \
+--user-pool-id ap-northeast-1_xxxxxxxxx \
+--custom-attributes Name="acceptServiceIds",AttributeDataType="String"
+````
+
+#### 8. Change User Status
 
 ```bash
 aws cognito-idp admin-initiate-auth \
@@ -163,7 +195,7 @@ aws cognito-idp admin-respond-to-auth-challenge \
 
 ```
 
-#### 7. Set Admin Role for user
+#### 9. Set Admin Role for user
 
 ```bash
 aws cognito-idp admin-update-user-attributes \
@@ -172,7 +204,7 @@ aws cognito-idp admin-update-user-attributes \
 --user-attributes Name="custom:role",Value="admin"
 ```
 
-#### 8. Sign In by Admin User
+#### 10. Sign In by Admin User
 
 Access to https://your-domain.example.com/admin , and Sign In by created user.
 
@@ -182,7 +214,7 @@ Execute below command
 
 ```bash
 export AWS_PROFILE="your-profile-name"
-export AWS_REGION="us-east-1"
+export AWS_DEFAULT_REGION="ap-northeast-1"
 sls create_domain # Deploy for dev
 ```
 
@@ -199,7 +231,7 @@ Execute below command
 
 ```bash
 export AWS_PROFILE="your-profile-name"
-export AWS_REGION="us-east-1"
+export AWS_DEFAULT_REGION="ap-northeast-1"
 sls deploy # Deploy for dev
 ```
 
@@ -251,6 +283,7 @@ Destroy for serverless resources
 
 ```bash
 sls remove --stage Target-stage
+sls delete_domain --stage Target-stage
 ```
 
 Removed files in S3 Buckets named "your-domain.example.com-cloudfront-logs" and "your-domain.example.com" 
