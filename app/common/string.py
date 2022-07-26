@@ -3,6 +3,29 @@ import string
 import random
 import uuid
 import ulid
+from html.parser import HTMLParser
+
+
+class MLStripper(HTMLParser):
+    def __init__(self):
+        self.reset()
+        self.strict = False
+        self.convert_charrefs= True
+        self.fed = []
+
+    def handle_data(self, d):
+        # Add codes hear if you need
+        self.fed.append(d)
+
+
+    def get_data(self):
+        return ''.join(self.fed)
+
+
+def strip_html_tags(html_str):
+    s = MLStripper()
+    s.feed(html_str)
+    return s.get_data()
 
 
 def random_str(num, is_digits_only=False):
@@ -54,8 +77,3 @@ def nl2br(text):
 def url2link(text):
     ptn = r'(https?://[0-9a-zA-Z\-\.\!~\*\'\(\);\/\?\:@&=+\$,%#]+)'
     return re.sub(ptn, r'<a href="\1" target="_blank">\1</a>', text)
-
-
-def strip_html_tags(text):
-    reg_obj = re.compile(r'<[^>]*?>')
-    return reg_obj.sub('', text)
