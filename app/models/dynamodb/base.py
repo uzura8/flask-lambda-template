@@ -33,9 +33,9 @@ class Base():
 
 
     @classmethod
-    def to_res(self, item):
+    def to_response(self, item):
         res = {}
-        for i in self.res_attr:
+        for i in self.response_attr:
             k = i['key']
             l = i['label']
             if k in item:
@@ -219,7 +219,7 @@ class Base():
             },
             ReturnConsumedCapacity='TOTAL'
         )
-        return res['ress'][table_name]
+        return res['Responses'][table_name]
 
 
     @classmethod

@@ -26,8 +26,8 @@ class Post(Base):
 
         is_admin = index_name == 'createdAtGsi'
         sort_key = 'createdAt' if index_name == 'createdAtGsi' else 'publishAt'
-        prj_exps = ['title', 'postId', 'slug', 'bodyText', 'bodyHtml', 'publishAt', 'updatedAt',
-                            'categorySlug', 'postStatus', 'createdAt']
+        prj_exps = ['title', 'postId', 'slug', 'body', 'bodyText', 'bodyHtml',
+                    'publishAt', 'updatedAt', 'categorySlug', 'postStatus', 'createdAt']
         exp_attr_names = {}
         exp_attr_vals = {}
         key_conds = ['#si = :si']
@@ -399,7 +399,7 @@ class Post(Base):
         body_text = ''
         if body_format == 'markdown':
             body_html = mistletoe.markdown(body_raw)
-            body_text = body_raw
+            body_text = strip_html_tags(body_html)
         elif body_format == 'text':
             body_html = nl2br(url2link(body_raw))
             body_text = body_raw
