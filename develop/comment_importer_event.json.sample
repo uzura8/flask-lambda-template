@@ -16,14 +16,14 @@
         "s3SchemaVersion": "1.0",
         "configurationId": "63535d7b-53de-4b20-acfb-e072c1654e49",
         "bucket": {
-          "name": "pr-sls-content-resources-dev",
+          "name": "cms-resources-prd",
           "ownerIdentity": {
             "principalId": "A3CWLVM9F0SIPM"
           },
-          "arn": "arn:aws:s3:::pr-sls-content-resources-dev"
+          "arn": "arn:aws:s3:::cms-resources-prd"
         },
         "object": {
-          "key": "comments/hoge/answer_2006.csv",
+          "key": "comments/hoge/sample.csv",
           "size": 1049,
           "eTag": "eb34bab5a7e43f73c778487f0fcb8223",
           "sequencer": "0062B2E233DCB39D54"
