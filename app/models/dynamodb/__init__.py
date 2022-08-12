@@ -7,6 +7,7 @@ from .comment_count import CommentCount
 from .category import Category
 from .tag import Tag
 from .post_tag import PostTag
+from .file import File
 from .vote_count import VoteCount
 from .vote_log import VoteLog
 from .contact import Contact
@@ -22,6 +23,7 @@ __all__ = [
     'Category',
     'Tag',
     'PostTag',
+    'File',
     'VoteCount',
     'VoteLog',
     'Contact',

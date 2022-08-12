@@ -36,10 +36,17 @@ class Base():
     def to_response(self, item):
         res = {}
         for i in self.response_attr:
-            k = i['key']
-            l = i['label']
+            if isinstance(i, str):
+                k = i
+                l = i
+            if isinstance(i, dict):
+                k = i['key']
+                l = i['label']
+
             if k in item:
-                res[l] = item[k]
+                val = item.get(k)
+                if val:
+                    res[l] = val
 
         return res
 

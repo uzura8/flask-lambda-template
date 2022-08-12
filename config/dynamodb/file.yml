@@ -1,0 +1,48 @@
+Type: 'AWS::DynamoDB::Table'
+Properties:
+  TableName: ${self:custom.prjPrefix}-file
+  AttributeDefinitions:
+    -
+      AttributeName: fileId
+      AttributeType: S
+    -
+      AttributeName: serviceId
+      AttributeType: S
+    -
+      AttributeName: statusCreatedAt
+      AttributeType: S
+    -
+      AttributeName: fileTypeStatusCreatedAt
+      AttributeType: S
+  KeySchema:
+    -
+      AttributeName: fileId
+      KeyType: HASH
+  #ProvisionedThroughput:
+  #  ReadCapacityUnits: 5
+  #  WriteCapacityUnits: 3
+  BillingMode: PAY_PER_REQUEST
+
+  GlobalSecondaryIndexes:
+    -
+      IndexName: statusCreatedAtGsi
+      KeySchema:
+      -
+        AttributeName: serviceId
+        KeyType: HASH
+      -
+        AttributeName: statusCreatedAt
+        KeyType: RANGE
+      Projection:
+        ProjectionType: ALL
+    -
+      IndexName: fileTypeStatusCreatedAtGsi
+      KeySchema:
+      -
+        AttributeName: serviceId
+        KeyType: HASH
+      -
+        AttributeName: fileTypeStatusCreatedAt
+        KeyType: RANGE
+      Projection:
+        ProjectionType: ALL

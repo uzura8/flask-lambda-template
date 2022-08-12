@@ -5,5 +5,7 @@ sesRegion: 'us-west-2'
 cognitoJwtHeaderName: 'Authorization'
 cognitoJwtHeaderPrefix: 'Bearer'
 
+mediaAcceptMimeTypes: '{"image":["image/png","image/gif","image/jpeg"],"file":[]}'
+
 commentImporterColumnConversionTable: '{"hoge": {"Created Time":"createdAt", "Comment":"body", "Handle Name":"profiles:nickname", "Ages":"profiles:age", "Comment ID":"localId", "Browser":"ua", "IP Address":"ip", "Unpublish Flag":"unpublish"}}'
 commentImporterContentList: '{"hoge": [{"id":"content001", "label":"Content1"}, {"id":"content002", "label":"Content2"}]}'

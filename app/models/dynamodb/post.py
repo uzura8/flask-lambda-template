@@ -264,6 +264,7 @@ class Post(Base):
             'publishAt': publish_at,
             'categorySlug': cate_slug,
             'title': vals['title'],
+            'images': vals['images'],
             'body': body_raw,
             'bodyHtml': body_html,
             'bodyText': body_text,
@@ -346,7 +347,7 @@ class Post(Base):
             publish_at = publish_at_upd if publish_at_upd else saved['publishAt']
             exp_vals[':spa'] = '#'.join([join_item, publish_at])
 
-        attrs = ['title', 'body', 'bodyFormat', 'updatedBy']
+        attrs = ['title', 'body', 'bodyFormat', 'updatedBy', 'images']
         upd_attrs = []
         for attr in attrs:
             val = vals.get(attr)

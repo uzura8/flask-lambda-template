@@ -35,4 +35,5 @@ from . import user
 from . import post
 from . import category
 from . import tag
+from . import file
 from . import account

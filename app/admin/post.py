@@ -1,4 +1,5 @@
 import json
+import os
 from flask import jsonify, request
 from flask_cognito import cognito_auth_required, current_cognito_jwt
 from app.models.dynamodb import Post, Tag, PostTag, ModelInvalidParamsException
@@ -7,6 +8,8 @@ from app.common.request import validate_req_params
 from app.common.string import validate_uuid
 from app.validators import NormalizerUtils
 from app.admin import bp, site_before_request, check_acl_service_id
+
+MEDIA_ACCEPT_MIMETYPES = json.loads(os.environ.get('MEDIA_ACCEPT_MIMETYPES', ''))
 
 
 @bp.before_request
@@ -320,6 +323,29 @@ def validation_schema_posts_post():
             'required': False,
             'empty': True,
             'regex': r'\d{4}\-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([\+\-]\d{2}:\d{2}|Z)$',
+        },
+        'images' : {
+            'type': 'list',
+            'schema': {
+                'type': 'dict',
+                'maxlength': 5,
+                'schema': {
+                    'fileId': {
+                        'type':'string',
+                        'coerce': (NormalizerUtils.trim),
+                        'required': True,
+                        'empty': False,
+                        'regex': r'^[0-9a-z\-]+$',
+                    },
+                    'mimeType': {
+                        'type':'string',
+                        'coerce': (NormalizerUtils.trim),
+                        'required': True,
+                        'empty': False,
+                        'allowed': MEDIA_ACCEPT_MIMETYPES['image'],
+                    },
+                }
+            }
         },
         'tags' : {
             'type': 'list',

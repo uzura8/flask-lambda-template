@@ -98,6 +98,8 @@ provider:
     APP_ROOT: /${self:custom.customDomain.basePath}
     CORS_ACCEPT_ORIGINS: ${file(${self:custom.stageConfigFileName}):corsAcceptOrigins}
     DEBUG_LOG_ENABLED: ${file(${self:custom.stageConfigFileName}):debugLogEnabled}
+    MEDIA_S3_BUCKET_NAME: ${file(${self:custom.stageConfigFileName}):mediaS3BucketName}
+    MEDIA_ACCEPT_MIMETYPES: ${file(./config/stages/common.yml):mediaAcceptMimeTypes}
     COMMENT_IMPORTER_COLUMN_CONVERSION_TABLE: ${file(./config/stages/common.yml):commentImporterColumnConversionTable}
     COMMENT_IMPORTER_CONTENT_LIST: ${file(./config/stages/common.yml):commentImporterContentList}
     COMMENT_IMPORTER_SIZE_LIMIT: ${file(${self:custom.stageConfigFileName}):commentImportS3BucketSizeLimit}
@@ -180,3 +182,4 @@ resources:
     CommentCountDynamoDBTable: ${file(./config/dynamodb/comment-count.yml)}
     TagDynamoDBTable: ${file(./config/dynamodb/tag.yml)}
     PostTagDynamoDBTable: ${file(./config/dynamodb/post-tag.yml)}
+    FileDynamoDBTable: ${file(./config/dynamodb/file.yml)}
