@@ -18,6 +18,12 @@ class File(Base):
 
 
     @classmethod
+    def check_fileId_exists(self, file_id):
+        item = self.get_one({'p': {'key':'fileId', 'val':file_id}})
+        return bool(item)
+
+
+    @classmethod
     def create(self, vals):
         service_id = vals.get('serviceId')
         if not service_id:
@@ -30,12 +36,19 @@ class File(Base):
         if status not in ['reserved', 'reserveFailed', 'published', 'removed']:
             raise ModelInvalidParamsException('status is invalid')
 
+        if vals.get('fileId'):
+            file_id = vals['fileId']
+            if self.check_fileId_exists(file_id):
+                raise ModelInvalidParamsException('fileId already exists')
+        else:
+            file_id = new_uuid()
+
         time = utc_iso(False, True)
         file_type = vals['fileType']
 
         table = self.get_table()
         item = {
-            'fileId': new_uuid(),
+            'fileId': file_id,
             'createdAt': time,
             'createdBy': vals.get('createdBy'),
             'serviceId': service_id,

@@ -99,6 +99,13 @@ def get_ext_by_mimetype(memetype):
 
 def validation_schema_files():
     return {
+        'fileId': {
+            'type':'string',
+            'coerce': (NormalizerUtils.trim),
+            'required': False,
+            'empty': True,
+            'regex': r'^[0-9a-z\-]{26}$',
+        },
         'fileType': {
             'type': 'string',
             'coerce': (NormalizerUtils.trim),
@@ -111,7 +118,7 @@ def validation_schema_files():
             'coerce': (NormalizerUtils.trim),
             'required': True,
             'empty': False,
-            'allowed': ['reserved', 'removed'],
+            'allowed': ['reserved', 'removed', 'published'],
         },
         'mimeType': {
             'type': 'string',
