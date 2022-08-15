@@ -6,6 +6,7 @@ from app.models.dynamodb.base import Base, ModelInvalidParamsException
 from app.models.dynamodb.category import Category
 from app.models.dynamodb.post_tag import PostTag
 from app.models.dynamodb.service import Service
+from app.models.dynamodb.file import File
 
 
 class Post(Base):
@@ -253,6 +254,10 @@ class Post(Base):
         body_format = vals['bodyFormat']
         body_html, body_text = self.conv_body_to_each_format(body_raw, body_format)
 
+        if vals.get('images'):
+            file_ids = [ file['fileId'] for file in vals['images'] ]
+            updated_files = File.bulk_update_status(file_ids, 'published')
+
         table = self.get_table()
         item = {
             'postId': new_uuid(),
@@ -319,7 +324,6 @@ class Post(Base):
             if is_published and not saved['publishAt']:
                 publish_at_upd = time
 
-        table = self.get_table()
         exp_items = []
         exp_vals = {}
 

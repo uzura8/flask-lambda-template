@@ -15,6 +15,7 @@ class File(Base):
         'size',
         {'key':'fileStatus', 'label':'status'},
     ]
+    status_allowed = ['reserved', 'reserveFailed', 'published', 'removed']
 
 
     @classmethod
@@ -33,7 +34,7 @@ class File(Base):
             raise ModelInvalidParamsException('serviceId not exists')
 
         status = vals.get('fileStatus')
-        if status not in ['reserved', 'reserveFailed', 'published', 'removed']:
+        if status not in self.status_allowed:
             raise ModelInvalidParamsException('status is invalid')
 
         if vals.get('fileId'):
@@ -62,3 +63,107 @@ class File(Base):
         }
         table.put_item(Item=item)
         return item
+
+
+    @classmethod
+    def update_hoge(self, query_keys, vals, is_update_time=False):
+        table = self.get_table()
+
+        if is_update_time:
+            vals['updatedAt'] = utc_iso(False, True)
+
+        update_attrs = {}
+        for key,val in vals.items():
+            update_attrs[key] = { 'Value': val }
+
+        update_keys = {}
+        for key_type,key_dict in query_keys.items():
+            key_name = key_dict['key']
+            update_keys[key_name] = key_dict['val']
+        res = table.update_item(
+            Key=update_keys,
+            AttributeUpdates=update_attrs,
+        )
+        items = self.get_one(query_keys)
+        return items
+
+
+    @classmethod
+    def update_status(self, file_id, status):
+        if status not in self.status_allowed:
+            raise ModelInvalidParamsException('status is invalid')
+
+        saved = self.get_one_by_pkey('fileId', file_id, True)
+        if not saved:
+            raise ModelInvalidParamsException('fileId is invalid')
+
+        if status == saved.get('status'):
+            return None
+
+        if not saved['createdAt']:
+            raise ModelInvalidParamsException('createdAt not exists on item: %s' % file_id)
+        created_at = saved['createdAt']
+
+        if not saved['fileType']:
+            raise ModelInvalidParamsException('fileType not exists on item: %s' % file_id)
+        file_type = saved['fileType']
+
+        exp_items = []
+        exp_vals = {}
+
+        exp_items.append('fileStatus=:fs')
+        exp_vals[':fs'] = status
+
+        exp_items.append('statusCreatedAt=:sca')
+        exp_vals[':sca'] = '#'.join([status, created_at])
+
+        exp_items.append('fileTypeStatusCreatedAt=:fsc')
+        exp_vals[':fsc'] = '#'.join([file_type, status, created_at])
+
+        updated_at = utc_iso(False, True)
+        exp_items.append('updatedAt=:ua')
+        exp_vals[':ua'] = updated_at
+
+        table = self.get_table()
+        res = table.update_item(
+            Key={
+                'fileId': file_id,
+            },
+            UpdateExpression='SET ' +  ', '.join(exp_items),
+            ExpressionAttributeValues=exp_vals,
+            ReturnValues='UPDATED_NEW'
+        )
+        for attr, val in res['Attributes'].items():
+            if attr not in saved:
+                continue
+            saved[attr] = val
+
+        return saved
+
+
+    @classmethod
+    def bulk_update_status(self, file_ids, status):
+        if status not in self.status_allowed:
+            raise ModelInvalidParamsException('status is invalid')
+
+        update_file_ids = []
+        for file_id in file_ids:
+            key = {'p': {'key':'fileId', 'val':file_id}}
+            file = self.get_one(key)
+            if not file:
+                raise ModelInvalidParamsException('fileId %s not exists' % file_id)
+
+            if file['fileStatus'] == status:
+                continue
+
+            update_file_ids.append(file_id)
+
+        updateds = []
+        if not update_file_ids:
+            return []
+
+        for file_id in update_file_ids:
+            updated = self.update_status(file_id, status)
+            updateds.append(updated)
+
+        return updateds

@@ -28,7 +28,9 @@ def post_list(service_id):
         schema = validation_schema_posts_post()
         vals = validate_req_params(schema, request.json)
         vals['serviceId'] = service_id
-        vals['createdBy'] = current_cognito_jwt.get('cognito:username', '')
+        created_by = current_cognito_jwt.get('cognito:username', '')
+        if created_by:
+            vals['createdBy'] = created_by
 
         try:
             post = Post.create(vals)
@@ -335,7 +337,7 @@ def validation_schema_posts_post():
                         'coerce': (NormalizerUtils.trim),
                         'required': True,
                         'empty': False,
-                        'regex': r'^[0-9a-z\-]+$',
+                        'regex': r'^[0-9a-z\-]{26}$',
                     },
                     'mimeType': {
                         'type':'string',
