@@ -256,7 +256,7 @@ class Post(Base):
 
         if vals.get('images'):
             file_ids = [ file['fileId'] for file in vals['images'] ]
-            updated_files = File.bulk_update_status(file_ids, 'published')
+            File.bulk_update_status(file_ids, 'published')
 
         table = self.get_table()
         item = {
@@ -351,11 +351,14 @@ class Post(Base):
             publish_at = publish_at_upd if publish_at_upd else saved['publishAt']
             exp_vals[':spa'] = '#'.join([join_item, publish_at])
 
-        deleted_images = []
         saved_images = saved['images']
         upd_images = vals.get('images', [])
+
+        del_img_fids = []
+        add_img_fids = []
         if upd_images != saved_images:
-            deleted_images = [ s for s in saved_images if s not in upd_images ]
+            del_img_fids = [ s['fileId'] for s in saved_images if s not in upd_images ]
+            add_img_fids = [ s['fileId'] for s in upd_images if s not in saved_images ]
 
         attrs = ['title', 'body', 'bodyFormat', 'updatedBy', 'images']
         upd_attrs = []
@@ -404,11 +407,12 @@ class Post(Base):
                                                         True, False, True)
 
         # Delete saved images
-        if deleted_images:
-            for d in deleted_images:
-                query_keys = {'p': {'key':'fileId', 'val':d['fileId']}}
-                upd_vals = {'fileStatus':'removed'}
-                File.update(query_keys, upd_vals, True)
+        if del_img_fids:
+            File.bulk_update_status(del_img_fids, 'removed')
+
+        # Add images
+        if add_img_fids:
+            File.bulk_update_status(add_img_fids, 'published')
 
         return saved
 
