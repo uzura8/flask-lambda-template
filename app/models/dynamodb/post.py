@@ -283,7 +283,7 @@ class Post(Base):
 
 
     @classmethod
-    def update(self, post_id, vals):
+    def update(self, post_id, vals, is_update_time=True):
         time = utc_iso(False, True)
         saved = self.get_one_by_pkey('postId', post_id, True)
         if not saved:
@@ -351,6 +351,12 @@ class Post(Base):
             publish_at = publish_at_upd if publish_at_upd else saved['publishAt']
             exp_vals[':spa'] = '#'.join([join_item, publish_at])
 
+        deleted_images = []
+        saved_images = saved['images']
+        upd_images = vals.get('images', [])
+        if upd_images != saved_images:
+            deleted_images = [ s for s in saved_images if s not in upd_images ]
+
         attrs = ['title', 'body', 'bodyFormat', 'updatedBy', 'images']
         upd_attrs = []
         for attr in attrs:
@@ -372,9 +378,10 @@ class Post(Base):
             exp_vals[':bodyHtml'] = body_html
             exp_vals[':bodyText'] = body_text
 
-        updated_at = time
-        exp_items.append('updatedAt=:ua')
-        exp_vals[':ua'] = updated_at
+        if is_update_time:
+            updated_at = time
+            exp_items.append('updatedAt=:ua')
+            exp_vals[':ua'] = updated_at
 
         table = self.get_table()
         res = table.update_item(
@@ -395,6 +402,13 @@ class Post(Base):
         else:
             saved['category'] = Category.get_one_by_slug(service_id, saved['categorySlug'],
                                                         True, False, True)
+
+        # Delete saved images
+        if deleted_images:
+            for d in deleted_images:
+                query_keys = {'p': {'key':'fileId', 'val':d['fileId']}}
+                upd_vals = {'fileStatus':'removed'}
+                File.update(query_keys, upd_vals, True)
 
         return saved
 
