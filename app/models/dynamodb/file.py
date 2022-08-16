@@ -66,29 +66,6 @@ class File(Base):
 
 
     @classmethod
-    def update_hoge(self, query_keys, vals, is_update_time=False):
-        table = self.get_table()
-
-        if is_update_time:
-            vals['updatedAt'] = utc_iso(False, True)
-
-        update_attrs = {}
-        for key,val in vals.items():
-            update_attrs[key] = { 'Value': val }
-
-        update_keys = {}
-        for key_type,key_dict in query_keys.items():
-            key_name = key_dict['key']
-            update_keys[key_name] = key_dict['val']
-        res = table.update_item(
-            Key=update_keys,
-            AttributeUpdates=update_attrs,
-        )
-        items = self.get_one(query_keys)
-        return items
-
-
-    @classmethod
     def update_status(self, file_id, status):
         if status not in self.status_allowed:
             raise ModelInvalidParamsException('status is invalid')
