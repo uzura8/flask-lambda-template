@@ -350,6 +350,12 @@ def validation_schema_posts_post():
                         'empty': False,
                         'allowed': MEDIA_ACCEPT_MIMETYPES['image'],
                     },
+                    'caption': {
+                        'type':'string',
+                        'coerce': (NormalizerUtils.trim),
+                        'required': False,
+                        'empty': True,
+                    },
                 }
             }
         },
