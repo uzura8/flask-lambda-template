@@ -68,7 +68,7 @@ class Comment(Base):
 
         if filter_exp:
             option['FilterExpression'] = filter_exp
-            option['Limit'] += 50
+            option['Limit'] += 500
 
         option['KeyConditionExpression'] = ' AND '.join(key_conds)
         option['ExpressionAttributeNames'] = exp_attr_names
