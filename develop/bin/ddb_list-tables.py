@@ -47,6 +47,26 @@ class DynamoDBHandler:
         return table.scan()
 
 
+    def truncate(self, table_name):
+        table = self.get_table(table_name)
+        delete_items = []
+        params   = {}
+        while True:
+            res = table.scan(**params)
+            delete_items.extend(res['Items'])
+            if ('LastEvaluatedKey' in res):
+                params['ExclusiveStartKey'] = res['LastEvaluatedKey']
+            else:
+                break
+
+        key_names = [ x['AttributeName'] for x in table.key_schema ]
+        delete_keys = [ { k:v for k,v in x.items() if k in key_names } for x in delete_items ]
+
+        with table.batch_writer() as batch:
+            for key in delete_keys:
+                batch.delete_item(Key = key)
+
+
     def get_all_by_between(self, table_name, service_id, start, end):
         table = self.get_table(table_name)
         option = {
@@ -97,6 +117,7 @@ pprint(res)
 #res = ddh.get_all_by_limit('vote-log', 10)
 #pprint(res)
 res = ddh.scan('contact')
+ddh.truncate('post')
 res = ddh.scan('post')
 pprint(res)
 res = ddh.scan('category')
@@ -104,4 +125,13 @@ pprint(res)
 res = ddh.scan('tag')
 pprint(res)
 res = ddh.scan('post-tag')
+pprint(res)
+res = ddh.scan('service')
+pprint(res)
+res = ddh.scan('comment')
+pprint(res)
+res = ddh.scan('comment-count')
+pprint(res)
+filefilefileddh.truncate('file')
+res = ddh.scan('file')
 pprint(res)
