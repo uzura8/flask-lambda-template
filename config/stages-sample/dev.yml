@@ -8,7 +8,11 @@ logsRestApiFullExecutionData: true # Optional configuration which specifies whet
 debugLogEnabled: true
 
 appMemorySize: 128 # MB
+
 mediaS3BucketName: "media-dev.example.com"
+mediaImageMakerMemorySize: 256 # MB
+mediaImageMakerTimeout: 600 # s
+mediaImageMakerFileSizeLimit: 5 # MB
 
 commentDefaultPublishStatus: "unpublish"
 commentImportTimeout: 300 # s

@@ -30,6 +30,13 @@
   Resource: arn:aws:s3:::${self:custom.commentImportS3BucketName}/*
 - Effect: Allow
   Action:
+    - s3:ListBucket
+    - s3:GetObject
+    - s3:PutObject
+    - s3:DeleteObject
+  Resource: arn:aws:s3:::${self:custom.mediaS3BucketName}/*
+- Effect: Allow
+  Action:
     - ses:SendEmail
     - ses:SendRawEmail
   Resource: '*'

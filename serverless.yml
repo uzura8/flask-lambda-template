@@ -16,6 +16,7 @@ custom:
   defaultStage: dev
   prjPrefix: ${self:service}-${self:provider.stage}
   stageConfigFileName: ./config/stages/${self:provider.stage}.yml
+  mediaS3BucketName: ${file(${self:custom.stageConfigFileName}):mediaS3BucketName}
   commentImportS3BucketName: ${file(${self:custom.stageConfigFileName}):commentImportS3BucketName}
   commentImportS3BucketPath: ${file(${self:custom.stageConfigFileName}):commentImportS3BucketPath}
   awsAccontId: ${file(./config/stages/common.yml):awsAccountId}
@@ -98,8 +99,10 @@ provider:
     APP_ROOT: /${self:custom.customDomain.basePath}
     CORS_ACCEPT_ORIGINS: ${file(${self:custom.stageConfigFileName}):corsAcceptOrigins}
     DEBUG_LOG_ENABLED: ${file(${self:custom.stageConfigFileName}):debugLogEnabled}
-    MEDIA_S3_BUCKET_NAME: ${file(${self:custom.stageConfigFileName}):mediaS3BucketName}
+    MEDIA_S3_BUCKET_NAME: ${self:custom.mediaS3BucketName}
     MEDIA_ACCEPT_MIMETYPES: ${file(./config/stages/common.yml):mediaAcceptMimeTypes}
+    MEDIA_IMAGE_SIZES: ${file(./config/stages/common.yml):mediaImageSizes}
+    MEDIA_IMAGE_MAKER_FILE_SIZE_LIMIT: ${file(${self:custom.stageConfigFileName}):mediaImageMakerFileSizeLimit}
     COMMENT_IMPORTER_COLUMN_CONVERSION_TABLE: ${file(./config/stages/common.yml):commentImporterColumnConversionTable}
     COMMENT_IMPORTER_CONTENT_LIST: ${file(./config/stages/common.yml):commentImporterContentList}
     COMMENT_IMPORTER_SIZE_LIMIT: ${file(${self:custom.stageConfigFileName}):commentImportS3BucketSizeLimit}
@@ -147,6 +150,21 @@ functions:
       - http: ANY /
       - http: ANY /{proxy+}
     provisionedConcurrency: 2
+
+  mediaImageMaker:
+    handler: app/media_image_maker.handler
+    memorySize: ${file(${self:custom.stageConfigFileName}):mediaImageMakerMemorySize}
+    timeout: ${file(${self:custom.stageConfigFileName}):mediaImageMakerTimeout}
+    events:
+      - s3:
+          bucket: ${self:custom.mediaS3BucketName}
+          events:
+            - "s3:ObjectCreated:*"
+          #rules:
+          #  #- prefix: /
+          #  #- suffix: .jpg
+          existing: true # If use existing bucket, set true
+          forceDeploy: true
 
   commentImporter:
     handler: app/comment_importer.handler

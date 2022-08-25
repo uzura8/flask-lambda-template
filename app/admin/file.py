@@ -7,6 +7,7 @@ from flask_cognito import cognito_auth_required, current_cognito_jwt
 from app.models.dynamodb import File, ModelInvalidParamsException
 from app.common.error import InvalidUsage
 from app.common.request import validate_req_params
+from app.common.media import get_ext_by_mimetype
 from app.validators import NormalizerUtils
 from app.admin import bp, site_before_request, check_acl_service_id
 
@@ -86,15 +87,6 @@ def generate_s3_key(vals, size='raw'):
         params = (vals['serviceId'], vals['fileId'], vals['name'])
         key = '%s/docs/%s/%s' % params
     return key
-
-
-def get_ext_by_mimetype(memetype):
-    exts = {
-        'image/jpeg': 'jpg',
-        'image/png': 'png',
-        'image/gif': 'gif',
-    }
-    return exts.get(memetype)
 
 
 def validation_schema_files():

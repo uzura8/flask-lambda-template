@@ -28,6 +28,7 @@ __pycache__
 /develop/env.sh
 /develop/var/*
 /develop/comment_importer_event.json
+/develop/media_image_maker_event.json
 /config/stages/*
 /config/templates/*
 /config/contact/*
