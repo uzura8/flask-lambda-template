@@ -16,11 +16,11 @@ class Image():
         self.pil_img = PilImage.open(io.BytesIO(img_bin))
         self.is_rm_prof = is_rm_prof
         self.img_format = self.pil_img.format
-        #self.set_exifs()
+        self.set_exifs()
 
 
     def resize(self, width, height, resize_type='relative'):
-        #self.rotate()
+        self.rotate()
         if resize_type == 'relative_crop':
             self.resize_relative_crop(width, height)
         elif resize_type == 'square_crop':
