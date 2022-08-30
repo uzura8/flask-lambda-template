@@ -6,20 +6,22 @@ from app.common.util import remove_bytes_value
 
 
 class Image():
-    pil_img = None
+    ori_img = None
+    proc_img = None
     exifs = {}
     is_rm_prof = True
     img_format = ''
 
 
     def __init__(self, img_bin, is_rm_prof=True):
-        self.pil_img = PilImage.open(io.BytesIO(img_bin))
+        self.ori_img = PilImage.open(io.BytesIO(img_bin))
         self.is_rm_prof = is_rm_prof
-        self.img_format = self.pil_img.format
+        self.img_format = self.ori_img.format
         self.set_exifs()
 
 
     def resize(self, width, height, resize_type='relative'):
+        self.proc_img = self.ori_img
         self.rotate()
         if resize_type == 'relative_crop':
             self.resize_relative_crop(width, height)
@@ -56,38 +58,38 @@ class Image():
         if not orientation:
             return
 
-        self.pil_img = convert_image[orientation](self.pil_img)
+        self.proc_img = convert_image[orientation](self.proc_img)
 
 
     def save(self):
         with io.BytesIO() as out_img:
-            if self.pil_img.format == 'jpeg':
+            if self.proc_img.format == 'jpeg':
                 if self.is_rm_prof:
-                    self.pil_img.save(out_img, 'jpeg', quality=95)
+                    self.proc_img.save(out_img, 'jpeg', quality=95)
                 else:
-                    self.pil_img.save(out_img, 'jpeg', quality=95,
-                                icc_profile=self.pil_img.info.get('icc_profile'))
+                    self.proc_img.save(out_img, 'jpeg', quality=95,
+                                icc_profile=self.proc_img.info.get('icc_profile'))
             else:
-                self.pil_img.save(out_img, self.img_format)
+                self.proc_img.save(out_img, self.img_format)
 
             return out_img.getvalue()
 
 
     def resize_relative(self, width, height):
-        self.pil_img.thumbnail((width, height), PilImage.ANTIALIAS)
+        self.proc_img.thumbnail((width, height), PilImage.ANTIALIAS)
 
 
     def resize_relative_crop(self, crop_width, crop_height):
-        img_width, img_height = self.pil_img.size
+        img_width, img_height = self.proc_img.size
         is_crop_width_long = crop_width > crop_height
         if is_crop_width_long:
             resize_ratio = crop_width / img_width
         else:
             resize_ratio = crop_height / img_height
 
-        self.pil_img.thumbnail((img_width * resize_ratio, img_height * resize_ratio),
+        self.proc_img.thumbnail((img_width * resize_ratio, img_height * resize_ratio),
                                 PilImage.ANTIALIAS)
-        img_width, img_height = self.pil_img.size
+        img_width, img_height = self.proc_img.size
 
         if is_crop_width_long:
             left = 0
@@ -101,12 +103,12 @@ class Image():
             right = left + crop_width
 
         box = (left, top, right, bottom)
-        self.pil_img = self.pil_img.crop(box)
+        self.proc_img = self.proc_img.crop(box)
 
 
     def resize_square_crop(self, size):
-        square_size = min(self.pil_img.size)
-        width, height = self.pil_img.size
+        square_size = min(self.proc_img.size)
+        width, height = self.proc_img.size
         if width > height:
             top = 0
             bottom = square_size
@@ -119,16 +121,16 @@ class Image():
             top = (height - square_size) / 2
             bottom = top + square_size
             box = (left, top, right, bottom)
-        self.pil_img = self.pil_img.crop(box)
-        self.pil_img.thumbnail((size, size), PilImage.ANTIALIAS)
+        self.proc_img = self.proc_img.crop(box)
+        self.proc_img.thumbnail((size, size), PilImage.ANTIALIAS)
 
 
     def set_exifs(self):
-        if self.pil_img.format.lower() != 'jpeg':
+        if self.ori_img.format.lower() != 'jpeg':
             return
 
         try:
-            exif = self.pil_img._getexif()
+            exif = self.ori_img._getexif()
         except AttributeError:
             return
 
