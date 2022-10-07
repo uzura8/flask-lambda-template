@@ -4,7 +4,7 @@ from app.models.dynamodb import Base
 
 class Service(Base):
     table_name = 'service'
-    response_attr = [
+    response_attrs = [
     ]
 
 

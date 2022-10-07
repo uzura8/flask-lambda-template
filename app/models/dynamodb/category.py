@@ -5,11 +5,17 @@ from app.models.dynamodb import Base, SiteConfig, Service
 class Category(Base):
     table_name = 'category'
     response_attr = [
-        {'key':'id', 'label':'id'},
-        {'key':'slug', 'label':'slug'},
-        {'key':'label', 'label':'label'},
-        {'key':'parents', 'label':'parents'},
-        {'key':'children', 'label':'children'},
+        'id',
+        'slug',
+        'label',
+        'parents',
+        'children',
+    ]
+    projection_attrs = [
+        'id',
+        'slug',
+        'label',
+        'parentPath',
     ]
 
 
@@ -18,7 +24,7 @@ class Category(Base):
         table = self.get_table()
         option = {
             'IndexName': 'gsi-list-by-service',
-            'ProjectionExpression': 'id, slug, label, parentPath',
+            'ProjectionExpression': self.prj_exps_str(),
             'KeyConditionExpression': '#si = :si',
             'ExpressionAttributeNames': {'#si':'serviceId'},
             'ExpressionAttributeValues': {':si':service_id},
@@ -37,7 +43,7 @@ class Category(Base):
         res = table.query(
             IndexName='gsi-one-by-slug',
             KeyConditionExpression=Key('serviceIdSlug').eq('#'.join([service_id, slug])),
-            ProjectionExpression='id, slug, label, parentPath',
+            ProjectionExpression=self.prj_exps_str(),
         )
         if 'Items' not in res or not res['Items']:
             return None
@@ -89,7 +95,7 @@ class Category(Base):
     def get_one_by_id(self, cate_id):
         table = self.get_table()
         res = table.query(
-            ProjectionExpression='slug, label, parentPath',
+            ProjectionExpression=self.prj_exps_str(),
             KeyConditionExpression=Key('id').eq(cate_id),
         )
         return res['Items'][0] if 'Items' in res and res['Items'] else None
@@ -101,7 +107,7 @@ class Category(Base):
         table = self.get_table()
         option = {
             'IndexName': 'gsi-list-by-service',
-            'ProjectionExpression': 'id, slug, label, parentPath',
+            'ProjectionExpression': self.prj_exps_str(),
             'ExpressionAttributeNames': {'#si':'serviceId', '#pp':'parentPath'},
             'ExpressionAttributeValues': {':si':service_id, ':pp':parent_path},
         }

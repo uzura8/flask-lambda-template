@@ -33,6 +33,4 @@ Properties:
         AttributeName: contentId
         KeyType: RANGE
       Projection:
-        NonKeyAttributes:
-        - commentCount
-        ProjectionType: INCLUDE
+        ProjectionType: ALL

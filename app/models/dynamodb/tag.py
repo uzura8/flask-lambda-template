@@ -4,11 +4,11 @@ from app.models.dynamodb import Base
 
 class Tag(Base):
     table_name = 'tag'
-    response_attr = [
-        {'key':'tagId', 'label':'tagId'},
-        #{'key':'serviceId', 'label':'serviceId'},
-        {'key':'label', 'label':'label'},
+    response_attrs = [
+        'tagId',
+        'label',
     ]
+    projection_attrs = response_attrs
 
 
     @classmethod
@@ -24,6 +24,7 @@ class Tag(Base):
         res = table.query(
             IndexName='TagsByServiceIdGsi',
             KeyConditionExpression=Key('serviceId').eq(service_id),
+            ProjectionExpression=self.prj_exps_str(),
             ScanIndexForward=is_asc,
             Limit=limit
         )

@@ -6,7 +6,7 @@ from app.common.string import new_uuid
 
 class File(Base):
     table_name = 'file'
-    response_attr = [
+    response_attrs = [
         'fileId',
         'createdAt',
         'fileType',

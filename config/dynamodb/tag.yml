@@ -31,10 +31,7 @@ Properties:
         AttributeName: label
         KeyType: RANGE
       Projection:
-        NonKeyAttributes:
-          - serviceId
-          - label
-        ProjectionType: INCLUDE
+        ProjectionType: ALL
       #BillingMode: PAY_PER_REQUEST
       #ProvisionedThroughput:
       #  ReadCapacityUnits: 5

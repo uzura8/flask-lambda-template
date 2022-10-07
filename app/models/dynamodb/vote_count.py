@@ -4,7 +4,8 @@ from app.models.dynamodb.base import Base, ModelInvalidParamsException
 
 class VoteCount(Base):
     table_name = 'vote-count'
-    response_attr = [
+    response_attrs = [
+        'voteCount'
     ]
 
 

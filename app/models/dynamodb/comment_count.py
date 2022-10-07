@@ -4,7 +4,8 @@ from app.models.dynamodb.base import Base, ModelInvalidParamsException
 
 class CommentCount(Base):
     table_name = 'comment-count'
-    response_attr = [
+    response_attrs = [
+        'commentCount',
     ]
 
 

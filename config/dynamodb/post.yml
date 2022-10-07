@@ -34,20 +34,7 @@ Properties:
         AttributeName: serviceIdSlug
         KeyType: HASH
       Projection:
-        NonKeyAttributes:
-          - postId
-          - slug
-          - title
-          - body
-          - bodyHtml
-          - bodyText
-          - publishAt
-          - updatedAt
-          - createdAt
-          - serviceId
-          - postStatus
-          - categorySlug
-        ProjectionType: INCLUDE
+        ProjectionType: ALL
       #ProvisionedThroughput:
       #  ReadCapacityUnits: 5
       #  WriteCapacityUnits: 3
@@ -61,20 +48,7 @@ Properties:
         AttributeName: statusPublishAt
         KeyType: RANGE
       Projection:
-        NonKeyAttributes:
-          - postId
-          - slug
-          - title
-          - body
-          - bodyHtml
-          - bodyText
-          - publishAt
-          - updatedAt
-          - createdAt
-          - serviceId
-          - postStatus
-          - categorySlug
-        ProjectionType: INCLUDE
+        ProjectionType: ALL
       #ProvisionedThroughput:
       #  ReadCapacityUnits: 5
       #  WriteCapacityUnits: 3
@@ -88,20 +62,7 @@ Properties:
         AttributeName: createdAt
         KeyType: RANGE
       Projection:
-        NonKeyAttributes:
-          - postId
-          - slug
-          - title
-          - body
-          - bodyHtml
-          - bodyText
-          - publishAt
-          - updatedAt
-          - createdAt
-          - serviceId
-          - postStatus
-          - categorySlug
-        ProjectionType: INCLUDE
+        ProjectionType: ALL
       #ProvisionedThroughput:
       #  ReadCapacityUnits: 5
       #  WriteCapacityUnits: 3

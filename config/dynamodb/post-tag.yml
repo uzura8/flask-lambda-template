@@ -34,10 +34,7 @@ Properties:
         AttributeName: statusPublishAt
         KeyType: RANGE
       Projection:
-        NonKeyAttributes:
-          - postId
-          - publishAt
-        ProjectionType: INCLUDE
+        ProjectionType: ALL
       #BillingMode: PAY_PER_REQUEST
       #ProvisionedThroughput:
       #  ReadCapacityUnits: 5

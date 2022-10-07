@@ -11,8 +11,22 @@ from app.models.dynamodb.file import File
 
 class Post(Base):
     table_name = 'post'
-    response_attr = [
+    response_attrs = [
+        'postId',
+        'slug',
+        'title',
+        'body',
+        'bodyHtml',
+        'bodyText',
+        'publishAt',
+        'updatedAt',
+        'createdAt',
+        'serviceId',
+        'postStatus',
+        'categorySlug',
+        'images',
     ]
+    projection_attrs = response_attrs
 
 
     @classmethod
@@ -27,14 +41,12 @@ class Post(Base):
 
         is_admin = index_name == 'createdAtGsi'
         sort_key = 'createdAt' if index_name == 'createdAtGsi' else 'publishAt'
-        prj_exps = ['title', 'postId', 'slug', 'body', 'bodyText', 'bodyHtml',
-                    'publishAt', 'updatedAt', 'categorySlug', 'postStatus', 'createdAt']
         exp_attr_names = {}
         exp_attr_vals = {}
         key_conds = ['#si = :si']
         option = {
             'IndexName': index_name,
-            'ProjectionExpression': ', '.join(prj_exps),
+            'ProjectionExpression': self.prj_exps_str(),
             #'KeyConditionExpression': '#si = :si AND begins_with(#sp, :sp)',
             'ScanIndexForward': not is_desc,
             'Limit': limit,

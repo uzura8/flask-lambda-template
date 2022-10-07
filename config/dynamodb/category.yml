@@ -34,11 +34,7 @@ Properties:
         AttributeName: parentPath
         KeyType: RANGE
       Projection:
-        NonKeyAttributes:
-          - label
-          - slug
-          - parentPath
-        ProjectionType: INCLUDE
+        ProjectionType: ALL
       #BillingMode: PAY_PER_REQUEST
       #ProvisionedThroughput:
       #  ReadCapacityUnits: 5
@@ -50,11 +46,7 @@ Properties:
         AttributeName: serviceIdSlug
         KeyType: HASH
       Projection:
-        NonKeyAttributes:
-          - label
-          - slug
-          - parentPath
-        ProjectionType: INCLUDE
+        ProjectionType: ALL
       #BillingMode: PAY_PER_REQUEST
       #ProvisionedThroughput:
       #  ReadCapacityUnits: 5

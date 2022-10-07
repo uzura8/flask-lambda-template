@@ -8,7 +8,6 @@ from app.models.dynamodb.comment_count import CommentCount
 
 class Comment(Base):
     table_name = 'comment'
-    response_attr = []
     projection_attrs = [
         'commentId',
         'serviceId',
@@ -17,6 +16,7 @@ class Comment(Base):
         'body',
         'profiles',
     ]
+    response_attrs = projection_attrs
 
 
     @classmethod

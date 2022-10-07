@@ -6,7 +6,9 @@ from app.models.dynamodb.tag import Tag
 
 class PostTag(Base):
     table_name = 'post-tag'
-    response_attr = [
+    response_attrs = [
+        'postId',
+        'statusPublishAt',
     ]
 
 
@@ -41,13 +43,12 @@ class PostTag(Base):
 
         status = 'publish'
         sort_key = 'publishAt'
-        prj_exps = ['postId', 'statusPublishAt']
         exp_attr_names = {}
         exp_attr_vals = {}
         key_conds = ['#ti = :ti']
         option = {
             'IndexName': 'postsByTagGsi',
-            'ProjectionExpression': ', '.join(prj_exps),
+            'ProjectionExpression': self.prj_exps_str(),
             'ScanIndexForward': not is_desc,
             'Limit': limit,
         }

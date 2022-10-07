@@ -33,9 +33,15 @@ class Base():
 
 
     @classmethod
+    def prj_exps_str(self):
+        res = [ attr['key'] if isinstance(attr, dict) else attr for attr in self.projection_attrs ]
+        return ', '.join(res)
+
+
+    @classmethod
     def to_response(self, item):
         res = {}
-        for i in self.response_attr:
+        for i in self.response_attrs:
             if isinstance(i, str):
                 k = i
                 l = i
