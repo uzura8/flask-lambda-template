@@ -392,6 +392,28 @@ def validation_schema_posts_post():
                 }
             }
         },
+        'links' : {
+            'type': 'list',
+            'schema': {
+                'type': 'dict',
+                'maxlength': 10,
+                'schema': {
+                    'url': {
+                        'type':'string',
+                        'coerce': (NormalizerUtils.trim),
+                        'required': True,
+                        'empty': False,
+                        'valid_url': True,
+                    },
+                    'label': {
+                        'type':'string',
+                        'coerce': (NormalizerUtils.trim),
+                        'required': False,
+                        'empty': True,
+                    },
+                }
+            }
+        },
         'tags' : {
             'type': 'list',
              'schema': {

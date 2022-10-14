@@ -288,6 +288,7 @@ class Post(Base):
             'title': vals['title'],
             'images': vals['images'],
             'files': vals['files'],
+            'links': vals['links'],
             'body': body_raw,
             'bodyHtml': body_html,
             'bodyText': body_text,
@@ -385,7 +386,7 @@ class Post(Base):
             del_file_fids = [ s['fileId'] for s in saved_files if s not in upd_files ]
             add_file_fids = [ s['fileId'] for s in upd_files if s not in saved_files ]
 
-        attrs = ['title', 'body', 'bodyFormat', 'updatedBy', 'images', 'files']
+        attrs = ['title', 'body', 'bodyFormat', 'updatedBy', 'images', 'files', 'links']
         upd_attrs = []
         for attr in attrs:
             val = vals.get(attr)

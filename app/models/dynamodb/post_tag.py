@@ -10,6 +10,7 @@ class PostTag(Base):
         'postId',
         'statusPublishAt',
     ]
+    projection_attrs = response_attrs
 
 
     @classmethod
