@@ -4,7 +4,7 @@ from app.models.dynamodb import Base, SiteConfig, Service
 
 class Category(Base):
     table_name = 'category'
-    response_attr = [
+    response_attrs = [
         'id',
         'slug',
         'label',

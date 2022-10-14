@@ -126,6 +126,10 @@ def post_detail(service_id, identifer):
             del_img_fids = [ i['fileId'] for i in post['images'] ]
             File.bulk_update_status(del_img_fids, 'removed')
 
+        if post.get('files'):
+            del_file_fids = [ i['fileId'] for i in post['files'] ]
+            File.bulk_update_status(del_file_fids, 'removed')
+
         Post.delete({'postId':post_id})
         return jsonify(), 200
 
@@ -331,6 +335,35 @@ def validation_schema_posts_post():
             'regex': r'\d{4}\-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([\+\-]\d{2}:\d{2}|Z)$',
         },
         'images' : {
+            'type': 'list',
+            'schema': {
+                'type': 'dict',
+                'maxlength': 5,
+                'schema': {
+                    'fileId': {
+                        'type':'string',
+                        'coerce': (NormalizerUtils.trim),
+                        'required': True,
+                        'empty': False,
+                        'regex': r'^[0-9a-z\-]{26}$',
+                    },
+                    'mimeType': {
+                        'type':'string',
+                        'coerce': (NormalizerUtils.trim),
+                        'required': True,
+                        'empty': False,
+                        'allowed': MEDIA_ACCEPT_MIMETYPES['image'],
+                    },
+                    'caption': {
+                        'type':'string',
+                        'coerce': (NormalizerUtils.trim),
+                        'required': False,
+                        'empty': True,
+                    },
+                }
+            }
+        },
+        'files' : {
             'type': 'list',
             'schema': {
                 'type': 'dict',

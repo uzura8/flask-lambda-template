@@ -25,6 +25,7 @@ class Post(Base):
         'postStatus',
         'categorySlug',
         'images',
+        'files',
     ]
     projection_attrs = response_attrs
 
@@ -270,6 +271,10 @@ class Post(Base):
             file_ids = [ file['fileId'] for file in vals['images'] ]
             File.bulk_update_status(file_ids, 'published')
 
+        if vals.get('files'):
+            file_ids = [ file['fileId'] for file in vals['files'] ]
+            File.bulk_update_status(file_ids, 'published')
+
         table = self.get_table()
         item = {
             'postId': new_uuid(),
@@ -282,6 +287,7 @@ class Post(Base):
             'categorySlug': cate_slug,
             'title': vals['title'],
             'images': vals['images'],
+            'files': vals['files'],
             'body': body_raw,
             'bodyHtml': body_html,
             'bodyText': body_text,
@@ -365,14 +371,21 @@ class Post(Base):
 
         saved_images = saved['images']
         upd_images = vals.get('images', [])
-
         del_img_fids = []
         add_img_fids = []
         if upd_images != saved_images:
             del_img_fids = [ s['fileId'] for s in saved_images if s not in upd_images ]
             add_img_fids = [ s['fileId'] for s in upd_images if s not in saved_images ]
 
-        attrs = ['title', 'body', 'bodyFormat', 'updatedBy', 'images']
+        saved_files = saved['files']
+        upd_files = vals.get('files', [])
+        del_file_fids = []
+        add_file_fids = []
+        if upd_files != saved_files:
+            del_file_fids = [ s['fileId'] for s in saved_files if s not in upd_files ]
+            add_file_fids = [ s['fileId'] for s in upd_files if s not in saved_files ]
+
+        attrs = ['title', 'body', 'bodyFormat', 'updatedBy', 'images', 'files']
         upd_attrs = []
         for attr in attrs:
             val = vals.get(attr)
@@ -426,7 +439,16 @@ class Post(Base):
         if add_img_fids:
             File.bulk_update_status(add_img_fids, 'published')
 
+        # Delete saved files
+        if del_file_fids:
+            File.bulk_update_status(del_file_fids, 'removed')
+
+        # Add files
+        if add_file_fids:
+            File.bulk_update_status(add_file_fids, 'published')
+
         return saved
+
 
     @staticmethod
     def conv_body_to_each_format(body_raw, body_format):

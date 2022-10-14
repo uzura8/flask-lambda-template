@@ -79,13 +79,13 @@ def file_detail(service_id, file_id):
 
 
 def generate_s3_key(vals, size='raw'):
+    ext = get_ext_by_mimetype(vals['mimeType'])
     if vals['fileType'] == 'image':
-        ext = get_ext_by_mimetype(vals['mimeType'])
         params = (vals['serviceId'], vals['fileId'], size, ext)
         key = '%s/images/%s/%s.%s' % params
     else:
-        params = (vals['serviceId'], vals['fileId'], vals['name'])
-        key = '%s/docs/%s/%s' % params
+        params = (vals['serviceId'], vals['fileId'], ext)
+        key = '%s/docs/%s.%s' % params
     return key
 
 
