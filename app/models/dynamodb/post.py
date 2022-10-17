@@ -28,6 +28,7 @@ class Post(Base):
         'files',
     ]
     projection_attrs = response_attrs
+    reserved_slugs = ['slug']
 
 
     @classmethod
@@ -233,6 +234,9 @@ class Post(Base):
         if not Service.check_exists(service_id):
             raise ModelInvalidParamsException('serviceId not exists')
 
+        if vals['slug'] in self.reserved_slugs:
+            raise ModelInvalidParamsException('This slug is not allowed')
+
         item = Post.get_one_by_slug(service_id, vals['slug'])
         if item:
             raise ModelInvalidParamsException('Slug already used')
@@ -312,8 +316,12 @@ class Post(Base):
 
         slug_upd = vals.get('slug')
         if slug_upd and slug_upd != saved['slug']:
+            if slug_upd in self.reserved_slugs:
+                raise ModelInvalidParamsException('This slug is not allowed')
+
             if Post.get_one_by_slug(service_id, slug_upd):
                 raise ModelInvalidParamsException('Slug already used')
+
         else:
             slug_upd = None
 

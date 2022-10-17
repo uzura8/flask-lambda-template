@@ -70,6 +70,30 @@ def post_list(service_id):
     return jsonify(post), 200
 
 
+@bp.route('/posts/<string:service_id>/slug', methods=['GET'])
+@cognito_auth_required
+def slug_util(service_id):
+    check_acl_service_id(service_id)
+    params = {}
+    for key in ['getNotExists', 'checkNotExists', 'slug']:
+        params[key] = request.args.get(key)
+    schema = validation_schema_posts_post()
+    vals = validate_req_params(schema, params)
+
+    if (vals['getNotExists'] and vals['checkNotExists'])\
+            or (not vals['getNotExists'] and not vals['checkNotExists']):
+        raise InvalidUsage('Invalid requested params', 400)
+
+        # TODO: Implement to response unused slug
+        return jsonify('hoge'), 200
+
+    elif vals['checkNotExists']:
+        slug_vals = validate_req_params(schema, {'slug':request.args.get('slug', '')})
+        post = Post.get_one_by_slug(service_id, slug_vals['slug'])
+        is_not_exists = not post
+        return jsonify(is_not_exists), 200
+
+
 @bp.route('/posts/<string:service_id>/<string:identifer>', methods=['POST', 'GET', 'HEAD', 'DELETE'])
 @cognito_auth_required
 def post_detail(service_id, identifer):
@@ -430,6 +454,20 @@ def validation_schema_posts_post():
                      }
                  }
             }
+        },
+        'getNotExists': {
+            'type': 'boolean',
+            'coerce': (str, NormalizerUtils.to_bool),
+            'required': False,
+            'empty': True,
+            'default': False,
+        },
+        'checkNotExists': {
+            'type': 'boolean',
+            'coerce': (str, NormalizerUtils.to_bool),
+            'required': False,
+            'empty': True,
+            'default': False,
         },
         'count': {
             'type': 'integer',
