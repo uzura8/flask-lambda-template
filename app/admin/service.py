@@ -70,4 +70,13 @@ def validation_schema_services():
             'empty': True,
             'default': '',
         },
+        'frontendPostDetailUrlPrefix': {
+            'type': 'string',
+            'coerce': (NormalizerUtils.rtrim),
+            'valid_url': True,
+            'required': False,
+            'nullable': True,
+            'empty': True,
+            'default': '',
+        },
     }

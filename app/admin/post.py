@@ -21,7 +21,7 @@ def before_request():
 @bp.route('/posts/<string:service_id>', methods=['POST', 'GET'])
 @cognito_auth_required
 def post_list(service_id):
-    check_acl_service_id(service_id)
+    service = check_acl_service_id(service_id)
 
     post = None
     if request.method == 'POST':
@@ -87,7 +87,7 @@ def slug_util(service_id):
 @bp.route('/posts/<string:service_id>/<string:identifer>', methods=['POST', 'GET', 'HEAD', 'DELETE'])
 @cognito_auth_required
 def post_detail(service_id, identifer):
-    check_acl_service_id(service_id)
+    service = check_acl_service_id(service_id)
     post = get_post_by_identifer(service_id, identifer)
     post_id = post['postId']
 
@@ -151,6 +151,8 @@ def post_detail(service_id, identifer):
         return jsonify(), 200
 
     res = saved if saved else post
+    res['service'] = service
+
     return jsonify(res), 200
 
 
