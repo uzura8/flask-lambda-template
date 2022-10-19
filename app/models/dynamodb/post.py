@@ -1,3 +1,4 @@
+import secrets
 import mistletoe
 from boto3.dynamodb.conditions import Key
 from app.common.date import utc_iso, iso_offset2utc
@@ -306,6 +307,7 @@ class Post(Base):
             'images': vals['images'],
             'files': vals['files'],
             'links': vals['links'],
+            'previewToken': secrets.token_hex(),
             'body': body_raw,
             'bodyHtml': body_html,
             'bodyText': body_text,
