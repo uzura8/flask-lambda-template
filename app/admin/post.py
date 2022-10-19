@@ -428,6 +428,12 @@ def validation_schema_posts_post():
                         'required': False,
                         'empty': True,
                     },
+                    'id': {
+                        'type': 'integer',
+                        'coerce': int,
+                        'required': True,
+                        'min': 1,
+                    },
                 }
             }
         },
