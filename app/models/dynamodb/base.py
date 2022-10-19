@@ -33,8 +33,9 @@ class Base():
 
 
     @classmethod
-    def prj_exps_str(self):
-        res = [ attr['key'] if isinstance(attr, dict) else attr for attr in self.projection_attrs ]
+    def prj_exps_str(self, is_public=True):
+        attrs = self.public_attrs if is_public else self.all_attrs
+        res = [ attr['key'] if isinstance(attr, dict) else attr for attr in attrs ]
         return ', '.join(res)
 
 

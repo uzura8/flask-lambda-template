@@ -6,15 +6,27 @@ from app.common.string import new_uuid
 
 class File(Base):
     table_name = 'file'
-    response_attrs = [
+
+    public_attrs = [
         'fileId',
         'createdAt',
+        'updatedAt',
         'fileType',
         'mimeType',
         'name',
         'size',
+        'serviceId',
+    ]
+    response_attrs = public_attrs + [
         {'key':'fileStatus', 'label':'status'},
     ]
+    private_attrs = [
+        'createdBy',
+        'fileTypeStatusCreatedAt',
+        'statusCreatedAt',
+    ]
+    all_attrs = public_attrs + private_attrs
+
     status_allowed = ['reserved', 'reserveFailed', 'published', 'removed']
 
 

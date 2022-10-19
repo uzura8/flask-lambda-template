@@ -6,11 +6,14 @@ from app.models.dynamodb.tag import Tag
 
 class PostTag(Base):
     table_name = 'post-tag'
-    response_attrs = [
+    public_attrs = [
         'postId',
+        'tagId',
         'statusPublishAt',
     ]
-    projection_attrs = response_attrs
+    response_attrs = public_attrs + []
+    private_attrs = []
+    all_attrs = public_attrs + private_attrs
 
 
     @classmethod
@@ -35,7 +38,7 @@ class PostTag(Base):
 
 
     @classmethod
-    def query_all_by_tag_id(self, tag_id, params):
+    def query_all_by_tag_id(self, tag_id, params, is_public=True):
         table = self.get_table()
         until_time = params.get('untilTime', '')
         since_time = params.get('sinceTime', '')
@@ -49,7 +52,7 @@ class PostTag(Base):
         key_conds = ['#ti = :ti']
         option = {
             'IndexName': 'postsByTagGsi',
-            'ProjectionExpression': self.prj_exps_str(),
+            'ProjectionExpression': self.prj_exps_str(is_public),
             'ScanIndexForward': not is_desc,
             'Limit': limit,
         }

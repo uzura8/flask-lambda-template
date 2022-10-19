@@ -4,27 +4,29 @@ from app.models.dynamodb import Base, SiteConfig, Service
 
 class Category(Base):
     table_name = 'category'
-    response_attrs = [
+    public_attrs = [
         'id',
         'slug',
         'label',
+        'serviceId',
+        'parentPath',
+    ]
+    response_attrs = public_attrs + [
         'parents',
         'children',
     ]
-    projection_attrs = [
-        'id',
-        'slug',
-        'label',
-        'parentPath',
+    private_attrs = [
+        'serviceIdSlug',
     ]
+    all_attrs = public_attrs + private_attrs
 
 
     @classmethod
-    def get_all_by_service_id(self, service_id):
+    def get_all_by_service_id(self, service_id, is_public=True):
         table = self.get_table()
         option = {
             'IndexName': 'gsi-list-by-service',
-            'ProjectionExpression': self.prj_exps_str(),
+            'ProjectionExpression': self.prj_exps_str(is_public),
             'KeyConditionExpression': '#si = :si',
             'ExpressionAttributeNames': {'#si':'serviceId'},
             'ExpressionAttributeValues': {':si':service_id},
@@ -43,7 +45,7 @@ class Category(Base):
         res = table.query(
             IndexName='gsi-one-by-slug',
             KeyConditionExpression=Key('serviceIdSlug').eq('#'.join([service_id, slug])),
-            ProjectionExpression=self.prj_exps_str(),
+            ProjectionExpression=self.prj_exps_str(for_response),
         )
         if 'Items' not in res or not res['Items']:
             return None
@@ -92,10 +94,10 @@ class Category(Base):
 
 
     @classmethod
-    def get_one_by_id(self, cate_id):
+    def get_one_by_id(self, cate_id, is_public=True):
         table = self.get_table()
         res = table.query(
-            ProjectionExpression=self.prj_exps_str(),
+            ProjectionExpression=self.prj_exps_str(is_public),
             KeyConditionExpression=Key('id').eq(cate_id),
         )
         return res['Items'][0] if 'Items' in res and res['Items'] else None
@@ -107,7 +109,7 @@ class Category(Base):
         table = self.get_table()
         option = {
             'IndexName': 'gsi-list-by-service',
-            'ProjectionExpression': self.prj_exps_str(),
+            'ProjectionExpression': self.prj_exps_str(for_response),
             'ExpressionAttributeNames': {'#si':'serviceId', '#pp':'parentPath'},
             'ExpressionAttributeValues': {':si':service_id, ':pp':parent_path},
         }

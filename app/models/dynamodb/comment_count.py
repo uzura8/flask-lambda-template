@@ -4,9 +4,18 @@ from app.models.dynamodb.base import Base, ModelInvalidParamsException
 
 class CommentCount(Base):
     table_name = 'comment-count'
-    response_attrs = [
+    public_attrs = [
         'commentCount',
+        'serviceId',
+        'contentId',
+        'updatedAt',
     ]
+    response_attrs = public_attrs + []
+    private_attrs = [
+        'contentIdPublishStatus',
+        'publishStatus',
+    ]
+    all_attrs = public_attrs + private_attrs
 
 
     @classmethod

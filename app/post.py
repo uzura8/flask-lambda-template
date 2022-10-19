@@ -64,7 +64,7 @@ def post(service_id, slug):
     if request.method == 'HEAD':
         return jsonify(), 200
 
-    return jsonify(item), 200
+    return jsonify(Post.to_response(item)), 200
 
 
 def validation_schema_posts_post():

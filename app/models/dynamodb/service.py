@@ -4,8 +4,17 @@ from app.models.dynamodb import Base
 
 class Service(Base):
     table_name = 'service'
-    response_attrs = [
+
+    public_attrs = [
+        'serviceId',
+        'label',
+        'frontendPostDetailUrlPrefix',
     ]
+    response_attrs = public_attrs + []
+    private_attrs = [
+        'createdAt',
+    ]
+    all_attrs = public_attrs + private_attrs
 
 
     @classmethod

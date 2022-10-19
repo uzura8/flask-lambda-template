@@ -197,9 +197,9 @@ def post_status(service_id, identifer):
 def get_post_by_identifer(service_id, identifer):
     is_uuid = validate_uuid(identifer)
     if is_uuid:
-        post = Post.get_one_by_id(identifer, True)
+        post = Post.get_one_by_id(identifer, True, False)
     else:
-        post = Post.get_one_by_slug(service_id, identifer, True)
+        post = Post.get_one_by_slug(service_id, identifer, True, False)
 
     if not post:
         raise InvalidUsage('Not Found', 404)

@@ -8,27 +8,28 @@ from app.models.dynamodb.comment_count import CommentCount
 
 class Comment(Base):
     table_name = 'comment'
-    projection_attrs = [
+    public_attrs = [
         'commentId',
-        'serviceId',
         'contentId',
         'createdAt',
         'body',
         'profiles',
     ]
-    response_attrs = projection_attrs
+    response_attrs = public_attrs + []
+    private_attrs = [
+        'ip',
+    ]
+    all_attrs = public_attrs + private_attrs
 
 
     @classmethod
-    def query_all_publish(self, service_id, content_id, params, prj_attrs=[]):
+    def query_all_publish(self, service_id, content_id, params, is_public=True):
         index_name = 'commentStatusCreatedAtGsi'
         table = self.get_table()
         until_time = params.get('untilTime', '')
         since_time = params.get('sinceTime', '')
         is_desc = params.get('order', 'asc') == 'desc'
         limit = params.get('count', 10)
-        if not prj_attrs:
-            prj_attrs = self.projection_attrs
 
         sort_key = 'createdAt'
         exp_attr_names = {}
@@ -38,7 +39,7 @@ class Comment(Base):
             'IndexName': index_name,
             'ScanIndexForward': not is_desc,
             'Limit': limit,
-            'ProjectionExpression': ','.join(prj_attrs),
+            'ProjectionExpression': self.prj_exps_str(is_public),
         }
         exp_attr_names['#si'] = 'serviceIdContentId'
         exp_attr_vals[':si'] = '#'.join([service_id, content_id])

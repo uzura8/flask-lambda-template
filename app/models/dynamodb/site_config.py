@@ -6,6 +6,11 @@ from app.common.date import utc_iso
 class SiteConfig(Base):
     table_name = 'site-config'
 
+    public_attrs = []
+    response_attrs = public_attrs + []
+    private_attrs = []
+    all_attrs = public_attrs + private_attrs
+
 
     @classmethod
     def get_val(self, service_id, name):

@@ -11,11 +11,12 @@ from app.models.dynamodb.file import File
 
 class Post(Base):
     table_name = 'post'
-    response_attrs = [
+    public_attrs = [
         'postId',
         'slug',
         'title',
         'body',
+        'bodyFormat',
         'bodyHtml',
         'bodyText',
         'publishAt',
@@ -26,13 +27,23 @@ class Post(Base):
         'categorySlug',
         'images',
         'files',
+        'links',
     ]
-    projection_attrs = response_attrs
+    response_attrs = public_attrs + [
+        'tags',
+        'category',
+    ]
+    private_attrs = [
+        'createdBy',
+        'previewToken',
+    ]
+    all_attrs = public_attrs + private_attrs
+
     reserved_slugs = ['slug']
 
 
     @classmethod
-    def query_all(self, index_name, service_id, params, with_cate=False):
+    def query_all(self, index_name, service_id, params, with_cate=False, is_public=True):
         table = self.get_table()
         status = params.get('status')
         until_time = params.get('untilTime', '')
@@ -48,7 +59,7 @@ class Post(Base):
         key_conds = ['#si = :si']
         option = {
             'IndexName': index_name,
-            'ProjectionExpression': self.prj_exps_str(),
+            'ProjectionExpression': self.prj_exps_str(is_public),
             #'KeyConditionExpression': '#si = :si AND begins_with(#sp, :sp)',
             'ScanIndexForward': not is_desc,
             'Limit': limit,
@@ -183,16 +194,16 @@ class Post(Base):
 
 
     @classmethod
-    def get_one_by_id(self, post_id, with_relations=False, for_response=True):
+    def get_one_by_id(self, post_id, with_relations=False, related_attrs_for_response=True):
         item = self.get_one_by_pkey('postId', post_id)
         if not item:
             return None
 
         if with_relations:
             if item.get('categorySlug'):
-                item['category'] = Category.get_one_by_slug(item['serviceId'],
-                                        item['categorySlug'], True, False, True)
-            item['tags'] = PostTag.get_all_by_post_id(post_id, True, for_response)
+                item['category'] = Category.get_one_by_slug(item['serviceId'], item['categorySlug'],
+                                                            True, False, related_attrs_for_response)
+            item['tags'] = PostTag.get_all_by_post_id(post_id, True, related_attrs_for_response)
 
         return item
 
@@ -211,16 +222,18 @@ class Post(Base):
 
 
     @classmethod
-    def get_one_by_slug(self, service_id, slug, with_cate=False, for_response=True):
-        item = self.get_one_by_pkey('serviceIdSlug', '#'.join([service_id, slug]), True, 'serviceIdSlugGsi')
+    def get_one_by_slug(self, service_id, slug, with_cate=False, related_attrs_for_response=True):
+        item = self.get_one_by_pkey('serviceIdSlug', '#'.join([service_id, slug]),
+                                    True, 'serviceIdSlugGsi')
         if not item:
             return None
 
         if with_cate and item.get('categorySlug'):
             if item.get('categorySlug'):
-                item['category'] = Category.get_one_by_slug(service_id,
-                                    item['categorySlug'], True, False, True)
-            item['tags'] = PostTag.get_all_by_post_id(item['postId'], True, for_response)
+                item['category'] = Category.get_one_by_slug(service_id, item['categorySlug'],
+                                                            True, False, related_attrs_for_response)
+            item['tags'] = PostTag.get_all_by_post_id(item['postId'], True,
+                                                      related_attrs_for_response)
 
         return item
 

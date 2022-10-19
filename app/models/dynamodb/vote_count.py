@@ -4,9 +4,19 @@ from app.models.dynamodb.base import Base, ModelInvalidParamsException
 
 class VoteCount(Base):
     table_name = 'vote-count'
-    response_attrs = [
-        'voteCount'
+
+    public_attrs = [
+        'serviceId',
+        'contentId',
+        'voteType',
+        'voteCount',
+        'updatedAt',
     ]
+    response_attrs = public_attrs + []
+    private_attrs = [
+        'contentIdType',
+    ]
+    all_attrs = public_attrs + private_attrs
 
 
     @classmethod
