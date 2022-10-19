@@ -151,6 +151,7 @@ def post_detail(service_id, identifer):
         return jsonify(), 200
 
     res = saved if saved else post
+    res = Post.to_response(res)
     res['service'] = service
 
     return jsonify(res), 200
@@ -397,7 +398,7 @@ def validation_schema_posts_post():
                         'coerce': (NormalizerUtils.trim),
                         'required': True,
                         'empty': False,
-                        'allowed': MEDIA_ACCEPT_MIMETYPES['image'],
+                        'allowed': MEDIA_ACCEPT_MIMETYPES['file'],
                     },
                     'caption': {
                         'type':'string',

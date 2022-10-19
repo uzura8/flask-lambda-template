@@ -2,6 +2,7 @@ media_types = [
     {'mimetype':'image/jpeg', 'extensions':['jpg', 'jpeg']},
     {'mimetype':'image/png', 'extensions':['png']},
     {'mimetype':'image/gif', 'extensions':['gif']},
+    {'mimetype':'application/pdf', 'extensions':['pdf']},
 ]
 
 
