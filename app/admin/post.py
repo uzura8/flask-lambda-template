@@ -1,5 +1,6 @@
 import json
 import os
+import traceback
 from flask import jsonify, request
 from flask_cognito import cognito_auth_required, current_cognito_jwt
 from app.models.dynamodb import Post, Tag, PostTag, File, ModelInvalidParamsException
@@ -39,6 +40,7 @@ def post_list(service_id):
             raise InvalidUsage(e.message, 400)
 
         except Exception as e:
+            print(traceback.format_exc())
             raise InvalidUsage('Server Error', 500)
 
         tags = []
@@ -105,6 +107,7 @@ def post_detail(service_id, identifer):
             raise InvalidUsage(e.message, 400)
 
         except Exception as e:
+            print(traceback.format_exc())
             raise InvalidUsage('Server Error', 500)
 
         is_upd_status_publish_at = False
@@ -349,6 +352,13 @@ def validation_schema_posts_post():
             'required': False,
             'empty': True,
             'regex': r'\d{4}\-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([\+\-]\d{2}:\d{2}|Z)$',
+        },
+        'isHiddenInList': {
+            'type': 'boolean',
+            'coerce': (str, NormalizerUtils.to_bool),
+            'required': False,
+            'empty': False,
+            'default': False,
         },
         'images' : {
             'type': 'list',

@@ -24,7 +24,6 @@ class Post(Base):
         'updatedAt',
         'createdAt',
         'serviceId',
-        'postStatus',
         'categorySlug',
         'images',
         'files',
@@ -37,6 +36,8 @@ class Post(Base):
     private_attrs = [
         'createdBy',
         'previewToken',
+        'postStatus',
+        'isHiddenInList',
     ]
     all_attrs = public_attrs + private_attrs
 
@@ -273,6 +274,10 @@ class Post(Base):
         elif is_publish:
             publish_at = time
 
+        is_hidden = vals.get('isHiddenInList', False)
+        sort_key_prefix = 'hidden' if is_hidden else status
+        status_publish_at = '#'.join([sort_key_prefix, publish_at])
+
         required_attrs = ['slug', 'title']
         for attr in required_attrs:
             if attr not in vals or len(vals[attr].strip()) == 0:
@@ -313,8 +318,9 @@ class Post(Base):
             'bodyText': body_text,
             'bodyFormat': body_format,
             'serviceIdSlug': '#'.join([service_id, slug]),
+            'isHiddenInList': is_hidden,
             'postStatus': status,
-            'statusPublishAt': '#'.join([status, publish_at]),
+            'statusPublishAt': status_publish_at,
         }
         table.put_item(Item=item)
         return item
@@ -366,6 +372,11 @@ class Post(Base):
             if is_published and not saved['publishAt']:
                 publish_at_upd = time
 
+        is_hidden_upd = vals.get('isHiddenInList')
+        if is_hidden_upd is not None:
+            if is_hidden_upd == saved['isHiddenInList']:
+                is_hidden_upd = None
+
         exp_items = []
         exp_vals = {}
 
@@ -387,11 +398,19 @@ class Post(Base):
             exp_items.append('publishAt=:pa')
             exp_vals[':pa'] = publish_at_upd
 
-        if status_upd or publish_at_upd:
-            exp_items.append('statusPublishAt=:spa')
-            join_item = status_upd if status_upd else saved['postStatus']
+        if is_hidden_upd is not None:
+            exp_items.append('isHiddenInList=:hil')
+            exp_vals[':hil'] = is_hidden_upd
+
+        if status_upd or publish_at_upd or is_hidden_upd is not None:
+            status = status_upd if status_upd else saved['postStatus']
+            is_hidden = is_hidden_upd if is_hidden_upd is not None else saved['isHiddenInList']
+            sort_key_prefix = 'hidden' if is_hidden else status
+
             publish_at = publish_at_upd if publish_at_upd else saved['publishAt']
-            exp_vals[':spa'] = '#'.join([join_item, publish_at])
+
+            exp_items.append('statusPublishAt=:spa')
+            exp_vals[':spa'] = '#'.join([sort_key_prefix, publish_at])
 
         saved_images = saved['images']
         upd_images = vals.get('images', [])

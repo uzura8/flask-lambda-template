@@ -62,8 +62,8 @@ def post(service_id, slug):
     if not item:
         raise InvalidUsage('Not Found', 404)
 
-    is_published = (item['postStatus'] != 'publish')\
-            or (item['publishAt'] and not is_future(item['publishAt']))
+    is_published = (item['postStatus'] == 'publish')\
+            and (item['publishAt'] and not is_future(item['publishAt']))
 
     if not is_published:
         if not vals['token'] or vals['token'] != item['previewToken']:
