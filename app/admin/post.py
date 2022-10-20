@@ -162,7 +162,7 @@ def post_detail(service_id, identifer):
 @bp.route('/posts/<string:service_id>/<string:identifer>/status', methods=['POST'])
 @cognito_auth_required
 def post_status(service_id, identifer):
-    check_acl_service_id(service_id)
+    service = check_acl_service_id(service_id)
     saved = get_post_by_identifer(service_id, identifer)
     post_id = saved['postId']
     tags = saved['tags']
@@ -190,6 +190,7 @@ def post_status(service_id, identifer):
     except Exception as e:
         raise InvalidUsage('Server Error', 500)
 
+    saved['service'] = service
     saved['tags'] = tags
     update_post_tags_status_publish_at(saved['postId'], saved['statusPublishAt'],
                                         saved['publishAt'])
