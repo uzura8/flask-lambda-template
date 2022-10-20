@@ -52,3 +52,13 @@ def str2dt(date_str, date_format='%Y/%m/%d %H:%M:%S', ajust_to_zeropadding_fmt=F
 def date_to_zfill(date_str):
     y, m, d = date_str.split('/')
     return '/'.join([y.zfill(2), m.zfill(2), d.zfill(2)])
+
+
+def is_future(target_data_str, date_format='%Y-%m-%dT%H:%M:%S%z', base_date_str=None):
+    target_dt = datetime.strptime(target_data_str, date_format)
+    if base_date_str:
+        base_dt = datetime.strptime(base_date_str, date_format)
+    else:
+        base_dt = datetime.now(timezone.utc)
+
+    return target_dt > base_dt

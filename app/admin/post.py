@@ -151,7 +151,6 @@ def post_detail(service_id, identifer):
         return jsonify(), 200
 
     res = saved if saved else post
-    res = Post.to_response(res)
     res['service'] = service
 
     return jsonify(res), 200

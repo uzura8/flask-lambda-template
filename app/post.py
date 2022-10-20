@@ -3,6 +3,7 @@ from flask import Blueprint, jsonify, request
 from app.models.dynamodb import Post, Category, Tag, Service
 from app.common.error import InvalidUsage
 from app.common.request import validate_req_params
+from app.common.date import is_future
 from app.validators import NormalizerUtils
 
 bp = Blueprint('post', __name__, url_prefix='/posts')
@@ -54,12 +55,19 @@ def post(service_id, slug):
     if not Service.check_exists(service_id):
         raise InvalidUsage('ServiceId does not exist', 404)
 
+    params = {'token': request.args.get('token')}
+    vals = validate_req_params(validation_schema_posts_post(), params)
+
     item = Post.get_one_by_slug(service_id, slug, True)
     if not item:
         raise InvalidUsage('Not Found', 404)
 
-    if item['postStatus'] != 'publish':
-        raise InvalidUsage('Not Found', 404)
+    is_published = (item['postStatus'] != 'publish')\
+            or (item['publishAt'] and not is_future(item['publishAt']))
+
+    if not is_published:
+        if not vals['token'] or vals['token'] != item['previewToken']:
+            raise InvalidUsage('Not Found', 404)
 
     if request.method == 'HEAD':
         return jsonify(), 200
@@ -142,5 +150,13 @@ def validation_schema_posts_post():
             'nullable': True,
             'empty': True,
             'regex': r'\d{4}\-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([\+\-]\d{2}:\d{2}|Z)$',
+        },
+        'token': {
+            'type': 'string',
+            'coerce': (NormalizerUtils.trim),
+            'required': False,
+            'nullable': True,
+            'empty': True,
+            'regex': r'^[0-9a-fA-F]+$',
         },
     }
