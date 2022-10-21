@@ -114,10 +114,15 @@ class Base():
     def get_all_by_pkey(self, pkeys, params=None, index_name=None):
         table = self.get_table()
 
+        if params.get('order') and not params.get('is_desc'):
+            if params is None:
+                params = {}
+            params['is_desc'] = params.get('order') == 'desc'
+
         option = {'ScanIndexForward': not (params and  params.get('is_desc', False))}
 
         if params and params.get('count'):
-            option['limit'] = params['count']
+            option['Limit'] = params['count']
 
         if index_name:
             option['IndexName'] = index_name
