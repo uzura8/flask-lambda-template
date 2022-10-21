@@ -196,6 +196,7 @@ resources:
     ContactDynamoDBTable: ${file(./config/dynamodb/contact.yml)}
     CategoryDynamoDBTable: ${file(./config/dynamodb/category.yml)}
     PostDynamoDBTable: ${file(./config/dynamodb/post.yml)}
+    PostGroupDynamoDBTable: ${file(./config/dynamodb/post-group.yml)}
     CommentDynamoDBTable: ${file(./config/dynamodb/comment.yml)}
     CommentCountDynamoDBTable: ${file(./config/dynamodb/comment-count.yml)}
     TagDynamoDBTable: ${file(./config/dynamodb/tag.yml)}

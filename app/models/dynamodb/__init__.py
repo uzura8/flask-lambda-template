@@ -2,6 +2,7 @@ from .base import Base, ModelInvalidParamsException
 from .service import Service
 from .site_config import SiteConfig
 from .post import Post
+from .post_group import PostGroup
 from .comment import Comment
 from .comment_count import CommentCount
 from .category import Category
@@ -18,6 +19,7 @@ __all__ = [
     'Service',
     'SiteConfig',
     'Post',
+    'PostGroup',
     'Comment',
     'CommentCount',
     'Category',

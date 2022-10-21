@@ -1,0 +1,38 @@
+Type: 'AWS::DynamoDB::Table'
+Properties:
+  TableName: ${self:custom.prjPrefix}-post-group
+  AttributeDefinitions:
+    -
+      AttributeName: serviceIdSlug
+      AttributeType: S
+    -
+      AttributeName: serviceId
+      AttributeType: S
+    -
+      AttributeName: updatedAt
+      AttributeType: S
+  KeySchema:
+    -
+      AttributeName: serviceIdSlug
+      KeyType: HASH
+  BillingMode: PAY_PER_REQUEST
+  #ProvisionedThroughput:
+  #  ReadCapacityUnits: 5
+  #  WriteCapacityUnits: 3
+
+  GlobalSecondaryIndexes:
+    -
+      IndexName: PostGroupsByServiceIdGsi
+      KeySchema:
+      -
+        AttributeName: serviceId
+        KeyType: HASH
+      -
+        AttributeName: updatedAt
+        KeyType: RANGE
+      Projection:
+        ProjectionType: ALL
+      #BillingMode: PAY_PER_REQUEST
+      #ProvisionedThroughput:
+      #  ReadCapacityUnits: 5
+      #  WriteCapacityUnits: 3

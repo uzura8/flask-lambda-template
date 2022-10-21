@@ -40,6 +40,7 @@ def check_acl_service_id(service_id):
 from . import service
 from . import user
 from . import post
+from . import post_group
 from . import category
 from . import tag
 from . import file

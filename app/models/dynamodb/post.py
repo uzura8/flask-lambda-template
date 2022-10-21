@@ -41,7 +41,7 @@ class Post(Base):
     ]
     all_attrs = public_attrs + private_attrs
 
-    reserved_slugs = ['slug']
+    reserved_slugs = ['slug', 'groups']
 
 
     @classmethod
