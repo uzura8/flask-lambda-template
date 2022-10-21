@@ -10,6 +10,7 @@ class Base():
     IS_LOCAL = bool(os.environ.get('IS_LOCAL'))
     PRJ_PREFIX = os.environ['PRJ_PREFIX']
 
+    reserved_values = None
 
     @classmethod
     def connect_dynamodb(self):
@@ -112,6 +113,7 @@ class Base():
     @classmethod
     def get_all_by_pkey(self, pkeys, params=None, index_name=None):
         table = self.get_table()
+
         option = {'ScanIndexForward': not (params and  params.get('is_desc', False))}
 
         if params and params.get('count'):
@@ -128,7 +130,6 @@ class Base():
         option['ExpressionAttributeNames'] = exp_attr_names
         option['ExpressionAttributeValues'] = exp_attr_vals
         res = table.query(**option)
-
         return res.get('Items')
 
 
@@ -162,12 +163,43 @@ class Base():
 
 
     @classmethod
+    def get_reserved_values(self, attr):
+        if not self.reserved_values:
+            return []
+
+        if attr not in self.reserved_values:
+            return []
+
+        return self.reserved_values[attr]
+
+
+    @classmethod
+    def check_set_reserved_value(self, vals, is_raise_exp=True):
+        if not self.reserved_values:
+            return False
+
+        for attr in self.reserved_values:
+            if attr not in vals:
+                continue
+
+            if vals[attr] in self.reserved_values[attr]:
+                if is_raise_exp:
+                    raise ModelInvalidParamsException('%s value is not allowed' % attr)
+                else:
+                    return True
+
+        return False
+
+
+    @classmethod
     def create(self, vals, uuid_name=None):
         if not vals.get('createdAt'):
             if vals.get('updatedAt'):
                 vals['createdAt'] = vals['updatedAt']
             else:
                 vals['createdAt'] = utc_iso(False, True)
+
+        self.check_set_reserved_value(vals)
 
         if uuid_name:
             vals[uuid_name] = new_uuid()
@@ -179,6 +211,8 @@ class Base():
 
     @classmethod
     def update(self, query_keys, vals, is_update_time=False):
+        self.check_set_reserved_value(vals)
+
         table = self.get_table()
 
         if is_update_time:
