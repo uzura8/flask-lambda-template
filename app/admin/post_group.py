@@ -49,7 +49,8 @@ def post_group_list(service_id):
             params[key] = request.args.get(key)
         vals = validate_req_params(validation_schema_group_list_get(), params)
         pkeys = {'key':'serviceId', 'val':service_id}
-        group = PostGroup.get_all_by_pkey(pkeys, vals, 'PostGroupsByServiceIdGsi')
+        res = PostGroup.get_all_by_pkey(pkeys, vals, 'PostGroupsByServiceIdGsi')
+        group = [ PostGroup.to_response(item) for item in res ]
 
     return jsonify(group), 200
 
@@ -59,7 +60,7 @@ def post_group_list(service_id):
 def post_group_detail_slug(service_id):
     check_acl_service_id(service_id)
     params = {}
-    for key in ['checkNotExists', 'slug']:
+    for key in ['checkNotExists', 'slug', 'withPostDetail']:
         params[key] = request.args.get(key)
     vals = validate_req_params(validation_schema_group_detail_slug_get(), params)
 
@@ -71,6 +72,7 @@ def post_group_detail_slug(service_id):
 @bp.route('/posts/<string:service_id>/groups/<string:slug>', methods=['POST', 'GET', 'HEAD', 'DELETE'])
 @cognito_auth_required
 def post_group_detail(service_id, slug):
+    check_acl_service_id(service_id)
     query_key = '#'.join([service_id, slug])
     group = PostGroup.get_one_by_pkey('serviceIdSlug', query_key)
 
@@ -100,6 +102,19 @@ def post_group_detail(service_id, slug):
 
     if request.method == 'HEAD':
         return jsonify(), 200
+
+    else:
+        vals = validate_req_params(validation_schema_group_detail_slug_get(),
+                                   {'withPostDetail':request.args.get('withPostDetail')})
+        if vals['withPostDetail']:
+            posts = []
+            if group.get('postIds'):
+                keys = [ {'postId':pid} for pid in group['postIds'] ]
+                batch_res = Post.batch_get_items(keys)
+                for pid in group['postIds']:
+                    p = next((p for p in batch_res if p.get('postId') == pid), None)
+                    posts.append(p)
+            group['posts'] = posts
 
     res = saved if saved else group
     return jsonify(res), 200
@@ -150,27 +165,17 @@ def validation_schema_group_list_get():
             'allowed': ['asc', 'desc'],
             'default': 'desc',
         },
-        'sinceTime': {
-            'type': 'string',
-            'coerce': (NormalizerUtils.trim),
-            'required': False,
-            'nullable': True,
-            'empty': True,
-            'regex': r'\d{4}\-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([\+\-]\d{2}:\d{2}|Z)$',
-        },
-        'untilTime': {
-            'type': 'string',
-            'coerce': (NormalizerUtils.trim),
-            'required': False,
-            'nullable': True,
-            'empty': True,
-            'regex': r'\d{4}\-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([\+\-]\d{2}:\d{2}|Z)$',
-        },
-        'checkNotExists': {
+    }
+
+
+def validation_schema_group_detail_get():
+    return {
+        'withPostDetail': {
             'type': 'boolean',
             'coerce': (str, NormalizerUtils.to_bool),
-            'required': True,
-            'empty': False,
+            'required': False,
+            'nullable': True,
+            'empty': True,
             'default': False,
         },
     }

@@ -20,5 +20,5 @@ class PostGroup(Base):
     all_attrs = public_attrs + private_attrs
 
     reserved_values = {
-        'slug': ['slug']
+        'slug': ['slug', 'create']
     }
