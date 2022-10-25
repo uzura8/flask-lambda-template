@@ -104,9 +104,9 @@ def post_group_detail(service_id, slug):
         return jsonify(), 200
 
     else:
-        vals = validate_req_params(validation_schema_group_detail_slug_get(),
+        vals = validate_req_params(validation_schema_group_detail_get(),
                                    {'withPostDetail':request.args.get('withPostDetail')})
-        if vals['withPostDetail']:
+        if vals.get('withPostDetail'):
             posts = []
             if group.get('postIds'):
                 keys = [ {'postId':pid} for pid in group['postIds'] ]

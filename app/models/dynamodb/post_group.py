@@ -13,7 +13,9 @@ class PostGroup(Base):
         'createdAt',
         'updatedAt',
     ]
-    response_attrs = public_attrs + []
+    response_attrs = public_attrs + [
+        'posts',
+    ]
     private_attrs = [
         'serviceIdSlug',
     ]
