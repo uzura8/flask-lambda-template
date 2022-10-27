@@ -1,0 +1,13 @@
+[DB]
+dbname = 
+dbuser = 
+host = 
+password = 
+port = 
+
+[CONVERT]
+limit = 10
+
+[SERVICE]
+service_id = hoge
+service_label = ほげ

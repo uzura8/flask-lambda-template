@@ -3,6 +3,7 @@ import string
 import random
 import uuid
 import ulid
+from typing import Iterator
 from html.parser import HTMLParser
 
 
@@ -26,6 +27,35 @@ def strip_html_tags(html_str):
     s = MLStripper()
     s.feed(html_str)
     return s.get_data()
+
+
+def _parse_words(val: str) -> Iterator[str]:
+    for block in re.split(r'[ _-]+', val):
+        yield block
+
+
+def to_pascal_case(val: str) -> str:
+    words_iter = _parse_words(val)
+    return ''.join(word.capitalize() for word in words_iter)
+
+
+def to_camel_case(val: str) -> str:
+    words_iter = _parse_words(val)
+    try:
+        first = next(words_iter)
+    except StopIteration:
+        return ''
+    return first.lower() + ''.join(word.capitalize() for word in words_iter)
+
+
+def to_snake_case(val: str) -> str:
+    words_iter = _parse_words(val)
+    return '_'.join(word.lower() for word in words_iter)
+
+
+def to_kebab_case(val: str) -> str:
+    words_iter = _parse_words(val)
+    return '-'.join(word.lower() for word in words_iter)
 
 
 def random_str(num, is_digits_only=False):

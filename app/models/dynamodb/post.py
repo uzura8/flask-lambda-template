@@ -285,6 +285,7 @@ class Post(Base):
 
         slug = vals['slug']
         cate_slug = vals['category']
+        token = vals['previewToken'] if vals.get('previewToken') else secrets.token_hex()
 
         body_raw = vals['body']
         body_format = vals['bodyFormat']
@@ -297,6 +298,8 @@ class Post(Base):
         if vals.get('files'):
             file_ids = [ file['fileId'] for file in vals['files'] ]
             File.bulk_update_status(file_ids, 'published')
+
+
 
         table = self.get_table()
         item = {
@@ -312,7 +315,7 @@ class Post(Base):
             'images': vals['images'],
             'files': vals['files'],
             'links': vals['links'],
-            'previewToken': secrets.token_hex(),
+            'previewToken': token,
             'body': body_raw,
             'bodyHtml': body_html,
             'bodyText': body_text,

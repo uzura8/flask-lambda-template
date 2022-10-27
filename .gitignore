@@ -29,8 +29,11 @@ __pycache__
 /develop/var/*
 /develop/comment_importer_event.json
 /develop/media_image_maker_event.json
+/develop/db_converter/config.ini
+/develop/db_converter/services/*
 /config/stages/*
 /config/templates/*
+/config/contact/*
 /config/contact/*
 /config-bkup*
 
