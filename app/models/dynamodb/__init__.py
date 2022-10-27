@@ -1,6 +1,7 @@
 from .base import Base, ModelInvalidParamsException
-from .service import Service
 from .site_config import SiteConfig
+from .service import Service
+from .service_config import ServiceConfig
 from .post import Post
 from .post_group import PostGroup
 from .comment import Comment
@@ -16,8 +17,9 @@ from .contact import Contact
 __all__ = [
     'Base',
     'ModelInvalidParamsException',
-    'Service',
     'SiteConfig',
+    'Service',
+    'ServiceConfig',
     'Post',
     'PostGroup',
     'Comment',

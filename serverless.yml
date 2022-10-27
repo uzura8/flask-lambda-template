@@ -189,8 +189,9 @@ functions:
 
 resources:
   Resources:
-    ServiceDynamoDBTable: ${file(./config/dynamodb/service.yml)}
     SiteConfigDynamoDBTable: ${file(./config/dynamodb/site-config.yml)}
+    ServiceDynamoDBTable: ${file(./config/dynamodb/service.yml)}
+    ServiceConfigDynamoDBTable: ${file(./config/dynamodb/service-config.yml)}
     VoteLogDynamoDBTable: ${file(./config/dynamodb/vote-log.yml)}
     VoteCountDynamoDBTable: ${file(./config/dynamodb/vote-count.yml)}
     ContactDynamoDBTable: ${file(./config/dynamodb/contact.yml)}

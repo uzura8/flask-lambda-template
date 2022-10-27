@@ -156,7 +156,7 @@ class Category(Base):
                 parent_path = '#'.join([parent['parentPath'], str(vals['parentId'])])
 
         slug = vals['slug']
-        cate_id = SiteConfig.increament_number(service_id, 'category_id')
+        cate_id = SiteConfig.increament_number('category_id')
 
         table = self.get_table()
         item = {
