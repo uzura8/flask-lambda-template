@@ -40,6 +40,11 @@ def utime2udate_iso(unixtime, conv_tz_spec=False):
     return date_utc
 
 
+def local_dt2udate_iso(local_dt, with_ms=False, conv_tz_spec=False):
+    dt_utc = local_dt.astimezone(timezone.utc)
+    return utc_iso(with_ms, conv_tz_spec, dt_utc)
+
+
 def str2dt(date_str, date_format='%Y/%m/%d %H:%M:%S', ajust_to_zeropadding_fmt=False):
     if ajust_to_zeropadding_fmt:
         items = date_str.split(' ')

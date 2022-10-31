@@ -56,11 +56,8 @@ def post_groups(service_id):
         raise InvalidUsage('ServiceId does not exist', 404)
 
     params = {}
-    for key in ['count', 'order']:
-        params[key] = request.args.get(key)
-    vals = validate_req_params(validation_schema_group_list_get(), params)
     pkeys = {'key':'serviceId', 'val':service_id}
-    group = PostGroup.get_all_by_pkey(pkeys, vals, 'PostGroupsByServiceIdGsi')
+    group = PostGroup.get_all_by_pkey(pkeys, None, 'PostGroupsByServiceIdGsi')
     body = [ PostGroup.to_response(item) for item in group ]
     return jsonify(body), 200
 
@@ -195,24 +192,5 @@ def validation_schema_posts_post():
             'nullable': True,
             'empty': True,
             'regex': r'^[0-9a-fA-F]+$',
-        },
-    }
-
-
-def validation_schema_group_list_get():
-    return {
-        'count': {
-            'type': 'integer',
-            'coerce': int,
-            'required': False,
-            'min': 1,
-            'max': 50,
-            'default': 20,
-        },
-        'order': {
-            'type': 'string',
-            'required': False,
-            'allowed': ['asc', 'desc'],
-            'default': 'desc',
         },
     }

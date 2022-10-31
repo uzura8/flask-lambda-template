@@ -113,7 +113,8 @@ def post_group_detail(service_id, slug):
                 batch_res = Post.batch_get_items(keys)
                 for pid in group['postIds']:
                     p = next((p for p in batch_res if p.get('postId') == pid), None)
-                    posts.append(p)
+                    if p:
+                        posts.append(p)
             group['posts'] = posts
 
     res = saved if saved else group

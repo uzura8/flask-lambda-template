@@ -29,6 +29,11 @@ def strip_html_tags(html_str):
     return s.get_data()
 
 
+def strip_html_tags_simple(text):
+    clean = re.compile('<.*?>')
+    return re.sub(clean, '', text)
+
+
 def _parse_words(val: str) -> Iterator[str]:
     for block in re.split(r'[ _-]+', val):
         yield block
