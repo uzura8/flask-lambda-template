@@ -1,6 +1,17 @@
+import os
+#import sys
+import datetime
 import configparser
+import json
+import decimal
 from pathlib import Path
 import pymysql.cursors
+from pprint import pprint #!!!!!!!!!!!!!!!!
+
+#parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+#sys.path.append(parent_dir)
+#
+#from app.common.decimal_encoder import DecimalEncoder
 
 
 class DbConverterBase():
@@ -15,17 +26,20 @@ class DbConverterBase():
     service_id = ''
     service_label = ''
     user_id = ''
-    category_table = []
-    tag_table = []
-    post_table = []
+    category_exc_table = []
+    tag_exc_table = []
+    post_exc_table = []
+    logs_dir = ''
 
 
     def __init__(self):
         self.set_conf()
         self.set_connect()
+        self.make_logs_dir()
 
 
     def __del__(self):
+        self.save_exc_tables()
         self.cursor.close()
         self.connect.close()
 
@@ -57,6 +71,37 @@ class DbConverterBase():
         return res
 
 
+    def get_category_slug_by_id(self, from_id, from_id_name='fromId'):
+        if not self.category_exc_table:
+            return ''
+
+        items = [x for x in self.category_exc_table if x[from_id_name] == from_id]
+        if not items:
+            return ''
+
+        return items[0].get('toSlug', '')
+
+
+    def make_logs_dir(self):
+        current = self.get_current_time()
+        parent = Path(__file__).resolve().parent
+        self.logs_dir = parent.joinpath('var/logs/%s' % current)
+        os.mkdir(self.logs_dir)
+
+
+    def save_exc_tables(self):
+        self.save_exc_table('category', self.category_exc_table)
+        self.save_exc_table('tag', self.tag_exc_table)
+        self.save_exc_table('post', self.post_exc_table)
+
+
+    def save_exc_table(self, table_name, data):
+        path = '%s/%s.json' % (self.logs_dir, table_name)
+        json_file = open(path, mode='w')
+        json.dump(data, json_file, default=self.encode_decimal)
+        json_file.close()
+
+
     def set_conf(self):
         self.config = configparser.ConfigParser()
         parent = Path(__file__).resolve().parent
@@ -81,12 +126,20 @@ class DbConverterBase():
         self.cursor = self.connect.cursor()
 
 
-    def get_category_slug_by_id(self, from_id, from_id_name='fromId'):
-        if not self.category_table:
-            return ''
+    @staticmethod
+    def get_current_time():
+        t_delta = datetime.timedelta(hours=9)
+        JST = datetime.timezone(t_delta, 'JST')
+        now = datetime.datetime.now(JST)
+        return now.strftime('%Y%m%d%H%M%S')
 
-        items = [x for x in self.category_table if x[from_id_name] == from_id]
-        if not items:
-            return ''
 
-        return items[0].get('toSlug', '')
+    @staticmethod
+    def encode_decimal(o):
+        if isinstance(o, decimal.Decimal):
+            if o % 1 > 0:
+                return float(o)
+
+            return int(o)
+
+        return o

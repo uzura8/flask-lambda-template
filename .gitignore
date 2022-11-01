@@ -31,6 +31,7 @@ __pycache__
 /develop/media_image_maker_event.json
 /develop/db_converter/config.ini
 /develop/db_converter/services/*
+/develop/db_converter/var/*
 /config/stages/*
 /config/templates/*
 /config/contact/*
