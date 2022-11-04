@@ -15,6 +15,6 @@ if __name__ == '__main__':
     else:
         service_id = args[1]
         module_name = to_snake_case(service_id)
-        module = importlib.import_module('services.%s' % module_name)
+        module = importlib.import_module('services.%s.main' % module_name)
         dbc = module.DbConverter()
         dbc.main()
