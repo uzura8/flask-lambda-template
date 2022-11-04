@@ -37,6 +37,7 @@ class DbConverterBase():
     post_tag_exc_table = []
     post_group_exc_table = []
     file_exc_table = []
+    file_not_exists = []
     logs_dir = ''
 
 
@@ -104,6 +105,7 @@ class DbConverterBase():
         self.save_exc_table('post_tag', self.post_tag_exc_table)
         self.save_exc_table('post_group', self.post_group_exc_table)
         self.save_exc_table('file', self.file_exc_table)
+        self.save_exc_table('file_not_exists', self.file_not_exists)
 
 
     def save_exc_table(self, table_name, data):
@@ -129,14 +131,14 @@ class DbConverterBase():
 
 
     def get_file_by_url(self, url, save_path=None):
-        res = requests.get(url)
+        res = requests.get(url).content
 
         if save_path:
             abs_path = self.converter_base_path.joinpath(save_path)
             with open(abs_path, mode='wb') as f:
-                f.write(res.content)
+                f.write(res)
 
-        return res.content, res.headers['Content-length']
+        return res
 
 
     def upload_media_to_s3(self, blob, upload_key, mimetype):
