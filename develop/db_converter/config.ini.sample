@@ -11,3 +11,5 @@ limit = 10
 [SERVICE]
 service_id = hoge
 service_label = ほげ
+base_url = example.com
+media_s3_bucket_name = media.example.com

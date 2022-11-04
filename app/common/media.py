@@ -1,3 +1,5 @@
+import os
+
 media_types = [
     {'mimetype':'image/jpeg', 'extensions':['jpg', 'jpeg']},
     {'mimetype':'image/png', 'extensions':['png']},
@@ -20,3 +22,9 @@ def get_mimetype_by_ext(ext):
         return None
 
     return res['mimetype']
+
+
+def get_ext_by_path(filepath):
+    dirname, basename = os.path.split(filepath)
+    basename_without_ext, ext = basename.split('.', 1)
+    return ext

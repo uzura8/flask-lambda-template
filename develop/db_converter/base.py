@@ -1,17 +1,18 @@
 import os
-#import sys
+import sys
 import datetime
 import configparser
 import json
 import decimal
+import requests
 from pathlib import Path
 import pymysql.cursors
-from pprint import pprint #!!!!!!!!!!!!!!!!
 
-#parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-#sys.path.append(parent_dir)
-#
+parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(parent_dir)
+
 #from app.common.decimal_encoder import DecimalEncoder
+from app.aws_s3_handler import AwsS3Handler
 
 
 class DbConverterBase():
@@ -20,22 +21,31 @@ class DbConverterBase():
     config = None
     connect = None
     cursor = None
+    converter_base_path = None
     limit = 0
     offset = 0
     offset_max = 0 # On Development, Set this value
+    s3handler = None
     service_id = ''
     service_label = ''
+    service_base_url = ''
+    media_s3_bucket_name = ''
     user_id = ''
     category_exc_table = []
     tag_exc_table = []
     post_exc_table = []
+    post_tag_exc_table = []
+    post_group_exc_table = []
+    file_exc_table = []
     logs_dir = ''
 
 
     def __init__(self):
+        self.converter_base_path = Path(__file__).resolve().parent
         self.set_conf()
         self.set_connect()
         self.make_logs_dir()
+        self.s3handler = AwsS3Handler(self.media_s3_bucket_name)
 
 
     def __del__(self):
@@ -64,7 +74,7 @@ class DbConverterBase():
 
     def get_all_by_id(self, table, cond_val, cond_key='id'):
         params = (table, cond_key, cond_val)
-        sql = 'SELECT * FROM %s WHERE %s = %s' % params
+        sql = "SELECT * FROM %s WHERE %s = '%s'" % params
         print(sql)
         self.cursor.execute(sql)
         res = self.cursor.fetchall()
@@ -83,16 +93,17 @@ class DbConverterBase():
 
 
     def make_logs_dir(self):
-        current = self.get_current_time()
-        parent = Path(__file__).resolve().parent
-        self.logs_dir = parent.joinpath('var/logs/%s' % current)
-        os.mkdir(self.logs_dir)
+        self.logs_dir = self.converter_base_path.joinpath('var/converteds')
+        #os.mkdir(self.logs_dir)
 
 
     def save_exc_tables(self):
         self.save_exc_table('category', self.category_exc_table)
         self.save_exc_table('tag', self.tag_exc_table)
         self.save_exc_table('post', self.post_exc_table)
+        self.save_exc_table('post_tag', self.post_tag_exc_table)
+        self.save_exc_table('post_group', self.post_group_exc_table)
+        self.save_exc_table('file', self.file_exc_table)
 
 
     def save_exc_table(self, table_name, data):
@@ -104,8 +115,7 @@ class DbConverterBase():
 
     def set_conf(self):
         self.config = configparser.ConfigParser()
-        parent = Path(__file__).resolve().parent
-        config_path = parent.joinpath('config.ini')
+        config_path = self.converter_base_path.joinpath('config.ini')
         self.config.read(config_path, encoding='utf-8')
         conf = self.config['CONVERT']
         self.limit = int(conf['limit'])
@@ -114,6 +124,23 @@ class DbConverterBase():
         conf = self.config['SERVICE']
         self.service_id = conf['service_id']
         self.service_label = conf['service_label']
+        self.service_base_url = conf['base_url']
+        self.media_s3_bucket_name = conf['media_s3_bucket_name']
+
+
+    def get_file_by_url(self, url, save_path=None):
+        res = requests.get(url)
+
+        if save_path:
+            abs_path = self.converter_base_path.joinpath(save_path)
+            with open(abs_path, mode='wb') as f:
+                f.write(res.content)
+
+        return res.content, res.headers['Content-length']
+
+
+    def upload_media_to_s3(self, blob, upload_key, mimetype):
+        self.s3handler.upload(blob, upload_key, mimetype)
 
 
     def set_connect(self):
