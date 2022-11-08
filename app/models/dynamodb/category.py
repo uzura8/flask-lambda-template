@@ -209,4 +209,8 @@ class Category(Base):
                         res.pop(target_key)
                     break
 
-        return [ val for val in res.values() ]
+        # If nest not exists, return original
+        if categories and not res.values():
+            return [ self.to_response(c) if for_response else c for c in categories ]
+
+        return res.values()
