@@ -13,3 +13,5 @@ service_id = hoge
 service_label = ほげ
 base_url = example.com
 media_s3_bucket_name = media.example.com
+media_base_url_before = before-media.example.com
+allowed_image_sizes = raw|200x200|600x600|400x400xc

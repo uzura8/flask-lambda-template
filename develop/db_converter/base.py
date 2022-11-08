@@ -24,12 +24,13 @@ class DbConverterBase():
     converter_base_path = None
     limit = 0
     offset = 0
-    offset_max = 0 # On Development, Set this value
     s3handler = None
     service_id = ''
     service_label = ''
     service_base_url = ''
     media_s3_bucket_name = ''
+    media_base_url_before = ''
+    allowed_image_sizes = ''
     user_id = ''
     category_exc_table = []
     tag_exc_table = []
@@ -39,6 +40,7 @@ class DbConverterBase():
     file_exc_table = []
     file_not_exists = []
     logs_dir = ''
+    offset_max = 20 # On Development, Set this value
 
 
     def __init__(self):
@@ -58,7 +60,6 @@ class DbConverterBase():
     def from_records(self, table, order_by='id'):
         params = (table, order_by, self.limit, self.offset)
         sql = 'SELECT * FROM %s ORDER BY %s LIMIT %s OFFSET %s' % params
-        print(sql)
         self.cursor.execute(sql)
         res = self.cursor.fetchall()
         return res
@@ -67,7 +68,6 @@ class DbConverterBase():
     def get_all(self, table, order_by='id'):
         params = (table, order_by)
         sql = 'SELECT * FROM %s ORDER BY %s' % params
-        print(sql)
         self.cursor.execute(sql)
         res = self.cursor.fetchall()
         return res
@@ -76,7 +76,6 @@ class DbConverterBase():
     def get_all_by_id(self, table, cond_val, cond_key='id'):
         params = (table, cond_key, cond_val)
         sql = "SELECT * FROM %s WHERE %s = '%s'" % params
-        print(sql)
         self.cursor.execute(sql)
         res = self.cursor.fetchall()
         return res
@@ -128,6 +127,8 @@ class DbConverterBase():
         self.service_label = conf['service_label']
         self.service_base_url = conf['base_url']
         self.media_s3_bucket_name = conf['media_s3_bucket_name']
+        self.media_base_url_before = conf['media_base_url_before']
+        self.allowed_image_sizes = conf['allowed_image_sizes']
 
 
     def get_file_by_url(self, url, save_path=None):
