@@ -134,6 +134,9 @@ class Image():
         except AttributeError:
             return
 
+        if not exif:
+            return
+
         for tag_id, values in exif.items():
             values = remove_bytes_value(values)
             if values is None:
