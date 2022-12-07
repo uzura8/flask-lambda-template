@@ -11,7 +11,7 @@ import pymysql.cursors
 parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(parent_dir)
 
-#from app.common.decimal_encoder import DecimalEncoder
+from app.common.log import output_log
 from app.aws_s3_handler import AwsS3Handler
 
 
@@ -40,10 +40,11 @@ class DbConverterBase():
     file_exc_table = []
     file_not_exists = []
     logs_dir = ''
-    offset_max = 20 # On Development, Set this value
+    offset_max = 0 # On Development, Set this value
 
 
     def __init__(self):
+        output_log('START: Convert')
         self.converter_base_path = Path(__file__).resolve().parent
         self.set_conf()
         self.set_connect()
@@ -55,6 +56,7 @@ class DbConverterBase():
         self.save_exc_tables()
         self.cursor.close()
         self.connect.close()
+        output_log('END: Convert')
 
 
     def from_records(self, table, order_by='id'):
