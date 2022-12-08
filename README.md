@@ -77,12 +77,12 @@ vi terraform.tfvars
 prj_prefix = "your-porject-name"
  ...
 route53_zone_id        = "Set your route53 zone id"
-domain_api_dev         = "your-domain-api-dev.example.com"
 domain_api_prd         = "your-domain-api.example.com"
-domain_static_site_dev = "your-domain-static-dev.example.com"
+domain_api_dev         = "your-domain-api-dev.example.com"
 domain_static_site_prd = "your-domain-static.example.com"
-domain_media_site_dev  = "your-domain-media-dev.example.com"
+domain_static_site_dev = "your-domain-static-dev.example.com"
 domain_media_site_prd  = "your-domain-media.example.com"
+domain_media_site_dev  = "your-domain-media-dev.example.com"
 ```
 
 #### 2. Set AWS profile name to environment variable
