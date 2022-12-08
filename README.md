@@ -1,8 +1,12 @@
-# Flask + Lambda + APIGateway Template 
+# Serverless-CMS
 
-This document refered to https://www.serverless.com/blog/flask-python-rest-api-serverless-lambda-dynamodb
+Constructed by
+
+* Serverside: Flask + Lambda + APIGateway (deploy by serverside framework)
+* Frontend: VueJS
 
 ## Instration
+
 
 #### Preparation
 
@@ -10,11 +14,20 @@ You need below
 
 * nodeJS >= v14.15.X
 * aws-cli >= 1.18.X
+* Terraform >= 0.14.5
 
-#### Install Serverless Framework
+#### Install tools
+
+Install serverless, python venv and terraform on mac
 
 ```bash
+# At project root dir
 npm install -g serverless
+python3 -m venv .venv
+
+brew install tfenv
+tfenv install 0.14.5
+tfenv use 0.14.5
 ```
 
 ### Install Packages
@@ -29,26 +42,309 @@ npm install
 Install python packages
 
 ```bash
-pip install -r requirement.txt
+. .venv/bin/activate
+pip install -r requirements.txt
 ```
+
+
+## Deploy AWS Resources by Terraform
+
+#### Create AWS S3 Bucket for terraform state and frontend config
+
+Create S3 Buckets like below in us-east-1 region
+
+* __your-serverless-deployment__
+    + Store deployment state files by terraformand and serverless framework
+    + Create directory "terraform/your-project-name"
+* __your-serverless-configs__
+    + Store config files for app
+    + Create directory "your-project-name/frontend/prd" and "your-project-name/frontend/dev"
+
+
+named "terraform-state-hoge" on "us-east-1" region
+
+#### 1. Edit Terraform config file
+
+Copy sample file and edit variables for your env
+
+```bash
+cd (project_root_dir)/terraform
+cp terraform.tfvars.sample terraform.tfvars
+vi terraform.tfvars
+```
+
+```terraform
+prj_prefix = "your-porject-name"
+ ...
+route53_zone_id        = "Set your route53 zone id"
+domain_api_dev         = "your-domain-api-dev.example.com"
+domain_api_prd         = "your-domain-api.example.com"
+domain_static_site_dev = "your-domain-static-dev.example.com"
+domain_static_site_prd = "your-domain-static.example.com"
+domain_media_site_dev  = "your-domain-media-dev.example.com"
+domain_media_site_prd  = "your-domain-media.example.com"
+```
+
+#### 2. Set AWS profile name to environment variable
+
+```bash
+export AWS_SDK_LOAD_CONFIG=1
+export AWS_PROFILE=your-aws-profile-name
+export AWS_REGION="us-east-1"
+```
+
+#### 3. Execute terraform init
+
+Command Example to init
+
+```bash
+terraform init -backend-config="bucket=your-serverless-deployment" -backend-config="key=terraform/your-project/terraform.tfstate" -backend-config="region=us-east-1" -backend-config="profile=your-aws-profile-name"
+```
+
+#### 4. Execute terraform apply
+
+```bash
+terraform apply -auto-approve -var-file=./terraform.tfvars
+```
+
+#### 5. Create Admin User
+
+Create Admin User by aws-cli
+
+```bash
+export AWS_SDK_LOAD_CONFIG=1
+export AWS_PROFILE=your-aws-profile-name
+export AWS_DEFAULT_REGION="us-east-1"
+
+aws cognito-idp admin-create-user \
+--user-pool-id us-east-1_xxxxxxxxx \
+--username your-username \
+--user-attributes \
+  Name=email,Value=sample@example.com \
+  Name=email_verified,Value=True \
+  Name=custom:role,Value=admin \
+  Name=custom:acceptServiceIds,Value=hoge \
+--desired-delivery-mediums EMAIL
+```
+
+You get temporary password by email
+Update password as parmanent
+
+```bash
+aws cognito-idp admin-set-user-password \
+--user-pool-id us-east-1_xxxxxxxxx \
+--username your-username \
+--password 'your-parmanent-password' \
+--permanent
+```
+
+#### 6. Set CORS of media file bucket
+
+* Access to S3 console of media file bucket
+* Select tab "Permission"
+* Press "Edit" button of  "Cross-origin resource sharing (CORS)"
+* Set bellow
+
+```
+[
+    {
+        "AllowedHeaders": [
+            "*"
+        ],
+        "AllowedMethods": [
+            "PUT",
+            "POST",
+            "DELETE",
+            "GET"
+        ],
+        "AllowedOrigins": [
+            "https://your-domain-api.example.com"
+        ],
+        "ExposeHeaders": []
+    },
+    {
+        "AllowedHeaders": [
+            "*"
+        ],
+        "AllowedMethods": [
+            "GET"
+        ],
+        "AllowedOrigins": [
+            "*"
+        ],
+        "ExposeHeaders": []
+    }
+]
+```
+
+## Deploy Server Side Resources
+
+### Setup configs
 
 Setup config files per stage
 
 ```bash
 cp -r config/stages-sample config/stages
-cp -r config/contact/sample config/contact/your-service-id
-vi config/stages-sample/*
-vi config/contact/your-service-ida/*
+vi config/stages/*
 ```
 
+```bash
+# config/stages/common.yml
+
+service: 'your-project-name'
+awsAccountId: 'your-aws-acconnt-id'
+defaultRegion: 'us-east-1'
+deploymentBucketName: 'your-serverless-deployment'
+ ...
+```
+
+```bash
+# config/stages/prd.yml
+# config/stages/dev.yml
+
+domainName: your-domain-api.example.com
+corsAcceptOrigins: 'https://your-domain.example.com'
+notificationEmail: admin@example.com
+ ...
+mediaS3BucketName: "your-domain-media.example.com"
+ ...
+commentImportS3BucketName: "your-content-resources"
+commentImportS3BucketPath: "your-project/prd/comments"
+ ...
+```
+
+
+### Create Domains for API
+
+Execute below command
+
+```bash
+export AWS_SDK_LOAD_CONFIG=1
+export AWS_PROFILE="your-profile-name"
+export AWS_REGION="us-east-1"
+
+sls create_domain # Deploy for dev
+```
+
+If deploy for prod
+
+```bash
+sls create_domain --stage prd # Deploy for prod
+```
+
+### Deploy to Lambda
+
+Execute below command
+
+```bash
+export AWS_SDK_LOAD_CONFIG=1
+export AWS_PROFILE="your-profile-name"
+export AWS_REGION="us-east-1"
+
+sls deploy # Deploy for dev
+```
+
+If deploy for prod
+
+```bash
+sls deploy --stage prd # Deploy for prod
+```
+
+### Save default ServiceId on DynamoDB
+
+1. Open DynamoDB page on AWS console
+2. Click Tables > Explore items
+3. Select "your-prefix-stage-service"
+4. Click "Create item"
+5. Select "JSON"
+6. Input below, and create
+
+```bash
+{
+  "serviceId": {
+    "S": "hoge"
+  },
+  "label": {
+    "S": "ほげ"
+  }
+}
+````
+
+## Deploy Frontend Resources
+### Setup about TinyMCE Editor
+* Access to [TinyMCE Dashbord](https://www.tiny.cloud/my-account/dashboard/)
+* Get Your Tiny API Key
+* Move to [Approved Domains](https://www.tiny.cloud/my-account/domains/), then Add your static-site domain
+
+### Set enviroment variables
+
+* Access to https://github.com/{your-account}/{repository-name}/settings/secrets/actions
+* Push "New repository secret"
+* Add Below
+    * Common
+        * __AWS_ACCESS_KEY_ID__ : your-aws-access_key
+        * __AWS_SECRET_ACCESS_KEY__ : your-aws-secret_key
+    * For Production
+        * __CLOUDFRONT_DISTRIBUTION__ : your cloudfront distribution created by terraform for production
+        * __S3_CONFIG_BUCKET__: "your-serverles-configs/your-project/frontend/prd" for production
+        * __S3_RESOURCE_BUCKET__: "your-domain-static-site.example.com" for production
+    * For Develop
+        * __CLOUDFRONT_DISTRIBUTION_DEV__ : your cloudfront distribution created by terraform for develop
+        * __S3_CONFIG_BUCKET_DEV__: "your-serverles-configs/your-project/frontend/dev" for develop
+        * __S3_RESOURCE_BUCKET_DEV__: "your-domain-static-site-dev.example.com" for develop
+
+### Upload config file for frontend app
+
+#### Edit config file
+#### Basic config
+
+```bash
+cd (project_root_dir)
+cp src/client/js/config/config.json.sample src/client/js/config/config.json
+vi src/client/js/config/config.json
+```
+
+```json
+{
+  "domain": "your-domain-api.example.com",
+  "port": null,
+  "baseUrl": "/",
+  "isSSL": true,
+ ...
+  "media": {
+    "url": "https://your-domain-media.example.com",
+ ...
+  },
+  "tinyMCEApiKey": "ggo8q5i8bjt96lyz6637of9qcpcy2215i6i8h2ue2ydwl9nc"
+}
+```
+
+#### AWS Cognito config (If use admin functions)
+
+```bash
+cp src/client/js/config/cognito-client-config.json.sample src/client/js/config/cognito-client-config.json
+vi src/client/js/config/cognito-client-config.json
+```
+
+```json
+{
+  "Region": "us-east-1",
+  "UserPoolId": "us-east-1_xxxxxxxxx",
+  "ClientId": "xxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "IdentityPoolId": "us-east-1:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+}
+```
+
+#### Upload S3 Bucket "your-serverless-configs/your-project-name/frontend/{stage}"
+
+#### Deploy continually on pushed to git
 
 
 ## Work on local
 
-Setup venv
+Set venv
 
 ```bash
-python3 -m venv .venv
 . .venv/bin/activate
 ```
 
@@ -74,194 +370,8 @@ Request [http://127.0.0.1:5000](http://127.0.0.1:5000/hoge)
 sls invoke local --function funcName --data param
 ```
 
-## Deploy AWS Resources by Terraform
-
-#### Create AWS S3 Bucket for terraform state and frontend config
-
-Create S3 Bucket named "content-api-config-hoge"
-
-#### Preparation
-
-You need below
-
-* aws-cli >= 1.18.X
-* Terraform >= 0.14.5
-
-##### Example Installation Terraform by tfenv on mac
-
-```bash
-brew install tfenv
-tfenv install 0.14.5
-tfenv use 0.14.5
-```
-
-#### 1. Edit Terraform config file
-
-Copy sample file and edit variables for your env
-
-```bash
-cd (project_root_dir)/terraform
-cp terraform.tfvars.sample terraform.tfvars
-vi terraform.tfvars
-```
-
-```terraform
- ...
-route53_zone_id = "Set your route53 zone id"
-domain_api_dev  = "your-domain-api-dev.example.com"
-domain_api_prd  = "your-domain-api.example.com"
-```
-
-#### 2. Set AWS profile name to environment variable
-
-```bash
-export AWS_PROFILE=your-aws-profile-name
-export AWS_DEFAULT_REGION="ap-northeast-1"
-```
-
-#### 3. Execute terraform init
-
-Command Example to init
-
-```bash
-terraform init -backend-config="bucket=content-api-config-hoge" -backend-config="key=terraform.tfstate" -backend-config="region=ap-northeast-1" -backend-config="profile=your-aws-profile-name"
-```
-
-#### 4. Execute terraform apply
-
-```bash
-terraform apply -auto-approve -var-file=./terraform.tfvars
-```
-
-#### 5. Save default ServiceId on DynamoDB
-
-1. Opne DynamoDB page on AWS console
-2. Click Tables > Explore items
-3. Select "your-prefix-stage-service"
-4. Click "Create item"
-5. Select "JSON"
-6. Input below, and create
-
-```bash
-{
-  "serviceId": {
-    "S": "hoge"
-  },
-  "label": {
-    "S": "ほげ"
-  }
-}
-````
-
-#### 6. Create Admin User
-
-Create Admin User on Cognito consele
-
-#### 7. Add Custom Attributes
-
-```bash
-aws cognito-idp add-custom-attributes \
---user-pool-id ap-northeast-1_xxxxxxxxx \
---custom-attributes Name="role",AttributeDataType="String"
-
-aws cognito-idp add-custom-attributes \
---user-pool-id ap-northeast-1_xxxxxxxxx \
---custom-attributes Name="acceptServiceIds",AttributeDataType="String"
-````
-
-#### 8. Change User Status
-
-```bash
-aws cognito-idp admin-initiate-auth \
---user-pool-id ap-northeast-1_xxxxxxxxx \
---client-id xxxxxxxxxxxxxxxxxxxxxxxxxx \
---auth-flow ADMIN_USER_PASSWORD_AUTH \
---auth-parameters \
-USERNAME=********,PASSWORD=*********
-
-# Response
-{
-    "ChallengeName": "NEW_PASSWORD_REQUIRED",
-    "Session": "xxxxx....", # Copy this value
-    ...
-}
-
-aws cognito-idp admin-respond-to-auth-challenge \
---user-pool-id ap-northeast-1_xxxxxxxxx \
---client-id xxxxxxxxxxxxxxxxxxxxxxxxxx \
---challenge-name NEW_PASSWORD_REQUIRED \
---challenge-responses NEW_PASSWORD='your-password',USERNAME=your-username \
---session "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-
-```
-
-#### 9. Set Admin Role for user
-
-```bash
-aws cognito-idp admin-update-user-attributes \
---user-pool-id ap-northeast-1_xxxxxxxxx \
---username your-user-name \
---user-attributes Name="custom:role",Value="admin"
-```
-
-#### 10. Sign In by Admin User
-
-Access to https://your-domain.example.com/admin , and Sign In by created user.
-
-## Create Domains for API
-
-Execute below command
-
-```bash
-export AWS_PROFILE="your-profile-name"
-export AWS_DEFAULT_REGION="ap-northeast-1"
-sls create_domain # Deploy for dev
-```
-
-If deploy for prod
-
-```bash
-sls create_domain --stage prd # Deploy for prod
-```
-
-
-## Deploy to Lambda
-
-Execute below command
-
-```bash
-export AWS_PROFILE="your-profile-name"
-export AWS_DEFAULT_REGION="ap-northeast-1"
-sls deploy # Deploy for dev
-```
-
-If deploy for prod
-
-```bash
-sls deploy --stage prd # Deploy for prod
-```
-
-Request https://xxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com/dev
-
-
-
 ## Development
-
-### Execute Backup task on local
-
-```bash
-serverless invoke local --function backupVoteLog
-```
-
-### Truncate Comemnt Table
-
-```bash
-serverless invoke --function commentTruncater --stage dev
-```
-
-
 ### Performance Test
-
 #### Setup K6
 
 Install for macOS

@@ -1,9 +1,11 @@
-service: content-api
+service: 'your-project'
 awsAccountId: 'Your-AWS-Acconnt-ID'
-defaultRegion: 'ap-northeast-1'
-sesRegion: 'us-west-2'
+defaultRegion: 'us-east-1'
+deploymentBucketName: 'your-serverless-deployment'
 cognitoJwtHeaderName: 'Authorization'
 cognitoJwtHeaderPrefix: 'Bearer'
+
+sesRegion: 'us-west-2'
 
 mediaAcceptMimeTypes: '{"image":["image/png","image/gif","image/jpeg"],"file":["image/png","image/gif","image/jpeg","application/pdf"]}'
 mediaImageSizes: '["1200x1200","800x800","400x400","400x400xs"]'

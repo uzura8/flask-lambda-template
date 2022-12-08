@@ -81,12 +81,11 @@ provider:
   stage: ${opt:stage, self:custom.defaultStage}
   region: ${file(./config/stages/common.yml):defaultRegion}
   endpointType: REGIONAL
-  #profile: your-aws-profile-name
   iam:
     role:
       statements: ${file(./config/iam-role-statements.yml)}
   deploymentBucket:
-    name: ${self:service}-deployment-bucket
+    name: ${file(./config/stages/common.yml):deploymentBucketName}
     serverSideEncryption: AES256
   logs:
     restApi:
@@ -129,6 +128,7 @@ package:
     - .venv/**
     - __pycache__
     - package-lock.json
+    - .DS_Store
     - .babelrc
     - .browserslistrc
     - .dynamodb/**
@@ -155,7 +155,7 @@ functions:
   mediaImageMaker:
     handler: app/media_image_maker.handler
     layers:
-      - arn:aws:lambda:ap-northeast-1:770693421928:layer:Klayers-p38-Pillow:5 # Ref https://github.com/keithrozario/Klayers/tree/master/deployments
+      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p38-Pillow:5  # Ref https://github.com/keithrozario/Klayers/tree/master/deployments
     memorySize: ${file(${self:custom.stageConfigFileName}):mediaImageMakerMemorySize}
     timeout: ${file(${self:custom.stageConfigFileName}):mediaImageMakerTimeout}
     events:

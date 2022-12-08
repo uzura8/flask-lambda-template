@@ -1,0 +1,36 @@
+{
+  "domain": null,
+  "port": null,
+  "baseUrl": "/",
+  "isSSL": false,
+  "siteName": "Sample Site",
+  voteTypesDefault": ["like", "dislike"],
+  "isEnabledComment": true,
+  "adminAuthHeader": "Authorization",
+  "adminAuthHeaderTokenPrefix": "Bearer",
+  "post": {
+    "autoSlugSet": {
+      "isEnabled": false,
+      "format": "date"
+    }
+  },
+  "media": {
+    "url": "https://media.example.com",
+    "upload": {
+      "image": {
+        "sizes": ["1200x1200", "800x800", "400x400", "400x400xs"],
+        "mimeTypes": ["image/png", "image/gif", "image/jpeg"],
+        "extensions": ["png", "gif", "jpg", "jpeg"],
+        "sizeLimitMB": 3,
+        "maxcount": 5
+      },
+      "file": {
+        "mimeTypes": ["image/png", "image/gif", "image/jpeg", "application/pdf"],
+        "extensions": ["png", "gif", "jpg", "jpeg", "pdf"],
+        "sizeLimitMB": 3,
+        "maxcount": 5
+      }
+    }
+  },
+  "tinyMCEApiKey": null
+}

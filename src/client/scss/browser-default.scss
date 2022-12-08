@@ -1,0 +1,66 @@
+h1, h2, h3, h4, h5, h6 {
+  display: block;
+  font-weight: bold;
+}
+h1 {
+  margin: 0.67em 0; /* Webkit, Firefoxは、margin-before: 0.67em; margin-after: 0.67em; */
+  font-size: 2em;
+}
+h2 {
+  margin: 0.83em 0; /* Webkit, Firefoxは、margin-before: 0.83em; margin-after: 0.83em; */
+  font-size: 1.5em;
+}
+h3 {
+  margin: 1em 0; /* Webkit, Firefoxは、margin-before: 1em; margin-after: 1em; */
+  font-size: 1.17em;
+}
+h4 {
+  margin: 1.12em 0
+}
+h5 {
+  font-size: .83em;
+  margin: 1.5em 0
+}
+h6 {
+  font-size: .75em;
+  margin: 1.67em 0
+}
+
+ul {
+  margin: 1em 0;
+  padding-left: 40px;
+  list-style: disc;
+  list-style-type: disc;
+  list-style-position: outside;
+}
+ol {
+  margin: 1em 0;
+  padding-left: 40px;
+  list-style-type: decimal;
+}
+li {
+  display: list-item;
+}
+dl {
+  display:block;
+  margin: 1em 0; /* Webkit, Firefoxは、margin-before: 1em; margin-after: 1em; */
+}
+dt {
+  display: block;
+}
+dd {
+  display:block;
+  margin-left: 40px; /* Webkit, Firefoxは、margin-start: 40px; */
+}
+p {
+    margin-top: 0
+}
+pre {
+    //background: #eee;
+    margin-bottom: 10px;
+}
+table td,
+table th {
+    border: 1px solid #ddd;
+    padding: 5px;
+}

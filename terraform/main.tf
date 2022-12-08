@@ -1,12 +1,22 @@
 variable "prj_prefix" {}
-variable "aws_region_default" {}
+variable "region_api" {}
+variable "region_site" {}
 variable "route53_zone_id" {}
 variable "domain_api_dev" {}
 variable "domain_api_prd" {}
+variable "domain_static_site_prd" {}
+variable "domain_static_site_dev" {}
+variable "domain_media_site_prd" {}
+variable "domain_media_site_dev" {}
 
 provider "aws" {
-  region = var.aws_region_default
-  alias  = "default"
+  region = var.region_api
+  alias  = "api"
+}
+
+provider "aws" {
+  region = var.region_site
+  alias  = "site"
 }
 
 terraform {
@@ -22,13 +32,37 @@ terraform {
 
 locals {
   fqdn = {
-    api_dev = var.domain_api_dev
-    api_prd = var.domain_api_prd
+    api_dev         = var.domain_api_dev
+    api_prd         = var.domain_api_prd
+    static_site_prd = var.domain_static_site_prd
+    static_site_dev = var.domain_static_site_dev
+    media_site_prd  = var.domain_media_site_prd
+    media_site_dev  = var.domain_media_site_dev
+  }
+  bucket = {
+    static_site_prd = local.fqdn.static_site_prd
+    static_site_dev = local.fqdn.static_site_dev
+    media_site_prd  = local.fqdn.media_site_prd
+    media_site_dev  = local.fqdn.media_site_dev
   }
 }
 
+## S3 for cloudfront logs
+resource "aws_s3_bucket" "accesslog_static_site" {
+  provider      = aws.site
+  bucket        = "${local.fqdn.static_site_prd}-accesslog"
+  force_destroy = true # Set true, destroy bucket with objects
+  acl           = "log-delivery-write"
+
+  tags = {
+    Name      = join("-", [var.prj_prefix, "s3", "accesslog_static_site"])
+    ManagedBy = "terraform"
+  }
+}
+
+
 resource "aws_acm_certificate" "api_dev" {
-  provider          = aws.default
+  provider          = aws.api
   domain_name       = local.fqdn.api_dev
   validation_method = "DNS"
 
@@ -38,12 +72,54 @@ resource "aws_acm_certificate" "api_dev" {
   }
 }
 resource "aws_acm_certificate" "api_prd" {
-  provider          = aws.default
+  provider          = aws.api
   domain_name       = local.fqdn.api_prd
   validation_method = "DNS"
 
   tags = {
     Name      = join("-", [var.prj_prefix, "acm"])
+    ManagedBy = "terraform"
+  }
+}
+
+resource "aws_acm_certificate" "static_site_prd" {
+  provider          = aws.site
+  domain_name       = local.fqdn.static_site_prd
+  validation_method = "DNS"
+
+  tags = {
+    Name      = join("-", [var.prj_prefix, "acm_static_site_prd"])
+    ManagedBy = "terraform"
+  }
+}
+resource "aws_acm_certificate" "static_site_dev" {
+  provider          = aws.site
+  domain_name       = local.fqdn.static_site_dev
+  validation_method = "DNS"
+
+  tags = {
+    Name      = join("-", [var.prj_prefix, "acm_static_site_dev"])
+    ManagedBy = "terraform"
+  }
+}
+
+resource "aws_acm_certificate" "media_site_prd" {
+  provider          = aws.site
+  domain_name       = local.fqdn.media_site_prd
+  validation_method = "DNS"
+
+  tags = {
+    Name      = join("-", [var.prj_prefix, "acm_media_site_prd"])
+    ManagedBy = "terraform"
+  }
+}
+resource "aws_acm_certificate" "media_site_dev" {
+  provider          = aws.site
+  domain_name       = local.fqdn.media_site_dev
+  validation_method = "DNS"
+
+  tags = {
+    Name      = join("-", [var.prj_prefix, "acm_media_site_dev"])
     ManagedBy = "terraform"
   }
 }
@@ -64,6 +140,7 @@ resource "aws_route53_record" "api_dev_acm_c" {
   records         = [each.value.record]
   allow_overwrite = true
 }
+
 resource "aws_route53_record" "api_prd_acm_c" {
   for_each = {
     for d in aws_acm_certificate.api_prd.domain_validation_options : d.domain_name => {
@@ -80,21 +157,683 @@ resource "aws_route53_record" "api_prd_acm_c" {
   allow_overwrite = true
 }
 
+resource "aws_route53_record" "static_site_prd_acm_c" {
+  for_each = {
+    for d in aws_acm_certificate.static_site_prd.domain_validation_options : d.domain_name => {
+      name   = d.resource_record_name
+      record = d.resource_record_value
+      type   = d.resource_record_type
+    }
+  }
+  zone_id         = var.route53_zone_id
+  name            = each.value.name
+  type            = each.value.type
+  ttl             = 172800
+  records         = [each.value.record]
+  allow_overwrite = true
+}
+resource "aws_route53_record" "static_site_dev_acm_c" {
+  for_each = {
+    for d in aws_acm_certificate.static_site_dev.domain_validation_options : d.domain_name => {
+      name   = d.resource_record_name
+      record = d.resource_record_value
+      type   = d.resource_record_type
+    }
+  }
+  zone_id         = var.route53_zone_id
+  name            = each.value.name
+  type            = each.value.type
+  ttl             = 172800
+  records         = [each.value.record]
+  allow_overwrite = true
+}
+
+resource "aws_route53_record" "media_site_prd_acm_c" {
+  for_each = {
+    for d in aws_acm_certificate.media_site_prd.domain_validation_options : d.domain_name => {
+      name   = d.resource_record_name
+      record = d.resource_record_value
+      type   = d.resource_record_type
+    }
+  }
+  zone_id         = var.route53_zone_id
+  name            = each.value.name
+  type            = each.value.type
+  ttl             = 172800
+  records         = [each.value.record]
+  allow_overwrite = true
+}
+resource "aws_route53_record" "media_site_dev_acm_c" {
+  for_each = {
+    for d in aws_acm_certificate.media_site_dev.domain_validation_options : d.domain_name => {
+      name   = d.resource_record_name
+      record = d.resource_record_value
+      type   = d.resource_record_type
+    }
+  }
+  zone_id         = var.route53_zone_id
+  name            = each.value.name
+  type            = each.value.type
+  ttl             = 172800
+  records         = [each.value.record]
+  allow_overwrite = true
+}
+
 ## Related ACM Certification and CNAME record
 resource "aws_acm_certificate_validation" "api_dev" {
-  provider                = aws.default
+  provider                = aws.api
   certificate_arn         = aws_acm_certificate.api_dev.arn
   validation_record_fqdns = [for record in aws_route53_record.api_dev_acm_c : record.fqdn]
 }
 resource "aws_acm_certificate_validation" "api_prd" {
-  provider                = aws.default
+  provider                = aws.api
   certificate_arn         = aws_acm_certificate.api_prd.arn
   validation_record_fqdns = [for record in aws_route53_record.api_prd_acm_c : record.fqdn]
+}
+resource "aws_acm_certificate_validation" "static_site_prd" {
+  provider                = aws.site
+  certificate_arn         = aws_acm_certificate.static_site_prd.arn
+  validation_record_fqdns = [for record in aws_route53_record.static_site_prd_acm_c : record.fqdn]
+}
+resource "aws_acm_certificate_validation" "static_site_dev" {
+  provider                = aws.site
+  certificate_arn         = aws_acm_certificate.static_site_dev.arn
+  validation_record_fqdns = [for record in aws_route53_record.static_site_dev_acm_c : record.fqdn]
+}
+resource "aws_acm_certificate_validation" "media_site_prd" {
+  provider                = aws.site
+  certificate_arn         = aws_acm_certificate.media_site_prd.arn
+  validation_record_fqdns = [for record in aws_route53_record.media_site_prd_acm_c : record.fqdn]
+}
+resource "aws_acm_certificate_validation" "media_site_dev" {
+  provider                = aws.site
+  certificate_arn         = aws_acm_certificate.media_site_dev.arn
+  validation_record_fqdns = [for record in aws_route53_record.media_site_dev_acm_c : record.fqdn]
+}
+
+## A record
+resource "aws_route53_record" "static_site_prd_cdn_a" {
+  zone_id = var.route53_zone_id
+  name    = local.fqdn.static_site_prd
+  type    = "A"
+  alias {
+    evaluate_target_health = true
+    name                   = aws_cloudfront_distribution.static_site_prd.domain_name
+    zone_id                = aws_cloudfront_distribution.static_site_prd.hosted_zone_id
+  }
+}
+resource "aws_route53_record" "static_site_dev_cdn_a" {
+  zone_id = var.route53_zone_id
+  name    = local.fqdn.static_site_dev
+  type    = "A"
+  alias {
+    evaluate_target_health = true
+    name                   = aws_cloudfront_distribution.static_site_dev.domain_name
+    zone_id                = aws_cloudfront_distribution.static_site_dev.hosted_zone_id
+  }
+}
+resource "aws_route53_record" "media_site_prd_cdn_a" {
+  zone_id = var.route53_zone_id
+  name    = local.fqdn.media_site_prd
+  type    = "A"
+  alias {
+    evaluate_target_health = true
+    name                   = aws_cloudfront_distribution.media_site_prd.domain_name
+    zone_id                = aws_cloudfront_distribution.media_site_prd.hosted_zone_id
+  }
+}
+resource "aws_route53_record" "media_site_dev_cdn_a" {
+  zone_id = var.route53_zone_id
+  name    = local.fqdn.media_site_dev
+  type    = "A"
+  alias {
+    evaluate_target_health = true
+    name                   = aws_cloudfront_distribution.media_site_dev.domain_name
+    zone_id                = aws_cloudfront_distribution.media_site_dev.hosted_zone_id
+  }
+}
+
+# Create CloudFront OAI
+resource "aws_cloudfront_origin_access_identity" "static_site_prd" {
+  comment = "Origin Access Identity for s3 ${local.bucket.static_site_prd} bucket"
+}
+resource "aws_cloudfront_origin_access_identity" "static_site_dev" {
+  comment = "Origin Access Identity for s3 ${local.bucket.static_site_dev} bucket"
+}
+resource "aws_cloudfront_origin_access_identity" "media_site_prd" {
+  comment = "Origin Access Identity for s3 ${local.bucket.media_site_prd} bucket"
+}
+resource "aws_cloudfront_origin_access_identity" "media_site_dev" {
+  comment = "Origin Access Identity for s3 ${local.bucket.media_site_dev} bucket"
+}
+
+## Cache Policy
+data "aws_cloudfront_cache_policy" "managed_caching_optimized" {
+  name = "Managed-CachingOptimized"
+}
+data "aws_cloudfront_cache_policy" "managed_caching_disabled" {
+  name = "Managed-CachingDisabled"
+}
+
+## Distribution
+resource "aws_cloudfront_distribution" "static_site_prd" {
+  origin {
+    domain_name = "${local.bucket.static_site_prd}.s3.us-east-1.amazonaws.com"
+    origin_id   = "S3-${local.fqdn.static_site_prd}"
+    s3_origin_config {
+      origin_access_identity = aws_cloudfront_origin_access_identity.static_site_prd.cloudfront_access_identity_path
+    }
+  }
+
+  enabled             = true
+  is_ipv6_enabled     = true
+  default_root_object = "index.html"
+
+  # Alternate Domain Names (CNAMEs)
+  aliases = [local.fqdn.static_site_prd]
+
+  # Config for SSL Certification
+  viewer_certificate {
+    cloudfront_default_certificate = false
+    acm_certificate_arn            = aws_acm_certificate.static_site_prd.arn
+    minimum_protocol_version       = "TLSv1.2_2021"
+    ssl_support_method             = "sni-only"
+  }
+
+  retain_on_delete = false
+
+  logging_config {
+    include_cookies = true
+    bucket          = "${aws_s3_bucket.accesslog_static_site.id}.s3.amazonaws.com"
+    prefix          = "log/static/prd/cf/"
+  }
+
+  # For SPA to catch all request by /index.html
+  custom_error_response {
+    #error_caching_min_ttl = 360
+    error_code         = 404
+    response_code      = 200
+    response_page_path = "/index.html"
+  }
+
+  custom_error_response {
+    #error_caching_min_ttl = 360
+    error_code         = 403
+    response_code      = 200
+    response_page_path = "/index.html"
+  }
+
+  default_cache_behavior {
+    allowed_methods  = ["GET", "HEAD", "OPTIONS"]
+    cached_methods   = ["GET", "HEAD"]
+    target_origin_id = "S3-${local.fqdn.static_site_prd}"
+    #viewer_protocol_policy = "allow-all"
+    viewer_protocol_policy = "redirect-to-https"
+    compress               = true
+    cache_policy_id        = data.aws_cloudfront_cache_policy.managed_caching_optimized.id
+    min_ttl                = 0
+    default_ttl            = 3600
+    max_ttl                = 86400
+  }
+
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
+    }
+  }
+}
+resource "aws_cloudfront_distribution" "static_site_dev" {
+  origin {
+    domain_name = "${local.bucket.static_site_dev}.s3.us-east-1.amazonaws.com"
+    origin_id   = "S3-${local.fqdn.static_site_dev}"
+    s3_origin_config {
+      origin_access_identity = aws_cloudfront_origin_access_identity.static_site_dev.cloudfront_access_identity_path
+    }
+  }
+
+  enabled             = true
+  is_ipv6_enabled     = true
+  default_root_object = "index.html"
+
+  # Alternate Domain Names (CNAMEs)
+  aliases = [local.fqdn.static_site_dev]
+
+  # Config for SSL Certification
+  viewer_certificate {
+    cloudfront_default_certificate = false
+    acm_certificate_arn            = aws_acm_certificate.static_site_dev.arn
+    minimum_protocol_version       = "TLSv1.2_2021"
+    ssl_support_method             = "sni-only"
+  }
+
+  retain_on_delete = false
+
+  #logging_config {
+  #  include_cookies = true
+  #  bucket          = "${aws_s3_bucket.accesslog_static_site.id}.s3.amazonaws.com"
+  #  prefix          = "log/static/dev/cf/"
+  #}
+
+  # For SPA to catch all request by /index.html
+  custom_error_response {
+    #error_caching_min_ttl = 360
+    error_code         = 404
+    response_code      = 200
+    response_page_path = "/index.html"
+  }
+
+  custom_error_response {
+    #error_caching_min_ttl = 360
+    error_code         = 403
+    response_code      = 200
+    response_page_path = "/index.html"
+  }
+
+  default_cache_behavior {
+    allowed_methods  = ["GET", "HEAD", "OPTIONS"]
+    cached_methods   = ["GET", "HEAD"]
+    target_origin_id = "S3-${local.fqdn.static_site_dev}"
+    #viewer_protocol_policy = "allow-all"
+    viewer_protocol_policy = "redirect-to-https"
+    compress               = true
+    cache_policy_id        = data.aws_cloudfront_cache_policy.managed_caching_optimized.id
+    min_ttl                = 0
+    default_ttl            = 3600
+    max_ttl                = 86400
+  }
+
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
+    }
+  }
+}
+
+resource "aws_cloudfront_distribution" "media_site_prd" {
+  origin {
+    domain_name = "${local.bucket.media_site_prd}.s3.us-east-1.amazonaws.com"
+    origin_id   = "S3-${local.fqdn.media_site_prd}"
+    s3_origin_config {
+      origin_access_identity = aws_cloudfront_origin_access_identity.media_site_prd.cloudfront_access_identity_path
+    }
+  }
+
+  enabled             = true
+  is_ipv6_enabled     = true
+  default_root_object = "index.html"
+
+  # Alternate Domain Names (CNAMEs)
+  aliases = [local.fqdn.media_site_prd]
+
+  # Config for SSL Certification
+  viewer_certificate {
+    cloudfront_default_certificate = false
+    acm_certificate_arn            = aws_acm_certificate.media_site_prd.arn
+    minimum_protocol_version       = "TLSv1.2_2021"
+    ssl_support_method             = "sni-only"
+  }
+
+  retain_on_delete = false
+
+  logging_config {
+    include_cookies = true
+    bucket          = "${aws_s3_bucket.accesslog_static_site.id}.s3.amazonaws.com"
+    prefix          = "log/media/prd/cf/"
+  }
+
+  # For SPA to catch all request by /index.html
+  custom_error_response {
+    #error_caching_min_ttl = 360
+    error_code         = 404
+    response_code      = 200
+    response_page_path = "/index.html"
+  }
+
+  custom_error_response {
+    #error_caching_min_ttl = 360
+    error_code         = 403
+    response_code      = 200
+    response_page_path = "/index.html"
+  }
+
+  default_cache_behavior {
+    allowed_methods  = ["GET", "HEAD", "OPTIONS"]
+    cached_methods   = ["GET", "HEAD"]
+    target_origin_id = "S3-${local.fqdn.media_site_prd}"
+    #viewer_protocol_policy = "allow-all"
+    viewer_protocol_policy = "redirect-to-https"
+    compress               = true
+    cache_policy_id        = data.aws_cloudfront_cache_policy.managed_caching_optimized.id
+    min_ttl                = 0
+    default_ttl            = 3600
+    max_ttl                = 86400
+  }
+
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
+    }
+  }
+}
+resource "aws_cloudfront_distribution" "media_site_dev" {
+  origin {
+    domain_name = "${local.bucket.media_site_dev}.s3.us-east-1.amazonaws.com"
+    origin_id   = "S3-${local.fqdn.media_site_dev}"
+    s3_origin_config {
+      origin_access_identity = aws_cloudfront_origin_access_identity.media_site_dev.cloudfront_access_identity_path
+    }
+  }
+
+  enabled             = true
+  is_ipv6_enabled     = true
+  default_root_object = "index.html"
+
+  # Alternate Domain Names (CNAMEs)
+  aliases = [local.fqdn.media_site_dev]
+
+  # Config for SSL Certification
+  viewer_certificate {
+    cloudfront_default_certificate = false
+    acm_certificate_arn            = aws_acm_certificate.media_site_dev.arn
+    minimum_protocol_version       = "TLSv1.2_2021"
+    ssl_support_method             = "sni-only"
+  }
+
+  retain_on_delete = false
+
+  #logging_config {
+  #  include_cookies = true
+  #  bucket          = "${aws_s3_bucket.accesslog_static_site.id}.s3.amazonaws.com"
+  #  prefix          = "log/media/dev/cf/"
+  #}
+
+  # For SPA to catch all request by /index.html
+  custom_error_response {
+    #error_caching_min_ttl = 360
+    error_code         = 404
+    response_code      = 200
+    response_page_path = "/index.html"
+  }
+
+  custom_error_response {
+    #error_caching_min_ttl = 360
+    error_code         = 403
+    response_code      = 200
+    response_page_path = "/index.html"
+  }
+
+  default_cache_behavior {
+    allowed_methods  = ["GET", "HEAD", "OPTIONS"]
+    cached_methods   = ["GET", "HEAD"]
+    target_origin_id = "S3-${local.fqdn.media_site_dev}"
+    #viewer_protocol_policy = "allow-all"
+    viewer_protocol_policy = "redirect-to-https"
+    compress               = true
+    cache_policy_id        = data.aws_cloudfront_cache_policy.managed_caching_optimized.id
+    min_ttl                = 0
+    default_ttl            = 3600
+    max_ttl                = 86400
+  }
+
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
+    }
+  }
+}
+
+# Create IAM poliocy document
+data "aws_iam_policy_document" "s3_policy_static_site_prd" {
+  statement {
+    sid     = "PublicRead"
+    effect  = "Allow"
+    actions = ["s3:GetObject"]
+    resources = [
+      aws_s3_bucket.static_site_prd.arn,
+      "${aws_s3_bucket.static_site_prd.arn}/*"
+    ]
+
+    ## Accept to access from CloudFront only
+    #principals {
+    #  identifiers = [aws_cloudfront_origin_access_identity.static_site_prd.iam_arn]
+    #  type        = "AWS"
+    #}
+
+    # Accept to access from All
+    principals {
+      identifiers = ["*"]
+      type        = "*"
+    }
+  }
+}
+data "aws_iam_policy_document" "s3_policy_static_site_dev" {
+  statement {
+    sid     = "PublicRead"
+    effect  = "Allow"
+    actions = ["s3:GetObject"]
+    resources = [
+      aws_s3_bucket.static_site_dev.arn,
+      "${aws_s3_bucket.static_site_dev.arn}/*"
+    ]
+
+    ## Accept to access from CloudFront only
+    #principals {
+    #  identifiers = [aws_cloudfront_origin_access_identity.static_site_dev.iam_arn]
+    #  type        = "AWS"
+    #}
+
+    # Accept to access from All
+    principals {
+      identifiers = ["*"]
+      type        = "*"
+    }
+  }
+}
+
+data "aws_iam_policy_document" "s3_policy_media_site_prd" {
+  statement {
+    sid     = "PublicRead"
+    effect  = "Allow"
+    actions = ["s3:GetObject"]
+    resources = [
+      aws_s3_bucket.media_site_prd.arn,
+      "${aws_s3_bucket.media_site_prd.arn}/*"
+    ]
+
+    ## Accept to access from CloudFront only
+    #principals {
+    #  identifiers = [aws_cloudfront_origin_access_identity.media_site_prd.iam_arn]
+    #  type        = "AWS"
+    #}
+
+    # Accept to access from All
+    principals {
+      identifiers = ["*"]
+      type        = "*"
+    }
+  }
+}
+data "aws_iam_policy_document" "s3_policy_media_site_dev" {
+  statement {
+    sid     = "PublicRead"
+    effect  = "Allow"
+    actions = ["s3:GetObject"]
+    resources = [
+      aws_s3_bucket.media_site_dev.arn,
+      "${aws_s3_bucket.media_site_dev.arn}/*"
+    ]
+
+    ## Accept to access from CloudFront only
+    #principals {
+    #  identifiers = [aws_cloudfront_origin_access_identity.media_site_dev.iam_arn]
+    #  type        = "AWS"
+    #}
+
+    # Accept to access from All
+    principals {
+      identifiers = ["*"]
+      type        = "*"
+    }
+  }
+}
+
+# Related policy to bucket
+resource "aws_s3_bucket_policy" "static_site_prd" {
+  provider = aws.site
+  bucket   = aws_s3_bucket.static_site_prd.id
+  policy   = data.aws_iam_policy_document.s3_policy_static_site_prd.json
+}
+resource "aws_s3_bucket_policy" "static_site_dev" {
+  provider = aws.site
+  bucket   = aws_s3_bucket.static_site_dev.id
+  policy   = data.aws_iam_policy_document.s3_policy_static_site_dev.json
+}
+
+resource "aws_s3_bucket_policy" "media_site_prd" {
+  provider = aws.site
+  bucket   = aws_s3_bucket.media_site_prd.id
+  policy   = data.aws_iam_policy_document.s3_policy_media_site_prd.json
+}
+resource "aws_s3_bucket_policy" "media_site_dev" {
+  provider = aws.site
+  bucket   = aws_s3_bucket.media_site_dev.id
+  policy   = data.aws_iam_policy_document.s3_policy_media_site_dev.json
+}
+
+## S3 for Static Website Hosting
+resource "aws_s3_bucket" "static_site_prd" {
+  provider      = aws.site
+  bucket        = local.bucket.static_site_prd
+  force_destroy = true # Set true, destroy bucket with objects
+
+  acl = "private" # Accept to access from CloudFront only
+  #acl = "public-read" # Accept to access to S3 Bucket from All
+
+  logging {
+    target_bucket = aws_s3_bucket.accesslog_static_site.id
+    target_prefix = "log/static/prd/s3/"
+  }
+
+  website {
+    index_document = "index.html"
+    error_document = "error.html"
+  }
+
+  tags = {
+    Name      = join("-", [var.prj_prefix, "s3", "static_site_prd"])
+    ManagedBy = "terraform"
+  }
+}
+resource "aws_s3_bucket" "static_site_dev" {
+  provider      = aws.site
+  bucket        = local.bucket.static_site_dev
+  force_destroy = true # Set true, destroy bucket with objects
+
+  acl = "private" # Accept to access from CloudFront only
+  #acl = "public-read" # Accept to access to S3 Bucket from All
+
+  #logging {
+  #  target_bucket = aws_s3_bucket.accesslog_static_site.id
+  #  target_prefix        = "log/static/dev/s3/"
+  #}
+
+  website {
+    index_document = "index.html"
+    error_document = "error.html"
+  }
+
+  tags = {
+    Name      = join("-", [var.prj_prefix, "s3", "static_site_dev"])
+    ManagedBy = "terraform"
+  }
+}
+
+resource "aws_s3_bucket" "media_site_prd" {
+  provider      = aws.site
+  bucket        = local.bucket.media_site_prd
+  force_destroy = true # Set true, destroy bucket with objects
+
+  acl = "private" # Accept to access from CloudFront only
+  #acl = "public-read" # Accept to access to S3 Bucket from All
+
+  logging {
+    target_bucket = aws_s3_bucket.accesslog_static_site.id
+    target_prefix = "log/media/prd/s3/"
+  }
+
+  website {
+    index_document = "index.html"
+    error_document = "error.html"
+  }
+
+  tags = {
+    Name      = join("-", [var.prj_prefix, "s3", "media_site_prd"])
+    ManagedBy = "terraform"
+  }
+}
+resource "aws_s3_bucket" "media_site_dev" {
+  provider      = aws.site
+  bucket        = local.bucket.media_site_dev
+  force_destroy = true # Set true, destroy bucket with objects
+
+  acl = "private" # Accept to access from CloudFront only
+  #acl = "public-read" # Accept to access to S3 Bucket from All
+
+  #logging {
+  #  target_bucket = aws_s3_bucket.accesslog_static_site.id
+  #  target_prefix        = "log/media/dev/s3/"
+  #}
+
+  website {
+    index_document = "index.html"
+    error_document = "error.html"
+  }
+
+  tags = {
+    Name      = join("-", [var.prj_prefix, "s3", "media_site_dev"])
+    ManagedBy = "terraform"
+  }
+}
+
+# S3 Public Access Block
+# Accept to access from All
+resource "aws_s3_bucket_public_access_block" "static_site_prd" {
+  provider                = aws.site
+  bucket                  = aws_s3_bucket.static_site_prd.bucket
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
+}
+resource "aws_s3_bucket_public_access_block" "static_site_dev" {
+  provider                = aws.site
+  bucket                  = aws_s3_bucket.static_site_dev.bucket
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
+}
+
+resource "aws_s3_bucket_public_access_block" "media_site_prd" {
+  provider                = aws.site
+  bucket                  = aws_s3_bucket.media_site_prd.bucket
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
+}
+resource "aws_s3_bucket_public_access_block" "media_site_dev" {
+  provider                = aws.site
+  bucket                  = aws_s3_bucket.media_site_dev.bucket
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
 }
 
 # Cognito
 resource "aws_cognito_user_pool" "prd" {
-  provider                 = aws.default
+  provider                 = aws.api
   name                     = join("-", [var.prj_prefix, "cognito-user-pool"])
   auto_verified_attributes = ["email"]
   alias_attributes         = ["email"]
@@ -106,12 +845,24 @@ resource "aws_cognito_user_pool" "prd" {
   schema {
     attribute_data_type      = "String"
     name                     = "role"
-    developer_only_attribute = true
+    developer_only_attribute = false
     required                 = false
-    #mutable                  = true
+    mutable                  = true
 
     string_attribute_constraints {
       max_length = "64"
+      #min_length = "1"
+    }
+  }
+  schema {
+    attribute_data_type      = "String"
+    name                     = "acceptServiceIds"
+    developer_only_attribute = false
+    required                 = false
+    mutable                  = true
+
+    string_attribute_constraints {
+      max_length = "128"
       #min_length = "1"
     }
   }
@@ -129,7 +880,6 @@ resource "aws_cognito_user_pool" "prd" {
 }
 
 resource "aws_cognito_user_pool_client" "prd" {
-  provider        = aws.default
   name            = join("-", [var.prj_prefix, "web_client"])
   user_pool_id    = aws_cognito_user_pool.prd.id
   generate_secret = false
@@ -143,7 +893,7 @@ resource "aws_cognito_user_pool_client" "prd" {
 }
 
 resource "aws_cognito_identity_pool" "prd" {
-  provider                         = aws.default
+  provider                         = aws.api
   identity_pool_name               = join("-", [var.prj_prefix, "cognito-identity-pool"])
   allow_unauthenticated_identities = false
 

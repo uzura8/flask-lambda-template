@@ -1,4 +1,4 @@
-domainName: content-api.example.com
+domainName: your-project-api.example.com
 corsAcceptOrigins: 'https://prod.example.com,https://stg.example.com'
 notificationEmail: admin@example.com
 logsRestApiAccessLogging: false # Optional configuration which enables or disables access logging. Defaults to true.
@@ -17,14 +17,14 @@ mediaImageMakerFileSizeLimit: 10 # MB
 commentDefaultPublishStatus: "unpublish"
 commentImportTimeout: 300 # s
 commentImportMemorySize: 256 # MB
-commentImportS3BucketName: "content-api-resources-prd"
-commentImportS3BucketPath: "comments"
+commentImportS3BucketName: "your-content-resources"
+commentImportS3BucketPath: "your-project/prd/comments"
 commentImportS3BucketSizeLimit: 3 # MB
 commentImportCsvRowsCountLimit: 1000 # Stop execution to import comments from csv, if run over this value
 commentImporterNoticeEmails: '{"hoge": {"to":"admin@example.com", "from":"admin@example.com", "from_name":"System Administrator"}}'
 
 # For Admin Console
-cognitoRegion: 'ap-northeast-1'
-cognitoUserpoolId: 'ap-northeast-1_*********'
+cognitoRegion: 'us-east-1'
+cognitoUserpoolId: 'us-east-1_*********'
 cognitoAppClientId: '**************************'
 cognitoCheckTokenExpiration: True # If set Falsae, disable token expiration checking for testing purposes

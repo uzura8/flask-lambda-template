@@ -1,29 +1,74 @@
+# OS file
 *~
 *.bak
+.DS_Store
+Thumbs.db
+
+# IDE user config
+.vscode/
+.idea/
+.vs/
 .buildpath
 .project
 .settings
 *.tmproj
-.idea
-nbproject/
-tags
-.DS_Store
-Thumbs.db
 desktop.ini
-tags
 nbproject/
+tags
 
+# npm
+node_modules/
 /package-lock.json
-/node_modules/*
+.env
+.yarn
 
-__pycache__
+# Python
 .venv
+__pycache__
 
+# Logs
+yarn-error.log
+npm-debug.log
+lerna-debug.log
+
+# Istanbul coverage
+coverage/
+
+# cypress
+cypress/screenshots
+cypress/videos
+
+.vercel
+.now
+
+# config
+/src/client/js/config/config.json
+/src/client/js/config/cognito-client-config.json
+/src/client/js/config/config-prd.json
+/src/client/js/config/config-dev.json
+
+# public
+/public/assets/js/*
+/public/assets/css/*
+/public/.htaccess
+
+# Terraform
+/terraform/.terraform
+/terraform/.terraform.lock.hcl
+/terraform/.terraform.tfstate.lock.info
+/terraform/terraform.tfvars
+/terraform/terraform.tfstate*
+
+# serverless
 /.serverless
 /.serverless-wsgi
 /serverless_wsgi.py
 /wsgi_handler.py
 /.dynamodb
+/config/stages/*
+/config/templates/*
+/config/contact/*
+/config-bkup*
 
 /develop/env.sh
 /develop/var/*
@@ -32,15 +77,3 @@ __pycache__
 /develop/db_converter/config.ini
 /develop/db_converter/services/*
 /develop/db_converter/var/*
-/config/stages/*
-/config/templates/*
-/config/contact/*
-/config/contact/*
-/config-bkup*
-
-# Terraform
-/terraform/.terraform
-/terraform/.terraform.lock.hcl
-/terraform/.terraform.tfstate.lock.info
-/terraform/terraform.tfvars
-/terraform/terraform.tfstate*
