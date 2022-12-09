@@ -197,7 +197,6 @@ resources:
     ServiceConfigDynamoDBTable: ${file(./config/dynamodb/service-config.yml)}
     VoteLogDynamoDBTable: ${file(./config/dynamodb/vote-log.yml)}
     VoteCountDynamoDBTable: ${file(./config/dynamodb/vote-count.yml)}
-    ContactDynamoDBTable: ${file(./config/dynamodb/contact.yml)}
     CategoryDynamoDBTable: ${file(./config/dynamodb/category.yml)}
     PostDynamoDBTable: ${file(./config/dynamodb/post.yml)}
     PostGroupDynamoDBTable: ${file(./config/dynamodb/post-group.yml)}
@@ -206,3 +205,4 @@ resources:
     TagDynamoDBTable: ${file(./config/dynamodb/tag.yml)}
     PostTagDynamoDBTable: ${file(./config/dynamodb/post-tag.yml)}
     FileDynamoDBTable: ${file(./config/dynamodb/file.yml)}
+    #ContactDynamoDBTable: ${file(./config/dynamodb/contact.yml)}

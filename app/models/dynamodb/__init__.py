@@ -12,7 +12,7 @@ from .post_tag import PostTag
 from .file import File
 from .vote_count import VoteCount
 from .vote_log import VoteLog
-from .contact import Contact
+#from .contact import Contact
 
 __all__ = [
     'Base',
@@ -30,5 +30,5 @@ __all__ = [
     'File',
     'VoteCount',
     'VoteLog',
-    'Contact',
+    #'Contact',
 ]

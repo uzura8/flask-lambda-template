@@ -46,6 +46,14 @@ Install python packages
 pip install -r requirements.txt
 ```
 
+#### Use Contact component
+
+If use Contact component, execute bellow
+
+```bash
+. .venv/bin/activate
+pip install -r pytz Flask-WTF
+```
 
 ## Deploy AWS Resources by Terraform
 
@@ -340,7 +348,17 @@ vi src/client/js/config/cognito-client-config.json
 #### Deploy continually on pushed to git
 
 
-## Work on local
+## Development
+### Local Development
+
+Install packages for development
+
+```bash
+. .venv/bin/activate
+pip install pylint
+```
+
+### Work on local
 
 Set venv
 
@@ -370,7 +388,29 @@ Request [http://127.0.0.1:5000](http://127.0.0.1:5000/hoge)
 sls invoke local --function funcName --data param
 ```
 
-## Development
+### Convert existing DB records to DynamoDB
+
+Install packages for converter if use MySQL for convert target service
+
+```bash
+. .venv/bin/activate
+pip install PyMySQL
+```
+
+Set converter of target service
+
+```bash
+cd (root/)develop/db_converter/services/
+git clone {repository url of target service converter}
+```
+
+Execute converter
+
+```bash
+cd (root/)develop/db_converter
+python main.py {service_name}
+```
+
 ### Performance Test
 #### Setup K6
 
@@ -385,7 +425,6 @@ brew install k6
 ```bash
 k6 run ./dev_tools/performance/vote.js --vus NN --duration MMs
 ```
-
 
 ## Destroy Resources
 
