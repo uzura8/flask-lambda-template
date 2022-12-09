@@ -1,0 +1,37 @@
+Type: 'AWS::DynamoDB::Table'
+Properties:
+  TableName: ${self:custom.prjPrefix}-shorten-url
+  AttributeDefinitions:
+    -
+      AttributeName: urlId
+      AttributeType: S
+    -
+      AttributeName: serviceId
+      AttributeType: S
+    -
+      AttributeName: createdAt
+      AttributeType: S
+  KeySchema:
+    -
+      AttributeName: urlId
+      KeyType: HASH
+  #ProvisionedThroughput:
+  #  ReadCapacityUnits: 5
+  #  WriteCapacityUnits: 3
+  BillingMode: PAY_PER_REQUEST
+
+  GlobalSecondaryIndexes:
+    -
+      IndexName: createdAtGsi
+      KeySchema:
+      -
+        AttributeName: serviceId
+        KeyType: HASH
+      -
+        AttributeName: createdAt
+        KeyType: RANGE
+      Projection:
+        ProjectionType: ALL
+      #ProvisionedThroughput:
+      #  ReadCapacityUnits: 5
+      #  WriteCapacityUnits: 3

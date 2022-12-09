@@ -240,5 +240,52 @@ export default {
         .catch(err => reject(err))
     })
   },
+
+  getShortenUrls: (serviceId, identifer = '', params = {}, token = null) => {
+    return new Promise((resolve, reject) => {
+      const options = utilUri.getReqOptions(params, token)
+      const uri = identifer
+        ? `admin/shorten-urls/${serviceId}/${identifer}`
+        : `admin/shorten-urls/${serviceId}`
+      client.get(uri, options)
+        .then((res) => {
+          resolve(res.data)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+
+  createShortenUrl: (serviceId, vals, token = null) => {
+    return new Promise((resolve, reject) => {
+      const options = utilUri.getReqOptions(null, token)
+      const uri = `admin/shorten-urls/${serviceId}`
+      client.post(uri, vals, options)
+        .then(res => resolve(res.data))
+        .catch(err => reject(err))
+    })
+  },
+
+  updateShortenUrl: (serviceId, identifer, vals, token = null) => {
+    return new Promise((resolve, reject) => {
+      if (utilCommon.isEmpty(vals)) throw new Error('No value')
+      const options = utilUri.getReqOptions(null, token)
+      const uri = `admin/shorten-urls/${serviceId}/${identifer}`
+      client.post(uri, vals, options)
+        .then(res => resolve(res.data))
+        .catch(err => reject(err))
+    })
+  },
+
+  deleteShortenUrl: (identifer, token = null) => {
+    return new Promise((resolve, reject) => {
+      const options = utilUri.getReqOptions(null, token)
+      const uri = `admin/shorten-urls/${identifer}`
+      client.delete(uri, options)
+        .then(res => resolve(res.data))
+        .catch(err => reject(err))
+    })
+  },
 }
 

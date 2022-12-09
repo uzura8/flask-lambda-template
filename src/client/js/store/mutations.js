@@ -25,6 +25,21 @@ export default {
     state.adminPostsPager.lastIndex = payload
   },
 
+  [types.PUSH_ITEM_TO_ADMIN_SHORTEN_URLS_PAGER_KEYS] (state, payload) {
+    const index = payload.index
+    if (state.adminShortenUrlsPager.keys.find(item => item.index === index)) return
+    state.adminShortenUrlsPager.keys.push(payload)
+  },
+
+  [types.RESET_ADMIN_SHORTEN_URLS_PAGER] (state, isResetKeys) {
+    if (isResetKeys) state.adminShortenUrlsPager.keys = []
+    state.adminShortenUrlsPager.lastIndex = 0
+  },
+
+  [types.SET_ADMIN_SHORTEN_URLS_PAGER_LAST_INDEX] (state, payload) {
+    state.adminShortenUrlsPager.lastIndex = payload
+  },
+
   //[types.AUTH_SET_USER] (state, payload) {
   //  state.auth.user = payload
   //},

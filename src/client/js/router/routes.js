@@ -33,6 +33,10 @@ import AdminPostGroups from '@/templates/AdminPostGroups'
 import AdminPostGroup from '@/templates/AdminPostGroup'
 import AdminPostGroupCreate from '@/templates/AdminPostGroupCreate'
 import AdminPostGroupEdit from '@/templates/AdminPostGroupEdit'
+import AdminShortenUrlCreate from '@/templates/AdminShortenUrlCreate'
+import AdminShortenUrlEdit from '@/templates/AdminShortenUrlEdit'
+import AdminShortenUrl from '@/templates/AdminShortenUrl'
+import AdminShortenUrls from '@/templates/AdminShortenUrls'
 
 export default [
   {
@@ -231,6 +235,42 @@ export default [
     path: '/admin/posts/:serviceId/:postId/edit',
     name: 'AdminPostEdit',
     component: AdminPostEdit,
+    meta: {
+      requiresAuth: true,
+      requiresAcceptService: true,
+    },
+  },
+  {
+    path: '/admin/shorten-urls/:serviceId/create',
+    name: 'AdminShortenUrlCreate',
+    component: AdminShortenUrlCreate,
+    meta: {
+      requiresAuth: true,
+      requiresAcceptService: true,
+    },
+  },
+  {
+    path: '/admin/shorten-urls/:serviceId/:urlId/edit',
+    name: 'AdminShortenUrlEdit',
+    component: AdminShortenUrlEdit,
+    meta: {
+      requiresAuth: true,
+      requiresAcceptService: true,
+    },
+  },
+  {
+    path: '/admin/shorten-urls/:serviceId/:urlId',
+    name: 'AdminShortenUrl',
+    component: AdminShortenUrl,
+    meta: {
+      requiresAuth: true,
+      requiresAcceptService: true,
+    },
+  },
+  {
+    path: '/admin/shorten-urls/:serviceId',
+    name: 'AdminShortenUrls',
+    component: AdminShortenUrls,
     meta: {
       requiresAuth: true,
       requiresAcceptService: true,

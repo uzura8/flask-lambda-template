@@ -61,7 +61,7 @@ class Base():
 
     @classmethod
     def scan(self, options=None):
-        if not options:
+        if options is None:
             options = {}
         table = self.get_table()
         res = table.scan(**options)

@@ -40,6 +40,10 @@ export default {
     return state.adminPostsPager.keys.length
   },
 
+  adminShortenUrlsPagerIndexCount: state => () => {
+    return state.adminShortenUrlsPager.keys.length
+  },
+
   //userInfo: state => (key) => {
   //  const acceptKey = [
   //    'uid', 'name', 'email', 'photoURL'

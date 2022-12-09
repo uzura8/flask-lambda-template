@@ -5,7 +5,7 @@
     <p class="subtitle is-5">ServiceID: {{ serviceId }}</p>
 
     <router-link
-      :to="`/admin/posts/${serviceId}/create`"
+      :to="`/admin/posts/${this.serviceId}/create`"
       class="button"
     >{{ $t('common.createNew') }}</router-link>
   </div>

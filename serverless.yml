@@ -206,3 +206,4 @@ resources:
     PostTagDynamoDBTable: ${file(./config/dynamodb/post-tag.yml)}
     FileDynamoDBTable: ${file(./config/dynamodb/file.yml)}
     #ContactDynamoDBTable: ${file(./config/dynamodb/contact.yml)}
+    ShortenUrlDynamoDBTable: ${file(./config/dynamodb/shorten-url.yml)}

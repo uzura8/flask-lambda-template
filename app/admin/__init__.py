@@ -45,3 +45,4 @@ from . import category
 from . import tag
 from . import file
 from . import account
+from . import shorten_url

@@ -76,6 +76,9 @@
     "selectFor": "Select {target}",
     "close": "Close",
     "sort": "Sort",
+    "url": "URL",
+    "locationTo": "Location to",
+    "via": "Via",
     "more": "More"
   },
   "msg": {
@@ -185,6 +188,9 @@
     "SelectFiles": "Select Files",
     "ExpAboutNewTagsSeparater": "Please input \",\" to separate on adding new tags",
     "hideInList": "Is hide in list",
+    "isViaJumpPageLabel": "Redirect Setting",
+    "viaJumpPage": "Via Jump Page",
+    "notViaJumpPage": "Dosn't via jump page",
     "Add a comment...": "Add a comment..."
   },
   "term": {
@@ -200,6 +206,7 @@
     "markdown": "Markdown",
     "text": "Normal Text",
     "postGroup": "Post Group",
+    "shortenUrl": "Shorten URL",
     "acceptServices": "Available services",
     "facebook": "Facebook",
     "twitter": "Twitter"
@@ -223,6 +230,7 @@
     "AdminUserManagement": "Admin User Management",
     "AdminPostManagement": "Posts Management",
     "AdminPostGroupManagement": "Posts Group Management",
+    "ShortenUrlList": "Registered Shorten URLs",
     "about": "About"
   },
   "site": {

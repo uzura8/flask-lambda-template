@@ -77,6 +77,9 @@
     "selectFor": "{target} を選択する",
     "close": "閉じる",
     "sort": "並び替え",
+    "url": "URL",
+    "locationTo": "遷移先",
+    "via": "経由",
     "more": "もっと見る"
   },
   "msg": {
@@ -186,6 +189,9 @@
     "SelectFiles": "ファイルを選択",
     "ExpAboutNewTagsSeparater": "新規タグを追加する場合は「, (カンマ)」で区切って指定してください",
     "hideInList": "一覧に表示しない",
+    "isViaJumpPageLabel": "遷移設定",
+    "viaJumpPage": "ジャンプページを経由する",
+    "notViaJumpPage": "ジャンプページを経由しない",
     "Add a comment...": "メッセージを入力してください"
   },
   "term": {
@@ -201,6 +207,7 @@
     "markdown": "Markdown",
     "text": "テキスト",
     "postGroup": "投稿グループ",
+    "shortenUrl": "短縮URL",
     "acceptServices": "使用可能なサービス",
     "facebook": "Facebook",
     "twitter": "Twitter"
@@ -224,6 +231,7 @@
     "AdminUserManagement": "ユーザ管理",
     "AdminPostManagement": "投稿管理",
     "AdminPostGroupManagement": "投稿グループ管理",
+    "ShortenUrlList": "登録済み短縮URL一覧",
     "about": "このサイトについて"
   },
   "site": {

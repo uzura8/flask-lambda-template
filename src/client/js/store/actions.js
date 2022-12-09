@@ -24,5 +24,17 @@ export default {
   setAdminPostsPagerLastIndex: async (ctx, payload) => {
     ctx.commit(types.SET_ADMIN_POSTS_PAGER_LAST_INDEX, payload)
   },
+
+  pushItemToAdminShortenUrlsPagerKeys: async (ctx, payload) => {
+    ctx.commit(types.PUSH_ITEM_TO_ADMIN_SHORTEN_URLS_PAGER_KEYS, payload)
+  },
+
+  resetAdminShortenUrlsPager: async (ctx, isResetKeys = false) => {
+    ctx.commit(types.RESET_ADMIN_SHORTEN_URLS_PAGER, isResetKeys)
+  },
+
+  setAdminShortenUrlsPagerLastIndex: async (ctx, payload) => {
+    ctx.commit(types.SET_ADMIN_SHORTEN_URLS_PAGER_LAST_INDEX, payload)
+  },
 }
 
