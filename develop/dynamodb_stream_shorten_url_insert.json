@@ -1,0 +1,31 @@
+{
+  "Records": [
+    {
+      "eventID": "345e9ccaacdc135aacc2bcea3f6fbac9",
+      "eventName": "INSERT",
+      "eventVersion": "1.1",
+      "eventSource": "aws:dynamodb",
+      "awsRegion": "us-east-1",
+      "dynamodb": {
+        "ApproximateCreationDateTime": 1670915565.0,
+        "Keys": {
+          "urlId": {"S": "jyqtkyLmwV"}
+        },
+        "NewImage": {
+          "createdAt": {"S": "2022-12-13T07:12:44Z"},
+          "createdBy": {"S": "admin01"},
+          "name": {"S": ""},
+          "description": {"S": ""},
+          "serviceId": {"S": "hoge"},
+          "urlId": {"S": "jyqtkyLmwV"},
+          "isViaJumpPage": {"BOOL": false},
+          "url": {"S": "https://google.com"}
+        },
+        "SequenceNumber": "18197600000000030892517891",
+        "SizeBytes": 189,
+        "StreamViewType": "NEW_IMAGE"
+      },
+      "eventSourceARN": "arn:aws:dynamodb:us-east-1:0000000000:table/sample-shorten-url/stream/2022-12-13T06:46:07.806"
+    }
+  ]
+}

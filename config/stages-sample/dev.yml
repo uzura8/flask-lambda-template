@@ -14,6 +14,11 @@ mediaImageMakerMemorySize: 256 # MB
 mediaImageMakerTimeout: 600 # s
 mediaImageMakerFileSizeLimit: 5 # MB
 
+urlShortenQrcodeMakerMemorySize: 128 # MB
+urlShortenQrcodeMakerTimeout: 300 # s
+urlShortenBaseUrl: 'https://rd-dev.example.com/'
+urlShortenJumpPageUrl: 'https://dev.example.com/rd/redirect.html'
+
 commentDefaultPublishStatus: "unpublish"
 commentImportTimeout: 300 # s
 commentImportMemorySize: 256 # MB
