@@ -79,7 +79,7 @@ def user_to_dict_for_response(coguser):
         'acceptServiceIds': sids,
         'enabled': coguser.get('Enabled', False),
         'status': coguser.get('UserStatus', ''),
-        'createdAt': coguser.get('UserLastModifiedDate'),
+        'createdAt': coguser.get('UserCreateDate'),
         'updatedAt': coguser.get('UserLastModifiedDate'),
     }
     return res
