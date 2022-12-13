@@ -116,7 +116,7 @@ export default{
     async deleteShortenUrl() {
       try {
         this.$store.dispatch('setLoading', true)
-        const res = await Admin.deleteShortenUrl(this.postId, this.adminUserToken)
+        const res = await Admin.deleteShortenUrl(this.urlId, this.adminUserToken)
         this.$store.dispatch('setLoading', false)
         this.$router.push(`/admin/shorten-urls/${this.serviceId}`)
       } catch (err) {
