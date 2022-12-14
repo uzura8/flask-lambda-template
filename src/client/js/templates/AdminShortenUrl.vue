@@ -64,10 +64,17 @@
     </div>
   </div>
 
+  <div class="mt-6 p-4 has-background-light">
+    <h3 class="title is-4">{{ $t('term.generatedUrl') }}</h3>
+    <div><a :href="redirectUrl" target="_blank">{{ redirectUrl }}</a></div>
+    <div class="mt-3"><img :src="qrCodeUrl"></div>
+    <div class="mt-2"><a :href="qrCodeUrl" download>{{ $t('common.download') }}</a></div>
+  </div>
+
 </div>
 </template>
 <script>
-import moment from '@/moment'
+import config from '@/config/config'
 import { Admin } from '@/api'
 import EbDropdown from '@/components/molecules/EbDropdown'
 
@@ -87,6 +94,14 @@ export default{
   computed: {
     urlId() {
       return this.$route.params.urlId
+    },
+
+    qrCodeUrl() {
+      return `${config.media.url}/shorten-url/qrcodes/${this.shortenUrl.urlId}.png`
+    },
+
+    redirectUrl() {
+      return `${config.shortenUrl.redirectBaseUrl}${this.urlId}`
     },
 
     listPageUri() {

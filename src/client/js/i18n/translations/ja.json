@@ -208,6 +208,7 @@
     "text": "テキスト",
     "postGroup": "投稿グループ",
     "shortenUrl": "短縮URL",
+    "generatedUrl": "生成されたURL",
     "acceptServices": "使用可能なサービス",
     "facebook": "Facebook",
     "twitter": "Twitter"
