@@ -32,5 +32,9 @@
       }
     }
   },
-  "tinyMCEApiKey": null
+  "tinyMCEApiKey": null,
+  "shortenUrl": {
+    "redirectBaseUrl": "https://rd.example.com/",
+    "waitingTimeForQrCodeCreated": 12
+  }
 }

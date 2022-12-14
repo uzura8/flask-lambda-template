@@ -66,12 +66,22 @@
 
   <div class="mt-6 p-4 has-background-light">
     <h3 class="title is-4">{{ $t('term.generatedUrl') }}</h3>
-    <div><a :href="redirectUrl" target="_blank">{{ redirectUrl }}</a></div>
+    <div><a
+      :href="redirectUrl"
+      class="is-size-5"
+      target="_blank"
+    >{{ redirectUrl }}</a></div>
     <div
       v-if="isDispQrCode"
       class="mt-3"
-    ><img :src="qrCodeUrl"></div>
-    <div class="mt-2"><a :href="qrCodeUrl" :download="`${urlId}.png`" target="_blank">{{ $t('common.download') }}</a></div>
+    >
+      <div><img :src="qrCodeUrl"></div>
+      <div class="mt-2"><a :href="qrCodeUrl" :download="`${urlId}.png`" target="_blank">{{ $t('common.download') }}</a></div>
+    </div>
+    <div
+      class="mt-3 has-text-warning-dark"
+      v-else-if="isLoading === false"
+    >{{ $t('msg.generateImageRequiresTimes') }}</div>
   </div>
 
 </div>

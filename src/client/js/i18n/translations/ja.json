@@ -160,6 +160,7 @@
     "changePublishStatusCompleted": "公開状態を変更しました",
     "cofirmToDelete": "本当に削除しますか？",
     "hiddenInList": "一覧には表示されません",
+    "generateImageRequiresTimes": "画像の生成に時間がかかる場合があります",
     "signInGreeting": "こんにちは、{name} さん！"
   },
   "error": {
