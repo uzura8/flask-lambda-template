@@ -67,14 +67,19 @@
   <div class="mt-6 p-4 has-background-light">
     <h3 class="title is-4">{{ $t('term.generatedUrl') }}</h3>
     <div><a :href="redirectUrl" target="_blank">{{ redirectUrl }}</a></div>
-    <div class="mt-3"><img :src="qrCodeUrl"></div>
+    <div
+      v-if="isDispQrCode"
+      class="mt-3"
+    ><img :src="qrCodeUrl"></div>
     <div class="mt-2"><a :href="qrCodeUrl" :download="`${urlId}.png`" target="_blank">{{ $t('common.download') }}</a></div>
   </div>
 
 </div>
 </template>
 <script>
+import moment from '@/moment'
 import config from '@/config/config'
+import utilDate from '@/util/date'
 import { Admin } from '@/api'
 import EbDropdown from '@/components/molecules/EbDropdown'
 
@@ -88,6 +93,7 @@ export default{
   data(){
     return {
       shortenUrl: null,
+      isDispQrCode: false,
     }
   },
 
@@ -114,6 +120,7 @@ export default{
 
   async created() {
     await this.getShortenUrl()
+    this.displayQrCode()
   },
 
   methods: {
@@ -142,6 +149,18 @@ export default{
         }
         this.handleApiError(err, this.$t(`msg["Delete failed"]`))
       }
+    },
+
+    displayQrCode() {
+      const now = utilDate.nowUtime()
+      const createdAt = moment(this.shortenUrl.createdAt).unix()
+      if (now - createdAt > config.shortenUrl.waitingTimeForQrCodeCreated) {
+        this.isDispQrCode = true
+        return
+      }
+      setTimeout(() => {
+        this.isDispQrCode = true
+      }, config.shortenUrl.waitingTimeForQrCodeCreated * 1000)
     },
   },
 }
