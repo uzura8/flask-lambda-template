@@ -4,7 +4,7 @@ import router from '@/router'
 import i18n from '@/i18n'
 import store from '@/store'
 import cognito from './cognito'
-import '@/sanitize'
+//import '@/sanitize'
 import App from '@/App'
 
 import Buefy from 'buefy'

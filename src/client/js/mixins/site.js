@@ -118,11 +118,11 @@ export default {
       }
     },
 
-    usableTextSanitized: function (text) {
-      let conved = util.str.nl2br(text)
-      conved = util.str.url2link(conved)
-      return this.$sanitize(conved)
-    },
+    //usableTextSanitized: function (text) {
+    //  let conved = util.str.nl2br(text)
+    //  conved = util.str.url2link(conved)
+    //  return this.$sanitize(conved)
+    //},
 
     usableTextEscaped: function (text) {
       let conved = util.str.escapeHtml(text)
