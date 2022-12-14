@@ -68,7 +68,7 @@
     <h3 class="title is-4">{{ $t('term.generatedUrl') }}</h3>
     <div><a :href="redirectUrl" target="_blank">{{ redirectUrl }}</a></div>
     <div class="mt-3"><img :src="qrCodeUrl"></div>
-    <div class="mt-2"><a :href="qrCodeUrl" download>{{ $t('common.download') }}</a></div>
+    <div class="mt-2"><a :href="qrCodeUrl" :download="`${urlId}.png`" target="_blank">{{ $t('common.download') }}</a></div>
   </div>
 
 </div>
