@@ -5,13 +5,16 @@ class ShortenUrl(Base):
     table_name = 'shorten-url'
     public_attrs = [
         'urlId',
-        'url',
+        'locationTo',
         'createdAt',
     ]
     response_attrs = public_attrs + []
     private_attrs = [
         'serviceId',
+        'url',
         'isViaJumpPage',
+        'paramKey',
+        'paramValue',
         'name',
         'description',
         'createdBy',

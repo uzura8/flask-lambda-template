@@ -18,6 +18,7 @@ urlShortenQrcodeMakerMemorySize: 128 # MB
 urlShortenQrcodeMakerTimeout: 300 # s
 urlShortenBaseUrl: 'https://rd-dev.example.com/'
 urlShortenJumpPageUrl: 'https://dev.example.com/rd/redirect.html'
+urlShortenJumpPageQueryKey: 'url'
 
 commentDefaultPublishStatus: "unpublish"
 commentImportTimeout: 300 # s

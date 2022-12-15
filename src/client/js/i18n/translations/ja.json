@@ -80,6 +80,7 @@
     "url": "URL",
     "locationTo": "遷移先",
     "via": "経由",
+    "paramsFor": "{target}用パラメータ",
     "more": "もっと見る"
   },
   "msg": {
@@ -159,6 +160,7 @@
     "cofirmToPublish": "本当に公開しますか？",
     "changePublishStatusCompleted": "公開状態を変更しました",
     "cofirmToDelete": "本当に削除しますか？",
+    "inputRequiredBoth": "両方入力してください",
     "hiddenInList": "一覧には表示されません",
     "generateImageRequiresTimes": "画像の生成に時間がかかる場合があります",
     "signInGreeting": "こんにちは、{name} さん！"
@@ -209,8 +211,10 @@
     "text": "テキスト",
     "postGroup": "投稿グループ",
     "shortenUrl": "短縮URL",
+    "generateUrl": "生成されるURL",
     "generatedUrl": "生成されたURL",
     "acceptServices": "使用可能なサービス",
+    "accessAnalysis": "アクセス解析",
     "facebook": "Facebook",
     "twitter": "Twitter"
   },

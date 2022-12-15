@@ -1,13 +1,19 @@
 import json
+import os
 import traceback
+from urllib.parse import quote
 from flask import jsonify, request
 from flask_cognito import cognito_auth_required, current_cognito_jwt
 from app.models.dynamodb import ShortenUrl, ModelInvalidParamsException
 from app.common.error import InvalidUsage
 from app.common.string import random_str
 from app.common.request import validate_req_params
+from app.common.url import join_query
 from app.validators import NormalizerUtils
 from app.admin import bp, site_before_request, check_acl_service_id
+
+JUMP_PAGE_URL = os.environ.get('URL_SHORTEN_JUMP_PAGE_URL')
+JUMP_PAGE_QUERY_KEY = os.environ.get('URL_SHORTEN_JUMP_PAGE_QUERY_KEY')
 
 
 @bp.before_request
@@ -19,7 +25,7 @@ def before_request():
 @bp.route('/shorten-urls/<string:service_id>', methods=['POST', 'GET'])
 @cognito_auth_required
 def url_list(service_id):
-    service = check_acl_service_id(service_id)
+    check_acl_service_id(service_id)
 
     if request.method == 'POST':
         schema = validation_schema_url_post()
@@ -34,6 +40,7 @@ def url_list(service_id):
         if not url_id:
             raise InvalidUsage('Create new url_id failed', 500)
         vals['urlId'] = url_id
+        vals['locationTo'] = generate_redirect_url(vals)
 
         try:
             res = ShortenUrl.create(vals)
@@ -77,12 +84,13 @@ def url_detail(service_id, url_id):
     if service_id != saved['serviceId']:
         raise InvalidUsage('ServiceId is invalid', 400)
 
-    service = check_acl_service_id(saved['serviceId'])
+    check_acl_service_id(saved['serviceId'])
 
     if request.method == 'POST':
         schema = validation_schema_url_post()
         vals = validate_req_params(schema, request.json)
         vals['updatedBy'] = current_cognito_jwt.get('cognito:username', '')
+        vals['locationTo'] = generate_redirect_url(vals)
 
         try:
             saved = ShortenUrl.update(query_keys, vals, True)
@@ -114,6 +122,31 @@ def get_new_url_id():
         i += 1
 
     return url_id
+
+
+def generate_redirect_url(vals, via_jump=False):
+    jump_page = JUMP_PAGE_URL
+    jump_pkey = JUMP_PAGE_QUERY_KEY
+    url = vals.get('url')
+    pkey = vals.get('paramKey')
+    pval = vals.get('paramValue')
+    via_jump = vals.get('isViaJumpPage')
+
+    add_query = ''
+    if pkey and pval:
+        add_query = '%s=%s' % (pkey, pval)
+
+    if via_jump:
+        quoted = quote(url, safe='')
+        if add_query:
+            add_query += '&'
+        add_query += '%s=%s' % (jump_pkey, quoted)
+        res = join_query(jump_page, add_query)
+
+    else:
+        res = join_query(url, add_query)
+
+    return res
 
 
 def validation_schema_url_id():
@@ -161,6 +194,24 @@ def validation_schema_url_post():
             'required': False,
             'empty': False,
             'default': False,
+        },
+        'paramKey': {
+            'type': 'string',
+            'coerce': (NormalizerUtils.trim),
+            'required': False,
+            'nullable': True,
+            'empty': True,
+            'default': '',
+            'dependencies': 'paramValue',
+        },
+        'paramValue': {
+            'type': 'string',
+            'coerce': (NormalizerUtils.trim),
+            'required': False,
+            'nullable': True,
+            'empty': True,
+            'default': '',
+            'dependencies': 'paramKey',
         },
     }
 

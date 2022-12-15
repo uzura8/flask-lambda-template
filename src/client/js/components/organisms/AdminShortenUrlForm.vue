@@ -1,8 +1,9 @@
 <template>
 <div>
   <b-field
-    :label="$t('common.url')"
+    :label="$t('common.locationTo')"
     :type="checkEmpty(errors.url) ? '' : 'is-danger'"
+    placeholder="https://example.com/"
     :message="checkEmpty(errors.url) ? '' : errors.url[0]"
     class="mt-5"
   >
@@ -22,6 +23,45 @@
       {{ $t('form.viaJumpPage') }}
     </b-checkbox>
   </b-field>
+
+  <b-field
+    :label="$t('common.paramsFor', {target: $t('term.accessAnalysis')})"
+    :message="checkEmpty(errors.paramKeyValue) ? '' : errors.paramKeyValue[0]"
+    :type="checkEmpty(errors.paramKeyValue) ? '' : 'is-danger'"
+    grouped
+  >
+    <b-field
+      label="paramKey"
+      :message="checkEmpty(errors.paramKey) ? '' : errors.paramKey[0]"
+      :type="checkEmpty(errors.paramKey) ? '' : 'is-danger'"
+    >
+      <b-input
+        v-model="paramKey"
+        @blur="validate('paramKey')"
+      ></b-input>
+    </b-field>
+    <b-field
+      label="paramValue"
+      :message="checkEmpty(errors.paramValue) ? '' : errors.paramValue[0]"
+      :type="checkEmpty(errors.ParamValue) ? '' : 'is-danger'"
+    >
+      <b-input
+        v-model="paramValue"
+        @blur="validate('paramValue')"
+        expanded
+      ></b-input>
+    </b-field>
+  </b-field>
+
+  <div
+    v-if="generatedUrl"
+    class="p-3 mt-4 has-background-light u-wrap"
+  >
+    <h5 class="title is-6">{{ $t('term.generateUrl') }}</h5>
+    <div>
+      <a :href="generatedUrl" target="_blank">{{ generatedUrl }}</a>
+    </div>
+  </div>
 
   <b-field
     :label="$t('common.name')"
@@ -99,8 +139,10 @@ export default{
       name: '',
       description: '',
       url: '',
+      paramKey: '',
+      paramValue: '',
       isViaJumpPage: false,
-      fieldKeys: ['name', 'description', 'url', 'isViaJumpPage'],
+      fieldKeys: ['name', 'description', 'url', 'isViaJumpPage', 'paramKey', 'paramValue'],
       errors: [],
     }
   },
@@ -115,6 +157,57 @@ export default{
       return true
     },
 
+    parsedUrl() {
+      if (this.checkEmpty(this.url) === true) return
+      return new URL(this.url)
+    },
+
+    generatedUrl() {
+      if (this.checkEmpty(this.url) === true) return ''
+      if (str.checkUrl(this.url) === false) return ''
+
+      let addedQuery = ''
+      if (this.paramKey && this.paramValue) {
+        addedQuery = `${this.paramKey}=${this.paramValue}`
+      }
+      const hash = this.parsedUrl.hash
+
+      let items = []
+      if (this.isViaJumpPage) {
+        items = [
+          this.parsedUrl.origin,
+          this.parsedUrl.pathname,
+          this.parsedUrl.search,
+          hash,
+        ]
+        const targetUrl = items.join('')
+
+        const parsedUrl = new URL(config.shortenUrl.viaJumpPage.url)
+        const delimitter = parsedUrl.search ? '&' : '?'
+        items = [
+          config.shortenUrl.viaJumpPage.url,
+          delimitter,
+          config.shortenUrl.viaJumpPage.paramKey,
+          '=',
+          encodeURIComponent(targetUrl),
+          addedQuery ? '&' : '',
+          addedQuery,
+        ]
+      } else {
+        let delimitter = ''
+        if (addedQuery) {
+          delimitter = this.parsedUrl.search ? '&' : '?'
+        }
+        items = [
+          this.parsedUrl.origin,
+          this.parsedUrl.pathname,
+          this.parsedUrl.search, delimitter, addedQuery,
+          hash,
+        ]
+      }
+      return items.join('')
+    },
+
     hasErrors() {
       if (this.globalError) return true
 
@@ -122,6 +215,7 @@ export default{
       Object.keys(this.errors).map(field => {
         if (this.errors[field].length > 0) hasError = true
       })
+      if (this.errors.paramKeyValue.length > 0) hasError = true
       return hasError
     },
   },
@@ -130,6 +224,7 @@ export default{
   },
 
   async created() {
+    this.initError('paramKeyValue')
     if (this.isEdit === true) {
       this.setShortenUrl()
     }
@@ -141,6 +236,8 @@ export default{
       this.url = this.shortenUrl.url != null ? String(this.shortenUrl.url) : ''
       this.description = this.shortenUrl.description != null ? String(this.shortenUrl.description) : ''
       this.isViaJumpPage = this.shortenUrl.isViaJumpPage
+      this.paramKey = this.shortenUrl.paramKey != null ? String(this.shortenUrl.paramKey) : ''
+      this.paramValue = this.shortenUrl.paramValue != null ? String(this.shortenUrl.paramValue) : ''
     },
 
     resetInputs() {
@@ -148,6 +245,8 @@ export default{
       this.name = ''
       this.description = ''
       this.isViaJumpPage = false
+      this.paramKey = ''
+      this.paramValue = ''
     },
 
     async save(forcePublish = false) {
@@ -160,6 +259,8 @@ export default{
         vals.name = this.name
         vals.description = this.description
         vals.isViaJumpPage = this.isViaJumpPage
+        vals.paramKey = this.paramKey
+        vals.paramValue = this.paramValue
         this.$store.dispatch('setLoading', true)
         let res
         if (this.isEdit) {
@@ -192,6 +293,11 @@ export default{
       this.fieldKeys.map(field => {
         this.validate(field)
       })
+
+      if ((this.paramKey && !this.paramValue) || (!this.paramKey && this.paramValue)) {
+        this.errors.paramKeyValue.push(this.$t('msg.inputRequiredBoth'))
+      }
+
       if (this.hasErrors) {
         this.globalError = this.$t("msg['Correct inputs with error']")
       } else if (this.isEmptyRequiredFields) {
@@ -226,6 +332,23 @@ export default{
 
     validateIsViaJumpPage() {
       this.initError('isViaJumpPage')
+    },
+
+    validateParamKey() {
+      this.initError('paramKey')
+      this.$set(this.errors, 'paramKeyValue', [])
+      if (this.paramKey === null) this.paramKey = ''
+      this.paramKey = this.paramKey.trim()
+      if (this.paramKey && str.checkKeyString(this.paramKey) === false) {
+        this.errors.paramKey.push(this.$t('msg.InvalidInput'))
+      }
+    },
+
+    validateParamValue() {
+      this.initError('paramValue')
+      this.$set(this.errors, 'paramKeyValue', [])
+      if (this.paramValue === null) this.paramValue = ''
+      this.paramValue = this.paramValue.trim()
     },
   },
 }

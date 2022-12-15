@@ -62,10 +62,22 @@
         class="control"
       ></div>
     </div>
+
+    <div class="field">
+      <label class="label">{{ $t('common.paramsFor', {target: $t('term.accessAnalysis')}) }}</label>
+      <div class="control" v-text="`${shortenUrl.paramKey}=${shortenUrl.paramValue}`"></div>
+    </div>
+
+    <div class="field mt-5">
+      <label class="label">{{ $t('term.generatedUrl') }}</label>
+      <div class="control is-size-5 u-wrap">
+        <a :href="shortenUrl.locationTo" target="_blank">{{ shortenUrl.locationTo }}</a>
+      </div>
+    </div>
   </div>
 
   <div class="mt-6 p-4 has-background-light">
-    <h3 class="title is-4">{{ $t('term.generatedUrl') }}</h3>
+    <h3 class="title is-4">{{ $t('term.shortenUrl') }}</h3>
     <div><a
       :href="redirectUrl"
       class="is-size-5"

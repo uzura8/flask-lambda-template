@@ -148,6 +148,11 @@ export default {
     return regexp.test(text)
   },
 
+  checkKeyString: function(text) {
+    const regexp = /^[0-9a-z\-i_]+$/
+    return regexp.test(text)
+  },
+
   checkServiceUsername: function(text, acceptSymbols = []) {
     let acceptChars = '0-9a-z'
     if (acceptSymbols.length) {
