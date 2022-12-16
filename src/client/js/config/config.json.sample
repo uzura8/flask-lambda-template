@@ -8,6 +8,7 @@
   "isEnabledComment": true,
   "adminAuthHeader": "Authorization",
   "adminAuthHeaderTokenPrefix": "Bearer",
+  "availableFunctions": ["post", "urlShortener"],
   "post": {
     "autoSlugSet": {
       "isEnabled": false,
@@ -40,4 +41,6 @@
       "paramKey": "url"
     },
     "waitingTimeForQrCodeCreated": 12
+  }
 }
+

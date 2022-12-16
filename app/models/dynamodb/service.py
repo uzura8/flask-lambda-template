@@ -8,6 +8,7 @@ class Service(Base):
     public_attrs = [
         'serviceId',
         'label',
+        'functions',
         'frontendPostDetailUrlPrefix',
     ]
     response_attrs = public_attrs + []

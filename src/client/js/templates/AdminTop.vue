@@ -4,15 +4,29 @@
   <p>{{ $t('msg.signInGreeting', { name: adminUserName }) }}</p>
 
   <div v-if="services" class="mt-6">
-    <h2 class="title is-4">{{ $t('page.AdminPostManagement') }}</h2>
-    <ul>
-      <li v-for="service in services">
-        <router-link :to="`/admin/posts/${service.serviceId}`">
-          <span class="has-text-weight-semibold">{{ service.label }}</span>
-          <span class="ml-1">({{ service.serviceId }})</span>
-        </router-link>
-      </li>
-    </ul>
+    <div
+      v-for="service in services"
+      :key="service.serviceId"
+      class="box"
+    >
+      <h3 class="title is-4">
+        <span>{{ service.label }}</span>
+        <span class="ml-1 has-text-weight-normal is-size-6">({{ service.serviceId }})</span>
+      </h3>
+      <div v-if="service.functions" class="block">
+        <ul>
+          <li
+            v-for="functionKey in service.functions"
+            class="is-size-5 mt-2"
+          >
+            <router-link :to="getFunctionUrl(service.serviceId, functionKey)">
+              {{ $t(`page.adminFunctions["${functionKey}"]`) }}
+            </router-link>
+          </li>
+        </ul>
+      </div>
+      <div v-else>{{ $t('msg["No Data"]') }}</div>
+    </div>
   </div>
 </div>
 </template>
@@ -55,6 +69,20 @@ export default{
         this.$store.dispatch('setLoading', false)
         this.handleApiError(err, this.$t('msg["Failed to get data from server"]'))
       }
+    },
+
+    getFunctionUrl(serviceId, functinKey) {
+      let path = ''
+      switch (functinKey) {
+        case 'post':
+          path = 'posts'
+          break
+        case 'urlShortener':
+          path = 'shorten-urls'
+          break
+      }
+      if (!path) return ''
+      return `/admin/${path}/${serviceId}`
     },
   }
 }

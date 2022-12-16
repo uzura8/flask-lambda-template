@@ -195,6 +195,7 @@
     "isViaJumpPageLabel": "遷移設定",
     "viaJumpPage": "ジャンプページを経由する",
     "notViaJumpPage": "ジャンプページを経由しない",
+    "functionToApply": "適用する機能",
     "Add a comment...": "メッセージを入力してください"
   },
   "term": {
@@ -215,6 +216,10 @@
     "generatedUrl": "生成されたURL",
     "acceptServices": "使用可能なサービス",
     "accessAnalysis": "アクセス解析",
+    "availableFunctions": {
+      "post": "投稿",
+      "urlShortener": "短縮URL"
+    },
     "facebook": "Facebook",
     "twitter": "Twitter"
   },
@@ -235,9 +240,12 @@
     "AdminUsers": "管理ユーザ一覧",
     "AdminUserSettings": "管理ユーザ設定",
     "AdminUserManagement": "ユーザ管理",
-    "AdminPostManagement": "投稿管理",
     "AdminPostGroupManagement": "投稿グループ管理",
     "ShortenUrlList": "登録済み短縮URL一覧",
+    "adminFunctions": {
+      "post": "投稿管理",
+      "urlShortener": "短縮URL管理"
+    },
     "about": "このサイトについて"
   },
   "site": {

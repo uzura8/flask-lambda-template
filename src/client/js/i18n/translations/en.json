@@ -194,6 +194,7 @@
     "isViaJumpPageLabel": "Redirect Setting",
     "viaJumpPage": "Via Jump Page",
     "notViaJumpPage": "Dosen't via jump page",
+    "functionToApply": "Function to apply",
     "Add a comment...": "Add a comment..."
   },
   "term": {
@@ -214,6 +215,10 @@
     "generatedUrl": "Generated URL",
     "acceptServices": "Available services",
     "accessAnalysis": "Access Analysis",
+    "availableFunctions": {
+      "post": "Post",
+      "urlShortener": "URL Shortener"
+    },
     "facebook": "Facebook",
     "twitter": "Twitter"
   },
@@ -234,9 +239,12 @@
     "AdminUsers": "Admin Users",
     "AdminUserSettings": "Admin User Settings",
     "AdminUserManagement": "Admin User Management",
-    "AdminPostManagement": "Posts Management",
     "AdminPostGroupManagement": "Posts Group Management",
     "ShortenUrlList": "Registered Shorten URLs",
+    "adminFunctions": {
+      "post": "Posts Management",
+      "urlShortener": "Shorten URLs Management"
+    },
     "about": "About"
   },
   "site": {

@@ -1,3 +1,5 @@
+import json
+import os
 from flask import jsonify, request
 from flask_cognito import cognito_auth_required
 from app.models.dynamodb import Service
@@ -5,6 +7,8 @@ from app.common.error import InvalidUsage
 from app.common.request import validate_req_params
 from app.validators import NormalizerUtils
 from app.admin import bp, site_before_request, admin_role_required
+
+AVAILABLE_FUNCTIONS = json.loads(os.environ.get('AVAILABLE_FUNCTIONS'))
 
 
 @bp.before_request
@@ -39,7 +43,7 @@ def service_detail(service_id):
         raise InvalidUsage('ServiceId does not exist', 404)
 
     if request.method == 'POST':
-        vals = validate_req_params(validation_schema_services(), request.json, ['label'])
+        vals = validate_req_params(validation_schema_services(), request.json, ['label', 'functions'])
         updated = Service.update(key, vals, True)
         return jsonify(updated), 200
     else:
@@ -61,6 +65,13 @@ def validation_schema_services():
             'coerce': (NormalizerUtils.trim),
             'required': True,
             'empty': False,
+        },
+        'functions': {
+            'type': 'list',
+            'required': False,
+            'empty': True,
+            'default': [],
+            'allowed': AVAILABLE_FUNCTIONS
         },
         'body': {
             'type': 'string',

@@ -27,6 +27,20 @@
     ></b-input>
   </b-field>
 
+  <b-field :label="$t('form.functionToApply')">
+    <b-checkbox
+      v-model="functions"
+      native-value="post"
+    >{{ $t('term.availableFunctions.post') }}</b-checkbox>
+  </b-field>
+
+  <b-field>
+    <b-checkbox
+      v-model="functions"
+      native-value="urlShortener"
+    >{{ $t('term.availableFunctions.urlShortener') }}</b-checkbox>
+  </b-field>
+
   <div
     v-if="globalError"
     class="block has-text-danger"
@@ -57,6 +71,7 @@
 </template>
 <script>
 import str from '@/util/str'
+import config from '@/config/config'
 import { Admin } from '@/api'
 
 export default{
@@ -76,7 +91,8 @@ export default{
     return {
       serviceIdInput: '',
       label: '',
-      fieldKeys: ['serviceIdInput', 'label'],
+      functions: [],
+      fieldKeys: ['serviceIdInput', 'label', 'functions'],
     }
   },
 
@@ -110,11 +126,13 @@ export default{
     setService() {
       if (!this.isEdit) return
       this.label = this.service.label != null ? String(this.service.label) : ''
+      this.functions = this.service.functions != null ? this.service.functions : []
     },
 
     resetInputs() {
       this.serviceIdInput = ''
       this.label = ''
+      this.functions = []
     },
 
     async save(forcePublish = false) {
@@ -126,6 +144,7 @@ export default{
         let vals = {}
         if (!this.isEdit) vals.serviceId = this.serviceIdInput
         vals.label = this.label
+        vals.functions = this.functions
         this.$store.dispatch('setLoading', true)
         let res
         if (this.isEdit) {
@@ -206,6 +225,24 @@ export default{
       if (this.label === null) this.label = ''
       this.label = this.label.trim()
       if (this.checkEmpty(this.label)) this.errors.label.push(this.$t('msg["Input required"]'))
+    },
+
+    validateFunctions() {
+      const allowed = config.availableFunctions
+      this.initError('functions')
+      if (this.functions == null) this.functions = []
+      if (this.functions) {
+        let hasError = false
+        this.functions.map((item) => {
+          if (hasError === true) return
+          if (allowed.includes(item) === false) {
+            hasError = true
+          }
+        })
+        if (hasError === true) {
+          this.globalError = this.$t('msg.invalidError', {field: this.$t('form.functionToApply')})
+        }
+      }
     },
   },
 }
