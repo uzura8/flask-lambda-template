@@ -122,6 +122,11 @@ def validation_schema_services():
                     'required': False,
                     'empty': True,
                 },
+                'analysisParamKeyDefault': {
+                    'type': 'string',
+                    'required': False,
+                    'empty': True,
+                },
             }
         },
     }

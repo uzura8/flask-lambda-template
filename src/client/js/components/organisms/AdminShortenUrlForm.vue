@@ -228,6 +228,7 @@ export default{
     if (this.isEdit === true) {
       this.setShortenUrl()
     }
+    await this.setAnalysisParamKeyDefault()
   },
 
   methods: {
@@ -247,6 +248,21 @@ export default{
       this.isViaJumpPage = false
       this.paramKey = ''
       this.paramValue = ''
+    },
+
+    async setAnalysisParamKeyDefault() {
+      try {
+        this.$store.dispatch('setLoading', true)
+        const service = await Admin.getServices(this.serviceId, null, this.adminUserToken)
+        this.$store.dispatch('setLoading', false)
+        if ('configs' in service && service.configs.analysisParamKeyDefault) {
+          if (!this.paramKey) this.paramKey = service.configs.analysisParamKeyDefault
+        }
+      } catch (err) {
+        console.log(err);//!!!!!!
+        this.$store.dispatch('setLoading', false)
+        this.handleApiError(err, this.$t('msg["Failed to get data from server"]'))
+      }
     },
 
     async save(forcePublish = false) {

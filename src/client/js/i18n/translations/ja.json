@@ -198,6 +198,7 @@
     "functionToApply": "適用する機能",
     "jumpPageUrl": "解析用ジャンプページのURL",
     "jumpPageParamKey": "解析用ジャンプページURLのクエリキー",
+    "analysisParamKeyDefault": "解析用クエリキーの初期値",
     "Add a comment...": "メッセージを入力してください"
   },
   "term": {

@@ -69,6 +69,17 @@
         ></b-input>
       </b-field>
     </b-field>
+
+    <b-field
+      :label="$t('form.analysisParamKeyDefault')"
+      :type="checkEmpty(errors.analysisParamKeyDefault) ? '' : 'is-danger'"
+      :message="checkEmpty(errors.analysisParamKeyDefault) ? '' : errors.analysisParamKeyDefault[0]"
+    >
+      <b-input
+        v-model="analysisParamKeyDefault"
+        @blur="validate('analysisParamKeyDefault')"
+      ></b-input>
+    </b-field>
   </div>
 
   <div
@@ -124,7 +135,8 @@ export default{
       functions: [],
       jumpPageUrl: '',
       jumpPageParamKey: '',
-      fieldKeys: ['serviceIdInput', 'label', 'jumpPageUrl', 'jumpPageParamKey', 'functions'],
+      analysisParamKeyDefault: '',
+      fieldKeys: ['serviceIdInput', 'label', 'functions', 'jumpPageUrl', 'jumpPageParamKey', 'analysisParamKeyDefault'],
     }
   },
 
@@ -138,6 +150,7 @@ export default{
       if (!this.checkEmpty(this.label)) return false
       if (!this.checkEmpty(this.jumpPageUrl)) return false
       if (!this.checkEmpty(this.jumpPageParamKey)) return false
+      if (!this.checkEmpty(this.analysisParamKeyDefault)) return false
       return true
     },
 
@@ -164,9 +177,11 @@ export default{
       if (this.service.hasOwnProperty('configs') && this.service.configs != null) {
         this.jumpPageUrl = this.service.configs.jumpPageUrl != null ? String(this.service.configs.jumpPageUrl) : ''
         this.jumpPageParamKey = this.service.configs.jumpPageParamKey != null ? String(this.service.configs.jumpPageParamKey) : ''
+        this.analysisParamKeyDefault = this.service.configs.analysisParamKeyDefault != null ? String(this.service.configs.analysisParamKeyDefault) : ''
       } else {
         this.jumpPageUrl = ''
         this.jumpPageParamKey = ''
+        this.analysisParamKeyDefault = ''
       }
     },
 
@@ -176,6 +191,7 @@ export default{
       this.functions = []
       this.jumpPageUrl = ''
       this.jumpPageParamKey = ''
+      this.analysisParamKeyDefault = ''
     },
 
     async save(forcePublish = false) {
@@ -189,10 +205,11 @@ export default{
         vals.label = this.label
         vals.functions = this.functions
 
-        if (this.jumpPageUrl || this.jumpPageParamKey) {
+        if (this.jumpPageUrl || this.jumpPageParamKey || this.analysisParamKeyDefault) {
           vals.configs = {}
           if (this.jumpPageUrl) vals.configs.jumpPageUrl = this.jumpPageUrl
           if (this.jumpPageParamKey) vals.configs.jumpPageParamKey = this.jumpPageParamKey
+          if (this.analysisParamKeyDefault) vals.configs.analysisParamKeyDefault = this.analysisParamKeyDefault
         }
 
         this.$store.dispatch('setLoading', true)
@@ -313,6 +330,12 @@ export default{
       this.initError('jumpPageParamKey')
       if (this.jumpPageParamKey === null) this.jumpPageParamKey = ''
       this.jumpPageParamKey = this.jumpPageParamKey.trim()
+    },
+
+    validateAnalysisParamKeyDefault() {
+      this.initError('analysisParamKeyDefault')
+      if (this.analysisParamKeyDefault === null) this.analysisParamKeyDefault = ''
+      this.analysisParamKeyDefault = this.analysisParamKeyDefault.trim()
     },
   },
 }

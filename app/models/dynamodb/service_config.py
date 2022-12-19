@@ -114,6 +114,9 @@ class ServiceConfig(Base):
         if key == 'jumpPageParamKey':
             return 'urlShortener-jumpPageParamKey'
 
+        if key == 'analysisParamKeyDefault':
+            return 'urlShortener-analysisParamKeyDefault'
+
         return ''
 
 
@@ -124,5 +127,8 @@ class ServiceConfig(Base):
 
         if save_name == 'urlShortener-jumpPageParamKey':
             return 'jumpPageParamKey'
+
+        if save_name == 'urlShortener-analysisParamKeyDefault':
+            return 'analysisParamKeyDefault'
 
         return ''

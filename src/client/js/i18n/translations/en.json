@@ -197,6 +197,7 @@
     "functionToApply": "Function to apply",
     "jumpPageUrl": "URL of jump page for analysis",
     "jumpPageParamKey": "Query key of jump page URL for analysis",
+    "analysisParamKeyDefault": "Default query key for analysis",
     "Add a comment...": "Add a comment..."
   },
   "term": {
