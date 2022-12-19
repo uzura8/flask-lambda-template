@@ -111,21 +111,25 @@ def validation_schema_services():
             'type': 'dict',
             'required': False,
             'empty': True,
+            'nullable': True,
             'schema': {
                 'jumpPageUrl': {
                     'type': 'string',
                     'required': False,
                     'empty': True,
+                    'nullable': True,
                 },
                 'jumpPageParamKey': {
                     'type': 'string',
                     'required': False,
                     'empty': True,
+                    'nullable': True,
                 },
                 'analysisParamKeyDefault': {
                     'type': 'string',
                     'required': False,
                     'empty': True,
+                    'nullable': True,
                 },
             }
         },
