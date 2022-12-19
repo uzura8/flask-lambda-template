@@ -1,5 +1,5 @@
 from boto3.dynamodb.conditions import Key
-from app.models.dynamodb import Base, Service
+from app.models.dynamodb import Base
 from app.common.date import utc_iso
 
 
@@ -7,7 +7,9 @@ class ServiceConfig(Base):
     table_name = 'service-config'
 
     public_attrs = []
-    response_attrs = public_attrs + []
+    response_attrs = public_attrs + [
+        'configs'
+    ]
     private_attrs = []
     all_attrs = public_attrs + private_attrs
 
@@ -28,10 +30,24 @@ class ServiceConfig(Base):
 
 
     @classmethod
-    def save(self, service_id, name, val):
-        if not Service.check_exists(service_id):
-            raise ValueError('service_id is invalid')
+    def get_all_by_service(self, service_id, as_object=False):
+        items = self.get_all_by_pkey({'key':'serviceId', 'val':service_id})
+        if not items:
+            return None
 
+        if not as_object:
+            return items
+
+        obj = {}
+        for item in items:
+            key = self.conv_save_name_to_key(item['configName'])
+            obj[key] = item['configVal']
+
+        return obj
+
+
+    @classmethod
+    def save(self, service_id, name, val):
         time = utc_iso(False, True)
         table = self.get_table()
         item = self.get_one_by_name(service_id, name)
@@ -42,13 +58,13 @@ class ServiceConfig(Base):
                 'configVal': val,
                 'updatedAt': time,
             }
-            res = table.put_item(Item=item)
-            return res
+            table.put_item(Item=item)
+            return item
 
         if item['configVal'] == val:
             return item
 
-        res = table.update_item(
+        table.update_item(
             Key={
                 'serviceId': service_id,
                 'configName': name,
@@ -62,14 +78,16 @@ class ServiceConfig(Base):
                 }
             },
         )
-        return res
+        return {
+            'serviceId': service_id,
+            'configName': name,
+            'configVal': val,
+            'updatedAt': time,
+        }
 
 
     @classmethod
     def increament_number(self, service_id, name):
-        if not Service.check_exists(service_id):
-            raise ValueError('service_id is invalid')
-
         item = self.get_one_by_name(service_id, name)
         if not item:
             self.save(service_id, name, 1)
@@ -77,7 +95,7 @@ class ServiceConfig(Base):
 
         table = self.get_table()
         #service_id_name = '#'.join([service_id, name])
-        res = table.update_item(
+        table.update_item(
             Key={
                 'serviceId': service_id,
                 'configName': name
@@ -86,3 +104,25 @@ class ServiceConfig(Base):
             ExpressionAttributeValues={':incr': 1}
         )
         return self.get_val(service_id, name)
+
+
+    @staticmethod
+    def conv_key_to_save_name(key):
+        if key == 'jumpPageUrl':
+            return 'urlShortener-jumpPageUrl'
+
+        if key == 'jumpPageParamKey':
+            return 'urlShortener-jumpPageParamKey'
+
+        return ''
+
+
+    @staticmethod
+    def conv_save_name_to_key(save_name):
+        if save_name == 'urlShortener-jumpPageUrl':
+            return 'jumpPageUrl'
+
+        if save_name == 'urlShortener-jumpPageParamKey':
+            return 'jumpPageParamKey'
+
+        return ''

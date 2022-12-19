@@ -4,7 +4,7 @@ import traceback
 from urllib.parse import quote
 from flask import jsonify, request
 from flask_cognito import cognito_auth_required, current_cognito_jwt
-from app.models.dynamodb import ShortenUrl, ModelInvalidParamsException
+from app.models.dynamodb import ShortenUrl, ServiceConfig, ModelInvalidParamsException
 from app.common.error import InvalidUsage
 from app.common.string import random_str
 from app.common.request import validate_req_params
@@ -40,7 +40,7 @@ def url_list(service_id):
         if not url_id:
             raise InvalidUsage('Create new url_id failed', 500)
         vals['urlId'] = url_id
-        vals['locationTo'] = generate_redirect_url(vals)
+        vals['locationTo'] = generate_redirect_url(service_id, vals)
 
         try:
             res = ShortenUrl.create(vals)
@@ -57,7 +57,6 @@ def url_list(service_id):
         for key in ['count', 'order']:
             params[key] = request.args.get(key)
         vals = validate_req_params(validation_schema_url_list_get(), params)
-        #vals = validate_req_params(validation_schema_url_list_get(), request.json)
         key_name =  'lastKeyCreatedAt'
         vals['index'] = 'createdAtGsi'
         last_key = request.args.get('lastKey')
@@ -90,7 +89,7 @@ def url_detail(service_id, url_id):
         schema = validation_schema_url_post()
         vals = validate_req_params(schema, request.json)
         vals['updatedBy'] = current_cognito_jwt.get('cognito:username', '')
-        vals['locationTo'] = generate_redirect_url(vals)
+        vals['locationTo'] = generate_redirect_url(service_id, vals)
 
         try:
             saved = ShortenUrl.update(query_keys, vals, True)
@@ -124,9 +123,8 @@ def get_new_url_id():
     return url_id
 
 
-def generate_redirect_url(vals, via_jump=False):
-    jump_page = JUMP_PAGE_URL
-    jump_pkey = JUMP_PAGE_QUERY_KEY
+def generate_redirect_url(service_id, vals):
+    service_confs = ServiceConfig.get_all_by_service(service_id, True)
     url = vals.get('url')
     pkey = vals.get('paramKey')
     pval = vals.get('paramValue')
@@ -137,6 +135,15 @@ def generate_redirect_url(vals, via_jump=False):
         add_query = '%s=%s' % (pkey, pval)
 
     if via_jump:
+        has_jump_data = not service_confs\
+                or not service_confs.get('jumpPageUrl')\
+                or not service_confs.get('jumpPageParamKey')
+        if not has_jump_data:
+            raise InvalidUsage('JumpPage data not exists', 500)
+
+        jump_page = service_confs['jumpPageUrl']
+        jump_pkey = service_confs['jumpPageParamKey']
+
         quoted = quote(url, safe='')
         if add_query:
             add_query += '&'

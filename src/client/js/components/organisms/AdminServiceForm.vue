@@ -34,7 +34,7 @@
     >{{ $t('term.availableFunctions.post') }}</b-checkbox>
   </b-field>
 
-  <b-field>
+  <b-field class="mb-0">
     <b-checkbox
       v-model="functions"
       native-value="urlShortener"
@@ -42,11 +42,41 @@
   </b-field>
 
   <div
+    v-if="functions.includes('urlShortener')"
+    class="pl-5"
+  >
+    <b-field grouped>
+      <b-field
+        :label="$t('form.jumpPageUrl')"
+        :type="checkEmpty(errors.jumpPageUrl) ? '' : 'is-danger'"
+        :message="checkEmpty(errors.jumpPageUrl) ? '' : errors.jumpPageUrl[0]"
+        expanded
+      >
+        <b-input
+          v-model="jumpPageUrl"
+          @blur="validate('jumpPageUrl')"
+        ></b-input>
+      </b-field>
+
+      <b-field
+        :label="$t('form.jumpPageParamKey')"
+        :type="checkEmpty(errors.jumpPageParamKey) ? '' : 'is-danger'"
+        :message="checkEmpty(errors.jumpPageParamKey) ? '' : errors.jumpPageParamKey[0]"
+      >
+        <b-input
+          v-model="jumpPageParamKey"
+          @blur="validate('jumpPageParamKey')"
+        ></b-input>
+      </b-field>
+    </b-field>
+  </div>
+
+  <div
     v-if="globalError"
-    class="block has-text-danger"
+    class="block has-text-danger mt-5 mb-0"
   >{{ globalError }}</div>
 
-  <div class="field">
+  <div class="field mt-5">
     <div class="control">
       <button
         class="button is-warning"
@@ -92,7 +122,9 @@ export default{
       serviceIdInput: '',
       label: '',
       functions: [],
-      fieldKeys: ['serviceIdInput', 'label', 'functions'],
+      jumpPageUrl: '',
+      jumpPageParamKey: '',
+      fieldKeys: ['serviceIdInput', 'label', 'jumpPageUrl', 'jumpPageParamKey', 'functions'],
     }
   },
 
@@ -104,6 +136,8 @@ export default{
     isEmptyAllFields() {
       if (!this.isEdit && !this.checkEmpty(this.serviceIdInput)) return false
       if (!this.checkEmpty(this.label)) return false
+      if (!this.checkEmpty(this.jumpPageUrl)) return false
+      if (!this.checkEmpty(this.jumpPageParamKey)) return false
       return true
     },
 
@@ -127,12 +161,21 @@ export default{
       if (!this.isEdit) return
       this.label = this.service.label != null ? String(this.service.label) : ''
       this.functions = this.service.functions != null ? this.service.functions : []
+      if (this.service.hasOwnProperty('configs') && this.service.configs != null) {
+        this.jumpPageUrl = this.service.configs.jumpPageUrl != null ? String(this.service.configs.jumpPageUrl) : ''
+        this.jumpPageParamKey = this.service.configs.jumpPageParamKey != null ? String(this.service.configs.jumpPageParamKey) : ''
+      } else {
+        this.jumpPageUrl = ''
+        this.jumpPageParamKey = ''
+      }
     },
 
     resetInputs() {
       this.serviceIdInput = ''
       this.label = ''
       this.functions = []
+      this.jumpPageUrl = ''
+      this.jumpPageParamKey = ''
     },
 
     async save(forcePublish = false) {
@@ -145,6 +188,13 @@ export default{
         if (!this.isEdit) vals.serviceId = this.serviceIdInput
         vals.label = this.label
         vals.functions = this.functions
+
+        if (this.jumpPageUrl || this.jumpPageParamKey) {
+          vals.configs = {}
+          if (this.jumpPageUrl) vals.configs.jumpPageUrl = this.jumpPageUrl
+          if (this.jumpPageParamKey) vals.configs.jumpPageParamKey = this.jumpPageParamKey
+        }
+
         this.$store.dispatch('setLoading', true)
         let res
         if (this.isEdit) {
@@ -190,6 +240,11 @@ export default{
       this.fieldKeys.map(field => {
         this.validate(field)
       })
+      if (!this.checkEmpty(this.jumpPageUrl) && this.checkEmpty(this.jumpPageParamKey)
+        || this.checkEmpty(this.jumpPageUrl) && !this.checkEmpty(this.jumpPageParamKey)) {
+        if (this.checkEmpty(this.jumpPageUrl)) this.errors.jumpPageUrl.push(this.$t('msg["Input required"]'))
+        if (this.checkEmpty(this.jumpPageParamKey)) this.errors.jumpPageParamKey.push(this.$t('msg["Input required"]'))
+      }
       if (this.hasErrors) {
         this.globalError = this.$t("msg['Correct inputs with error']")
       } else if (this.isEmptyAllFields) {
@@ -243,6 +298,21 @@ export default{
           this.globalError = this.$t('msg.invalidError', {field: this.$t('form.functionToApply')})
         }
       }
+    },
+
+    validateJumpPageUrl() {
+      this.initError('jumpPageUrl')
+      if (this.jumpPageUrl === null) this.jumpPageUrl = ''
+      this.jumpPageUrl = this.jumpPageUrl.trim()
+      if (this.checkEmpty(this.jumpPageUrl) === false) {
+        if (str.checkUrl(this.jumpPageUrl) === false) this.errors.jumpPageUrl.push(this.$t('msg.InvalidInput'))
+      }
+    },
+
+    validateJumpPageParamKey() {
+      this.initError('jumpPageParamKey')
+      if (this.jumpPageParamKey === null) this.jumpPageParamKey = ''
+      this.jumpPageParamKey = this.jumpPageParamKey.trim()
     },
   },
 }

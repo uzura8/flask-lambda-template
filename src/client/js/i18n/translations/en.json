@@ -195,6 +195,8 @@
     "viaJumpPage": "Via Jump Page",
     "notViaJumpPage": "Dosen't via jump page",
     "functionToApply": "Function to apply",
+    "jumpPageUrl": "URL of jump page for analysis",
+    "jumpPageParamKey": "Query key of jump page URL for analysis",
     "Add a comment...": "Add a comment..."
   },
   "term": {

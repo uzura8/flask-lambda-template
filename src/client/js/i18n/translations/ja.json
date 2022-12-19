@@ -196,6 +196,8 @@
     "viaJumpPage": "ジャンプページを経由する",
     "notViaJumpPage": "ジャンプページを経由しない",
     "functionToApply": "適用する機能",
+    "jumpPageUrl": "解析用ジャンプページのURL",
+    "jumpPageParamKey": "解析用ジャンプページURLのクエリキー",
     "Add a comment...": "メッセージを入力してください"
   },
   "term": {

@@ -38,13 +38,13 @@ class SiteConfig(Base):
                 'configVal': val,
                 'updatedAt': time,
             }
-            res = table.put_item(Item=item)
-            return res
+            table.put_item(Item=item)
+            return item
 
         if item['configVal'] == val:
             return item
 
-        res = table.update_item(
+        table.update_item(
             Key={'configName': name},
             AttributeUpdates={
                 'configVal': {
@@ -55,7 +55,11 @@ class SiteConfig(Base):
                 }
             },
         )
-        return res
+        return {
+            'configName': name,
+            'configVal': val,
+            'updatedAt': time,
+        }
 
 
     @classmethod
