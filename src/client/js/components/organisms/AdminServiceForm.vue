@@ -205,12 +205,10 @@ export default{
         vals.label = this.label
         vals.functions = this.functions
 
-        if (this.jumpPageUrl || this.jumpPageParamKey || this.analysisParamKeyDefault) {
-          vals.configs = {}
-          if (this.jumpPageUrl) vals.configs.jumpPageUrl = this.jumpPageUrl
-          if (this.jumpPageParamKey) vals.configs.jumpPageParamKey = this.jumpPageParamKey
-          if (this.analysisParamKeyDefault) vals.configs.analysisParamKeyDefault = this.analysisParamKeyDefault
-        }
+        vals.configs = {}
+        if (this.jumpPageUrl) vals.configs.jumpPageUrl = this.jumpPageUrl
+        if (this.jumpPageParamKey) vals.configs.jumpPageParamKey = this.jumpPageParamKey
+        vals.configs.analysisParamKeyDefault = this.analysisParamKeyDefault
 
         this.$store.dispatch('setLoading', true)
         let res
