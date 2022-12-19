@@ -295,13 +295,15 @@ export default{
       })
 
       if ((this.paramKey && !this.paramValue) || (!this.paramKey && this.paramValue)) {
-        this.errors.paramKeyValue.push(this.$t('msg.inputRequiredBoth'))
+        //this.errors.paramKeyValue.push(this.$t('msg.inputRequiredBoth'))
+        this.errors.paramKeyValue.push('inputRequiredBoth')
       }
 
       if (this.hasErrors) {
-        this.globalError = this.$t("msg['Correct inputs with error']")
+        //this.globalError = this.$t("msg['Correct inputs with error']")
+        this.globalError = "Correct inputs with error"
       } else if (this.isEmptyRequiredFields) {
-        this.globalError = this.$t("msg['Input required']")
+        this.globalError = 'Input required'
       }
     },
 
@@ -320,8 +322,8 @@ export default{
       this.initError('url')
       if (this.url === null) this.url = ''
       this.url = this.url.trim()
-      if (this.checkEmpty(this.url)) this.errors.url.push(this.$t('msg["Input required"]'))
-      if (str.checkUrl(this.url) === false) this.errors.url.push(this.$t('msg.InvalidInput'))
+      if (this.checkEmpty(this.url)) this.errors.url.push('Input required')
+      if (str.checkUrl(this.url) === false) this.errors.url.push('msg.InvalidInput')
     },
 
     validateDescription() {
@@ -340,7 +342,7 @@ export default{
       if (this.paramKey === null) this.paramKey = ''
       this.paramKey = this.paramKey.trim()
       if (this.paramKey && str.checkKeyString(this.paramKey) === false) {
-        this.errors.paramKey.push(this.$t('msg.InvalidInput'))
+        this.errors.paramKey.push('InvalidInput')
       }
     },
 
