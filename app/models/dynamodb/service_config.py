@@ -7,12 +7,20 @@ class ServiceConfig(Base):
     table_name = 'service-config'
 
     public_attrs = []
-    response_attrs = public_attrs + [
-        'configs'
-    ]
+    response_attrs = public_attrs + []
     private_attrs = []
     all_attrs = public_attrs + private_attrs
 
+    allowed_names = {
+        'post': [
+            'frontendPostDetailUrlPrefix'
+        ],
+        'urlShortener': [
+            'jumpPageUrl',
+            'jumpPageParamKey',
+            'analysisParamKeyDefault',
+        ],
+    }
 
     @classmethod
     def get_val(self, service_id, name):
@@ -106,29 +114,19 @@ class ServiceConfig(Base):
         return self.get_val(service_id, name)
 
 
-    @staticmethod
-    def conv_key_to_save_name(key):
-        if key == 'jumpPageUrl':
-            return 'urlShortener-jumpPageUrl'
-
-        if key == 'jumpPageParamKey':
-            return 'urlShortener-jumpPageParamKey'
-
-        if key == 'analysisParamKeyDefault':
-            return 'urlShortener-analysisParamKeyDefault'
-
+    @classmethod
+    def conv_key_to_save_name(self, key):
+        for func, names in self.allowed_names.items():
+            if key in names:
+                return f'{func}-{key}'
         return ''
 
 
-    @staticmethod
-    def conv_save_name_to_key(save_name):
-        if save_name == 'urlShortener-jumpPageUrl':
-            return 'jumpPageUrl'
-
-        if save_name == 'urlShortener-jumpPageParamKey':
-            return 'jumpPageParamKey'
-
-        if save_name == 'urlShortener-analysisParamKeyDefault':
-            return 'analysisParamKeyDefault'
-
+    @classmethod
+    def conv_save_name_to_key(self, save_name):
+        for func, keys in self.allowed_names.items():
+            for key in keys:
+                name = f'{func}-{key}'
+                if save_name == name:
+                    return key
         return ''

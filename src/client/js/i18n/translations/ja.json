@@ -196,6 +196,7 @@
     "viaJumpPage": "ジャンプページを経由する",
     "notViaJumpPage": "ジャンプページを経由しない",
     "functionToApply": "適用する機能",
+    "frontendPostDetailUrlPrefix": "投稿詳細のURLプレフィックス",
     "jumpPageUrl": "解析用ジャンプページのURL",
     "jumpPageParamKey": "解析用ジャンプページURLのクエリキー",
     "analysisParamKeyDefault": "解析用クエリキーの初期値",

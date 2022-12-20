@@ -195,6 +195,7 @@
     "viaJumpPage": "Via Jump Page",
     "notViaJumpPage": "Dosen't via jump page",
     "functionToApply": "Function to apply",
+    "frontendPostDetailUrlPrefix": "URL prefix for post details",
     "jumpPageUrl": "URL of jump page for analysis",
     "jumpPageParamKey": "Query key of jump page URL for analysis",
     "analysisParamKeyDefault": "Default query key for analysis",

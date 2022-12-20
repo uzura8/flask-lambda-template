@@ -99,7 +99,6 @@ provider:
     APP_ROOT: /${self:custom.customDomain.basePath}
     CORS_ACCEPT_ORIGINS: ${file(${self:custom.stageConfigFileName}):corsAcceptOrigins}
     DEBUG_LOG_ENABLED: ${file(${self:custom.stageConfigFileName}):debugLogEnabled}
-    AVAILABLE_FUNCTIONS: ${file(./config/stages/common.yml):availableFunctions}
     MEDIA_S3_BUCKET_NAME: ${self:custom.mediaS3BucketName}
     MEDIA_ACCEPT_MIMETYPES: ${file(./config/stages/common.yml):mediaAcceptMimeTypes}
     MEDIA_IMAGE_SIZES: ${file(./config/stages/common.yml):mediaImageSizes}

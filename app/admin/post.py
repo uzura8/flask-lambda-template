@@ -89,7 +89,7 @@ def slug_util(service_id):
 @bp.route('/posts/<string:service_id>/<string:identifer>', methods=['POST', 'GET', 'HEAD', 'DELETE'])
 @cognito_auth_required
 def post_detail(service_id, identifer):
-    service = check_acl_service_id(service_id)
+    service = check_acl_service_id(service_id, True)
     post = get_post_by_identifer(service_id, identifer)
     post_id = post['postId']
 

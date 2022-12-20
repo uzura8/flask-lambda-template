@@ -3,7 +3,7 @@ from functools import wraps
 from flask import Blueprint, current_app, jsonify, abort
 from flask_cognito import cognito_auth_required, current_cognito_jwt
 from app.common.error import InvalidUsage
-from app.models.dynamodb import Service
+from app.models.dynamodb import Service, ServiceConfig
 
 bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -25,7 +25,7 @@ def admin_role_required(f):
     return decorated_function
 
 
-def check_acl_service_id(service_id):
+def check_acl_service_id(service_id, with_configs=False):
     alloweds = current_cognito_jwt.get('custom:acceptServiceIds', '').split(',')
     if service_id not in alloweds:
         raise InvalidUsage('Forbidden', 403)
@@ -33,6 +33,9 @@ def check_acl_service_id(service_id):
     item = Service.get_one_by_id(service_id)
     if not item:
         raise InvalidUsage('ServiceId does not exist', 404)
+
+    if with_configs:
+        item['configs'] = ServiceConfig.get_all_by_service(service_id, True)
 
     return item
 

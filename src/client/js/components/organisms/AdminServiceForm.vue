@@ -27,12 +27,31 @@
     ></b-input>
   </b-field>
 
-  <b-field :label="$t('form.functionToApply')">
+  <b-field
+    class="mb-0"
+    :label="$t('form.functionToApply')"
+  >
     <b-checkbox
       v-model="functions"
       native-value="post"
     >{{ $t('term.availableFunctions.post') }}</b-checkbox>
   </b-field>
+
+  <div
+    v-if="functions.includes('post')"
+    class="pl-5 pt-2 pb-4"
+  >
+    <b-field
+      :label="$t('form.frontendPostDetailUrlPrefix')"
+      :type="checkEmpty(errors.frontendPostDetailUrlPrefix) ? '' : 'is-danger'"
+      :message="checkEmpty(errors.frontendPostDetailUrlPrefix) ? '' : errors.frontendPostDetailUrlPrefix[0]"
+    >
+      <b-input
+        v-model="frontendPostDetailUrlPrefix"
+        @blur="validate('frontendPostDetailUrlPrefix')"
+      ></b-input>
+    </b-field>
+  </div>
 
   <b-field class="mb-0">
     <b-checkbox
@@ -43,7 +62,7 @@
 
   <div
     v-if="functions.includes('urlShortener')"
-    class="pl-5"
+    class="pl-5 pt-2 pb-4"
   >
     <b-field grouped>
       <b-field
@@ -134,10 +153,19 @@ export default{
       serviceIdInput: '',
       label: '',
       functions: [],
+      frontendPostDetailUrlPrefix: '',
       jumpPageUrl: '',
       jumpPageParamKey: '',
       analysisParamKeyDefault: '',
-      fieldKeys: ['serviceIdInput', 'label', 'functions', 'jumpPageUrl', 'jumpPageParamKey', 'analysisParamKeyDefault'],
+      fieldKeys: [
+        'serviceIdInput',
+        'label',
+        'functions',
+        'frontendPostDetailUrlPrefix',
+        'jumpPageUrl',
+        'jumpPageParamKey',
+        'analysisParamKeyDefault',
+      ],
     }
   },
 
@@ -149,6 +177,7 @@ export default{
     isEmptyAllFields() {
       if (!this.isEdit && !this.checkEmpty(this.serviceIdInput)) return false
       if (!this.checkEmpty(this.label)) return false
+      if (!this.checkEmpty(this.frontendPostDetailUrlPrefix)) return false
       if (!this.checkEmpty(this.jumpPageUrl)) return false
       if (!this.checkEmpty(this.jumpPageParamKey)) return false
       if (!this.checkEmpty(this.analysisParamKeyDefault)) return false
@@ -176,10 +205,12 @@ export default{
       this.label = this.service.label != null ? String(this.service.label) : ''
       this.functions = this.service.functions != null ? this.service.functions : []
       if (common.checkObjHasProp(this.service, 'configs')) {
+        this.frontendPostDetailUrlPrefix = this.service.configs.frontendPostDetailUrlPrefix != null ? String(this.service.configs.frontendPostDetailUrlPrefix) : ''
         this.jumpPageUrl = this.service.configs.jumpPageUrl != null ? String(this.service.configs.jumpPageUrl) : ''
         this.jumpPageParamKey = this.service.configs.jumpPageParamKey != null ? String(this.service.configs.jumpPageParamKey) : ''
         this.analysisParamKeyDefault = this.service.configs.analysisParamKeyDefault != null ? String(this.service.configs.analysisParamKeyDefault) : ''
       } else {
+        this.frontendPostDetailUrlPrefix = ''
         this.jumpPageUrl = ''
         this.jumpPageParamKey = ''
         this.analysisParamKeyDefault = ''
@@ -190,6 +221,7 @@ export default{
       this.serviceIdInput = ''
       this.label = ''
       this.functions = []
+      this.frontendPostDetailUrlPrefix = ''
       this.jumpPageUrl = ''
       this.jumpPageParamKey = ''
       this.analysisParamKeyDefault = ''
@@ -207,6 +239,7 @@ export default{
         vals.functions = this.functions
 
         vals.configs = {}
+        vals.configs.frontendPostDetailUrlPrefix = this.frontendPostDetailUrlPrefix
         if (this.jumpPageUrl) vals.configs.jumpPageUrl = this.jumpPageUrl
         if (this.jumpPageParamKey) vals.configs.jumpPageParamKey = this.jumpPageParamKey
         vals.configs.analysisParamKeyDefault = this.analysisParamKeyDefault
@@ -314,6 +347,12 @@ export default{
           this.globalError = this.$t('msg.invalidError', {field: this.$t('form.functionToApply')})
         }
       }
+    },
+
+    validateFrontendPostDetailUrlPrefix() {
+      this.initError('frontendPostDetailUrlPrefix')
+      if (this.frontendPostDetailUrlPrefix === null) this.frontendPostDetailUrlPrefix = ''
+      this.frontendPostDetailUrlPrefix = this.frontendPostDetailUrlPrefix.trim()
     },
 
     validateJumpPageUrl() {

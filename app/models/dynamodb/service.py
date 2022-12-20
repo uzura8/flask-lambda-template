@@ -9,7 +9,7 @@ class Service(Base):
         'serviceId',
         'label',
         'functions',
-        'frontendPostDetailUrlPrefix',
+        'configs'
     ]
     response_attrs = public_attrs + []
     private_attrs = [
@@ -17,6 +17,7 @@ class Service(Base):
     ]
     all_attrs = public_attrs + private_attrs
 
+    allowed_functions = ['post', 'urlShortener']
 
     @classmethod
     def get_one_by_id(self, service_id):

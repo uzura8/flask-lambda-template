@@ -203,6 +203,7 @@
 <script>
 import moment from '@/moment'
 import { Admin } from '@/api'
+import common from '@/util/common'
 import PostBody from '@/components/atoms/PostBody'
 import InlineTime from '@/components/atoms/InlineTime'
 import EbDropdown from '@/components/molecules/EbDropdown'
@@ -252,10 +253,11 @@ export default{
 
     previewUrl() {
       if (!this.post) return ''
-      if ('service' in this.post === false) return ''
-      if ('frontendPostDetailUrlPrefix' in this.post.service === false) return ''
+      if (common.checkObjHasProp(this.post, 'service') === false) return ''
+      if (common.checkObjHasProp(this.post.service, 'configs') === false) return ''
+      if (common.checkObjHasProp(this.post.service.configs, 'frontendPostDetailUrlPrefix') === false) return ''
 
-      const previewUrlPrefix = this.post.service.frontendPostDetailUrlPrefix
+      const previewUrlPrefix = this.post.service.configs.frontendPostDetailUrlPrefix
       const previewUrl = `${previewUrlPrefix}${this.post.slug}`
       if (this.isPublished) return previewUrl
 

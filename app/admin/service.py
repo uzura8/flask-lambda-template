@@ -8,8 +8,6 @@ from app.common.request import validate_req_params
 from app.validators import NormalizerUtils
 from app.admin import bp, site_before_request, admin_role_required
 
-AVAILABLE_FUNCTIONS = json.loads(os.environ.get('AVAILABLE_FUNCTIONS'))
-
 
 @bp.before_request
 @site_before_request
@@ -88,20 +86,11 @@ def validation_schema_services():
             'required': False,
             'empty': True,
             'default': [],
-            'allowed': AVAILABLE_FUNCTIONS
+            'allowed': Service.allowed_functions
         },
         'body': {
             'type': 'string',
             'coerce': (NormalizerUtils.rtrim),
-            'required': False,
-            'nullable': True,
-            'empty': True,
-            'default': '',
-        },
-        'frontendPostDetailUrlPrefix': {
-            'type': 'string',
-            'coerce': (NormalizerUtils.rtrim),
-            'valid_url': True,
             'required': False,
             'nullable': True,
             'empty': True,
@@ -113,6 +102,15 @@ def validation_schema_services():
             'empty': True,
             'nullable': True,
             'schema': {
+                'frontendPostDetailUrlPrefix': {
+                    'type': 'string',
+                    'coerce': (NormalizerUtils.rtrim),
+                    'valid_url': True,
+                    'required': False,
+                    'nullable': True,
+                    'empty': True,
+                    'default': '',
+                },
                 'jumpPageUrl': {
                     'type': 'string',
                     'required': False,
