@@ -117,6 +117,7 @@
 </div>
 </template>
 <script>
+import common from '@/util/common'
 import str from '@/util/str'
 import { Admin } from '@/api'
 import config from '@/config/config'
@@ -255,7 +256,8 @@ export default{
         this.$store.dispatch('setLoading', true)
         const service = await Admin.getServices(this.serviceId, null, this.adminUserToken)
         this.$store.dispatch('setLoading', false)
-        if ('configs' in service && service.configs.analysisParamKeyDefault) {
+
+        if (common.checkObjHasProp(service, 'configs') && service.configs.analysisParamKeyDefault) {
           if (!this.paramKey) this.paramKey = service.configs.analysisParamKeyDefault
         }
       } catch (err) {

@@ -23,6 +23,14 @@ export default {
     return false;
   },
 
+  checkObjHasProp: (obj, prop) => {
+    if (typeof obj !== 'object') return false
+    if (Array.isArray(obj) === true) return false
+    if (obj.hasOwnProperty(prop) === false) return false
+    if (obj[prop] == null) return false
+    return true
+  },
+
   byteToUnit: (byteSize, returnUnit = 'MB', withUnit = true, digits = 1) => {
     let formattedSize = byteSize
     const lowerUnit = returnUnit.toLowerCase()

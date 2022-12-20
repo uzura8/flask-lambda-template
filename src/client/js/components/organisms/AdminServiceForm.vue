@@ -111,6 +111,7 @@
 </div>
 </template>
 <script>
+import common from '@/util/common'
 import str from '@/util/str'
 import config from '@/config/config'
 import { Admin } from '@/api'
@@ -174,7 +175,7 @@ export default{
       if (!this.isEdit) return
       this.label = this.service.label != null ? String(this.service.label) : ''
       this.functions = this.service.functions != null ? this.service.functions : []
-      if (this.service.hasOwnProperty('configs') && this.service.configs != null) {
+      if (common.checkObjHasProp(this.service, 'configs')) {
         this.jumpPageUrl = this.service.configs.jumpPageUrl != null ? String(this.service.configs.jumpPageUrl) : ''
         this.jumpPageParamKey = this.service.configs.jumpPageParamKey != null ? String(this.service.configs.jumpPageParamKey) : ''
         this.analysisParamKeyDefault = this.service.configs.analysisParamKeyDefault != null ? String(this.service.configs.analysisParamKeyDefault) : ''
