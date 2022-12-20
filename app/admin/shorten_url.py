@@ -135,9 +135,9 @@ def generate_redirect_url(service_id, vals):
         add_query = '%s=%s' % (pkey, pval)
 
     if via_jump:
-        has_jump_data = not service_confs\
-                or not service_confs.get('jumpPageUrl')\
-                or not service_confs.get('jumpPageParamKey')
+        has_jump_data = (service_confs\
+                and service_confs.get('jumpPageUrl')\
+                and service_confs.get('jumpPageParamKey'))
         if not has_jump_data:
             raise InvalidUsage('JumpPage data not exists', 500)
 
