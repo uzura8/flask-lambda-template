@@ -99,12 +99,17 @@ export default{
       required: false,
       default: 'copy',
     },
+
+    uploaderOptions: {
+      type: Object,
+      required: true,
+      default: null,
+    },
   },
 
   data(){
     return {
       WINDOW_URL: null,
-      uploaderOptions: null,
       isUploading: false,
       caption: '',
       error: '',
@@ -115,26 +120,18 @@ export default{
     isFileObject() {
       return this.file instanceof File
     },
-
-    //sizes() {
-    //  return config.media.upload.image.sizes
-    //},
   },
 
   watch: {
-    //file(val) {
-    //}
   },
 
   created() {
     this.WINDOW_URL = (window.URL || window.webkitURL)
-    this.uploaderOptions = config.media.upload.file
   },
 
   async mounted() {
     if (this.file.caption) this.caption = this.file.caption
     if (this.isFileObject) {
-      //this.setThumbToLocalImage()
       await this.upload()
     }
   },

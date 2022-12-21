@@ -199,6 +199,10 @@
     "jumpPageUrl": "URL of jump page for analysis",
     "jumpPageParamKey": "Query key of jump page URL for analysis",
     "analysisParamKeyDefault": "Default query key for analysis",
+    "mediaUploadAcceptMimetypesFor": "Accepted MimeTypes for upload {target}",
+    "mediaUploadImageSizes": "Upload Image Sizes",
+    "mediaUploadSizeLimitMBImage": "Upload Image Size Limit (MB)",
+    "mediaUploadSizeLimitMBFile": "Upload File Size Limit (MB)",
     "Add a comment...": "Add a comment..."
   },
   "term": {

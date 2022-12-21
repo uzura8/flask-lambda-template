@@ -13,6 +13,7 @@
         :file="file"
         :enable-caption="true"
         :action-button-type="imageActionButtonType"
+        :uploader-options="uploaderOptions"
         @uploaded-file="setUploadedFile"
         @delete-file="deleteFile"
         @input-caption="inputCaption"
@@ -34,6 +35,7 @@
         :file="file"
         :enable-caption="true"
         :action-button-type="fileActionButtonType"
+        :uploader-options="uploaderOptions"
         @uploaded-file="setUploadedFile"
         @delete-file="deleteFile"
         @input-caption="inputCaption"
@@ -95,12 +97,17 @@ export default{
       required: false,
       default: 'copy',
     },
+
+    uploaderOptions: {
+      type: Object,
+      required: true,
+      default: null,
+    },
   },
 
   data(){
     return {
       files: [],
-      uploaderOptions: null,
     }
   },
 
@@ -127,7 +134,6 @@ export default{
   },
 
   created() {
-    this.uploaderOptions = config.media.upload[this.fileType]
     if (this.value) {
       this.value.map((item) => {
         const item_copied = { ...item }

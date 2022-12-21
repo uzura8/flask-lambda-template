@@ -94,9 +94,11 @@
     class="mt-5"
   >
     <file-uploader
+      v-if="uploaderOptions"
       file-type="image"
       v-model="images"
       :image-action-button-type="editorMode === 'markdown' ? 'copy' : 'insert'"
+      :uploader-options="uploaderOptions.image"
       @insert-image="insertImage"
     ></file-uploader>
   </b-field>
@@ -108,8 +110,10 @@
     class="mt-5"
   >
     <file-uploader
+      v-if="uploaderOptions"
       file-type="file"
       v-model="files"
+      :uploader-options="uploaderOptions.file"
       @copy-url="copyUrl"
     ></file-uploader>
   </b-field>
@@ -277,6 +281,7 @@
 import { getTinymce } from '@tinymce/tinymce-vue/lib/cjs/main/ts/TinyMCE'
 import moment from 'moment'
 import str from '@/util/str'
+import utilMedia from '@/util/media'
 import { Admin, Category, Tag } from '@/api'
 import config from '@/config/config'
 import RichTextEditor from '@/components/atoms/RichTextEditor'
@@ -319,6 +324,7 @@ export default{
       savedTags: [],
       filteredTags: [],
       errors: [],
+      uploaderOptions: null,
       editorModes: [
         {
           mode: 'richText',
@@ -410,6 +416,7 @@ export default{
     }
     this.setCategories()
     this.setTags()
+    this.setUploaderOptions()
   },
 
   methods: {
@@ -476,6 +483,37 @@ export default{
           this.savedTags = res
           this.filteredTags = res
         }
+      } catch (err) {
+        console.log(err);//!!!!!!
+        this.$store.dispatch('setLoading', false)
+        this.handleApiError(err, this.$t('msg["Failed to get data from server"]'))
+      }
+    },
+
+    async setUploaderOptions() {
+      try {
+        const res = await Admin.getServices(this.serviceId, null, this.adminUserToken)
+        this.uploaderOptions = {
+          image: {
+            sizes: res.configs.mediaUploadImageSizes,
+            mimeTypes: res.configs.mediaUploadAcceptMimetypesImage,
+            extensions: [],
+            sizeLimitMB: res.configs.mediaUploadSizeLimitMBImage,
+          },
+          file: {
+            mimeTypes: res.configs.mediaUploadAcceptMimetypesFile,
+            extensions: [],
+            sizeLimitMB: res.configs.mediaUploadSizeLimitMBFile,
+          },
+        }
+        res.configs.mediaUploadAcceptMimetypesImage.map((item) => {
+          let ext = utilMedia.getExtensionByMimetype(item)
+          this.uploaderOptions.image.extensions.push(ext)
+        })
+        res.configs.mediaUploadAcceptMimetypesFile.map((item) => {
+          let ext = utilMedia.getExtensionByMimetype(item)
+          this.uploaderOptions.image.extensions.push(ext)
+        })
       } catch (err) {
         console.log(err);//!!!!!!
         this.$store.dispatch('setLoading', false)

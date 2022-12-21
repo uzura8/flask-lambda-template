@@ -109,12 +109,17 @@ export default{
       required: false,
       default: 'insert',
     },
+
+    uploaderOptions: {
+      type: Object,
+      required: true,
+      default: null,
+    },
   },
 
   data(){
     return {
       WINDOW_URL: null,
-      uploaderOptions: null,
       isUploading: false,
       caption: '',
       insertSize: 'raw',
@@ -139,7 +144,6 @@ export default{
 
   created() {
     this.WINDOW_URL = (window.URL || window.webkitURL)
-    this.uploaderOptions = config.media.upload.image
   },
 
   async mounted() {

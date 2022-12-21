@@ -51,6 +51,61 @@
         @blur="validate('frontendPostDetailUrlPrefix')"
       ></b-input>
     </b-field>
+
+    <b-field
+      :label="$t('form.mediaUploadAcceptMimetypesFor', {target: $t('common.images')})"
+      :type="checkEmpty(errors.mediaUploadAcceptMimetypesImage) ? '' : 'is-danger'"
+      :message="checkEmpty(errors.mediaUploadAcceptMimetypesImage) ? '' : errors.mediaUploadAcceptMimetypesImage[0]"
+    >
+      <b-input
+        v-model="mediaUploadAcceptMimetypesImage"
+        @blur="validate('mediaUploadAcceptMimetypesImage')"
+      ></b-input>
+    </b-field>
+
+    <b-field
+      :label="$t('form.mediaUploadImageSizes')"
+      :type="checkEmpty(errors.mediaUploadImageSizes) ? '' : 'is-danger'"
+      :message="checkEmpty(errors.mediaUploadImageSizes) ? '' : errors.mediaUploadImageSizes[0]"
+    >
+      <b-input
+        v-model="mediaUploadImageSizes"
+        @blur="validate('mediaUploadImageSizes')"
+      ></b-input>
+    </b-field>
+
+    <b-field
+      :label="$t('form.mediaUploadSizeLimitMBImage')"
+      :type="checkEmpty(errors.mediaUploadSizeLimitMBImage) ? '' : 'is-danger'"
+      :message="checkEmpty(errors.mediaUploadSizeLimitMBImage) ? '' : errors.mediaUploadSizeLimitMBImage[0]"
+    >
+      <b-input
+        v-model="mediaUploadSizeLimitMBImage"
+        @blur="validate('mediaUploadSizeLimitMBImage')"
+      ></b-input>
+    </b-field>
+
+    <b-field
+      :label="$t('form.mediaUploadAcceptMimetypesFor', {target: $t('common.files')})"
+      :type="checkEmpty(errors.mediaUploadAcceptMimetypesFile) ? '' : 'is-danger'"
+      :message="checkEmpty(errors.mediaUploadAcceptMimetypesFile) ? '' : errors.mediaUploadAcceptMimetypesFile[0]"
+    >
+      <b-input
+        v-model="mediaUploadAcceptMimetypesFile"
+        @blur="validate('mediaUploadAcceptMimetypesFile')"
+      ></b-input>
+    </b-field>
+
+    <b-field
+      :label="$t('form.mediaUploadSizeLimitMBFile')"
+      :type="checkEmpty(errors.mediaUploadSizeLimitMBFile) ? '' : 'is-danger'"
+      :message="checkEmpty(errors.mediaUploadSizeLimitMBFile) ? '' : errors.mediaUploadSizeLimitMBFile[0]"
+    >
+      <b-input
+        v-model="mediaUploadSizeLimitMBFile"
+        @blur="validate('mediaUploadSizeLimitMBFile')"
+      ></b-input>
+    </b-field>
   </div>
 
   <b-field class="mb-0">
@@ -154,6 +209,11 @@ export default{
       label: '',
       functions: [],
       frontendPostDetailUrlPrefix: '',
+      mediaUploadAcceptMimetypesImage: '',
+      mediaUploadImageSizes: '',
+      mediaUploadSizeLimitMBImage: '',
+      mediaUploadAcceptMimetypesFile: '',
+      mediaUploadSizeLimitMBFile: '',
       jumpPageUrl: '',
       jumpPageParamKey: '',
       analysisParamKeyDefault: '',
@@ -162,6 +222,11 @@ export default{
         'label',
         'functions',
         'frontendPostDetailUrlPrefix',
+        'mediaUploadAcceptMimetypesImage',
+        'mediaUploadImageSizes',
+        'mediaUploadSizeLimitMBImage',
+        'mediaUploadAcceptMimetypesFile',
+        'mediaUploadSizeLimitMBFile',
         'jumpPageUrl',
         'jumpPageParamKey',
         'analysisParamKeyDefault',
@@ -178,6 +243,11 @@ export default{
       if (!this.isEdit && !this.checkEmpty(this.serviceIdInput)) return false
       if (!this.checkEmpty(this.label)) return false
       if (!this.checkEmpty(this.frontendPostDetailUrlPrefix)) return false
+      if (!this.checkEmpty(this.mediaUploadAcceptMimetypesImage)) return false
+      if (!this.checkEmpty(this.mediaUploadImageSizes)) return false
+      if (!this.checkEmpty(this.mediaUploadSizeLimitMBImage)) return false
+      if (!this.checkEmpty(this.mediaUploadAcceptMimetypesFile)) return false
+      if (!this.checkEmpty(this.mediaUploadSizeLimitMBFile)) return false
       if (!this.checkEmpty(this.jumpPageUrl)) return false
       if (!this.checkEmpty(this.jumpPageParamKey)) return false
       if (!this.checkEmpty(this.analysisParamKeyDefault)) return false
@@ -206,11 +276,21 @@ export default{
       this.functions = this.service.functions != null ? this.service.functions : []
       if (common.checkObjHasProp(this.service, 'configs')) {
         this.frontendPostDetailUrlPrefix = this.service.configs.frontendPostDetailUrlPrefix != null ? String(this.service.configs.frontendPostDetailUrlPrefix) : ''
+        this.mediaUploadAcceptMimetypesImage = this.service.configs.mediaUploadAcceptMimetypesImage != null ? String(this.service.configs.mediaUploadAcceptMimetypesImage) : ''
+        this.mediaUploadImageSizes = this.service.configs.mediaUploadImageSizes != null ? String(this.service.configs.mediaUploadImageSizes) : ''
+        this.mediaUploadSizeLimitMBImage = this.service.configs.mediaUploadSizeLimitMBImage != null ? String(this.service.configs.mediaUploadSizeLimitMBImage) : ''
+        this.mediaUploadAcceptMimetypesFile = this.service.configs.mediaUploadAcceptMimetypesFile != null ? String(this.service.configs.mediaUploadAcceptMimetypesFile) : ''
+        this.mediaUploadSizeLimitMBFile = this.service.configs.mediaUploadSizeLimitMBFile != null ? String(this.service.configs.mediaUploadSizeLimitMBFile) : ''
         this.jumpPageUrl = this.service.configs.jumpPageUrl != null ? String(this.service.configs.jumpPageUrl) : ''
         this.jumpPageParamKey = this.service.configs.jumpPageParamKey != null ? String(this.service.configs.jumpPageParamKey) : ''
         this.analysisParamKeyDefault = this.service.configs.analysisParamKeyDefault != null ? String(this.service.configs.analysisParamKeyDefault) : ''
       } else {
         this.frontendPostDetailUrlPrefix = ''
+        this.mediaUploadAcceptMimetypesImage = ''
+        this.mediaUploadImageSizes = ''
+        this.mediaUploadSizeLimitMBImage = ''
+        this.mediaUploadAcceptMimetypesFile = ''
+        this.mediaUploadSizeLimitMBFile = ''
         this.jumpPageUrl = ''
         this.jumpPageParamKey = ''
         this.analysisParamKeyDefault = ''
@@ -222,6 +302,11 @@ export default{
       this.label = ''
       this.functions = []
       this.frontendPostDetailUrlPrefix = ''
+      this.mediaUploadAcceptMimetypesImage = ''
+      this.mediaUploadImageSizes = ''
+      this.mediaUploadSizeLimitMBImage = ''
+      this.mediaUploadAcceptMimetypesFile = ''
+      this.mediaUploadSizeLimitMBFile = ''
       this.jumpPageUrl = ''
       this.jumpPageParamKey = ''
       this.analysisParamKeyDefault = ''
@@ -240,6 +325,11 @@ export default{
 
         vals.configs = {}
         vals.configs.frontendPostDetailUrlPrefix = this.frontendPostDetailUrlPrefix
+        vals.configs.mediaUploadAcceptMimetypesImage = this.mediaUploadAcceptMimetypesImage
+        vals.configs.mediaUploadImageSizes = this.mediaUploadImageSizes
+        vals.configs.mediaUploadSizeLimitMBImage = this.mediaUploadSizeLimitMBImage
+        vals.configs.mediaUploadAcceptMimetypesFile = this.mediaUploadAcceptMimetypesFile
+        vals.configs.mediaUploadSizeLimitMBFile = this.mediaUploadSizeLimitMBFile
         if (this.jumpPageUrl) vals.configs.jumpPageUrl = this.jumpPageUrl
         if (this.jumpPageParamKey) vals.configs.jumpPageParamKey = this.jumpPageParamKey
         vals.configs.analysisParamKeyDefault = this.analysisParamKeyDefault
@@ -303,7 +393,17 @@ export default{
 
     validate(field) {
       const key = 'validate' + str.capitalize(field)
-      this[key]()
+      if (common.checkObjHasProp(this, key) && typeof this[key] === 'function') {
+        this[key]()
+      } else {
+        this.validateStringFieldCommon(field)
+      }
+    },
+
+    validateStringFieldCommon(field) {
+      this.initError(field)
+      if (this[field] === null) this[field] = ''
+      this[field] = this[field].trim()
     },
 
     async validateServiceIdInput() {
@@ -325,9 +425,7 @@ export default{
     },
 
     validateLabel() {
-      this.initError('label')
-      if (this.label === null) this.label = ''
-      this.label = this.label.trim()
+      this.validateStringFieldCommon('label')
       if (this.checkEmpty(this.label)) this.errors.label.push(this.$t('msg["Input required"]'))
     },
 
@@ -349,12 +447,6 @@ export default{
       }
     },
 
-    validateFrontendPostDetailUrlPrefix() {
-      this.initError('frontendPostDetailUrlPrefix')
-      if (this.frontendPostDetailUrlPrefix === null) this.frontendPostDetailUrlPrefix = ''
-      this.frontendPostDetailUrlPrefix = this.frontendPostDetailUrlPrefix.trim()
-    },
-
     validateJumpPageUrl() {
       this.initError('jumpPageUrl')
       if (this.jumpPageUrl === null) this.jumpPageUrl = ''
@@ -362,18 +454,6 @@ export default{
       if (this.checkEmpty(this.jumpPageUrl) === false) {
         if (str.checkUrl(this.jumpPageUrl) === false) this.errors.jumpPageUrl.push(this.$t('msg.InvalidInput'))
       }
-    },
-
-    validateJumpPageParamKey() {
-      this.initError('jumpPageParamKey')
-      if (this.jumpPageParamKey === null) this.jumpPageParamKey = ''
-      this.jumpPageParamKey = this.jumpPageParamKey.trim()
-    },
-
-    validateAnalysisParamKeyDefault() {
-      this.initError('analysisParamKeyDefault')
-      if (this.analysisParamKeyDefault === null) this.analysisParamKeyDefault = ''
-      this.analysisParamKeyDefault = this.analysisParamKeyDefault.trim()
     },
   },
 }

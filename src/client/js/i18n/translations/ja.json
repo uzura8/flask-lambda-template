@@ -200,6 +200,10 @@
     "jumpPageUrl": "解析用ジャンプページのURL",
     "jumpPageParamKey": "解析用ジャンプページURLのクエリキー",
     "analysisParamKeyDefault": "解析用クエリキーの初期値",
+    "mediaUploadAcceptMimetypesFor": "{target}のアップロード許可メディアタイプ",
+    "mediaUploadImageSizes": "アップロード画像サイズリスト",
+    "mediaUploadSizeLimitMBImage": "アップロード画像サイズ上限 (MB)",
+    "mediaUploadSizeLimitMBFile": "アップロードファイルサイズ上限 (MB)",
     "Add a comment...": "メッセージを入力してください"
   },
   "term": {
