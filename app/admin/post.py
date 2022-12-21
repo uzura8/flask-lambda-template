@@ -1,16 +1,14 @@
 import json
-import os
 import traceback
 from flask import jsonify, request
 from flask_cognito import cognito_auth_required, current_cognito_jwt
 from app.models.dynamodb import Post, Tag, PostTag, File, ModelInvalidParamsException
+from app.common.site import media_accept_mimetypes
 from app.common.error import InvalidUsage
 from app.common.request import validate_req_params
 from app.common.string import validate_uuid
 from app.validators import NormalizerUtils
 from app.admin import bp, site_before_request, check_acl_service_id
-
-MEDIA_ACCEPT_MIMETYPES = json.loads(os.environ.get('MEDIA_ACCEPT_MIMETYPES', ''))
 
 
 @bp.before_request
@@ -22,11 +20,11 @@ def before_request():
 @bp.route('/posts/<string:service_id>', methods=['POST', 'GET'])
 @cognito_auth_required
 def post_list(service_id):
-    service = check_acl_service_id(service_id)
+    service = check_acl_service_id(service_id, True)
 
     post = None
     if request.method == 'POST':
-        schema = validation_schema_posts_post()
+        schema = validation_schema_posts_post(service['configs'])
         vals = validate_req_params(schema, request.json)
         vals['serviceId'] = service_id
         created_by = current_cognito_jwt.get('cognito:username', '')
@@ -57,13 +55,13 @@ def post_list(service_id):
         params = {}
         for key in ['count', 'order']:
             params[key] = request.args.get(key)
-        vals = validate_req_params(validation_schema_posts_post(), params)
+        vals = validate_req_params(validation_schema_posts_get(), params)
         key_name =  'lastKeyCreatedAt'
         vals['index'] = 'createdAtGsi'
         last_key = request.args.get('lastKey')
         if last_key:
             params = {key_name:json.loads(last_key)}
-            vals_last_key = validate_req_params(validation_schema_posts_post(), params)
+            vals_last_key = validate_req_params(validation_schema_posts_get(), params)
             vals['ExclusiveStartKey'] = vals_last_key[key_name]
 
         hkey = {'name':'serviceId', 'value': service_id}
@@ -79,7 +77,7 @@ def slug_util(service_id):
     params = {}
     for key in ['checkNotExists', 'slug']:
         params[key] = request.args.get(key)
-    vals = validate_req_params(validation_schema_posts_post(), params)
+    vals = validate_req_params(validation_schema_posts_get(), params)
 
     post = Post.get_one_by_slug(service_id, vals['slug'])
     is_not_exists = not post
@@ -95,7 +93,7 @@ def post_detail(service_id, identifer):
 
     saved = None
     if request.method == 'POST':
-        schema = validation_schema_posts_post()
+        schema = validation_schema_posts_post(service['configs'])
         vals = validate_req_params(schema, request.json)
         vals['serviceId'] = service_id
         vals['updatedBy'] = current_cognito_jwt.get('cognito:username', '')
@@ -173,8 +171,7 @@ def post_status(service_id, identifer):
     if saved['serviceId'] != service_id:
         raise InvalidUsage('serviceId is invalid', 400)
 
-    schema_all = validation_schema_posts_post()
-    schema = dict(filter(lambda item: item[0] == 'status', schema_all.items()))
+    schema = validation_schema_posts_post_status()
     vals = validate_req_params(schema, request.json)
     vals['serviceId'] = service_id
 
@@ -216,7 +213,7 @@ def get_post_by_identifer(service_id, identifer):
 def update_post_tags_status_publish_at(post_id, status_publish_at, publish_at):
     post_tags = PostTag.get_all_by_pkey({'key':'postId', 'val':post_id})
     if not post_tags:
-        return
+        return None
 
     vals = []
     for post_tag in post_tags:
@@ -300,17 +297,28 @@ def update_post_tags(post, req_tags, is_update_status_publish_at=False):
     }
 
 
-def validation_schema_posts_post():
+schema_slug = {
+    'type': 'string',
+    'coerce': (str, NormalizerUtils.trim),
+    'required': True,
+    'empty': False,
+    'maxlength': 128,
+    'regex': r'^[0-9a-z\-]+$',
+    'valid_ulid': False,
+}
+schema_status = {
+    'type': 'string',
+    'required': False,
+    'allowed': ['publish', 'unpublish'],
+    'nullable': True,
+    'empty': True,
+    'default': 'unpublish',
+}
+
+
+def validation_schema_posts_post(service_configs=None):
     return {
-        'slug': {
-            'type': 'string',
-            'coerce': (str, NormalizerUtils.trim),
-            'required': True,
-            'empty': False,
-            'maxlength': 128,
-            'regex': r'^[0-9a-z\-]+$',
-            'valid_ulid': False,
-        },
+        'slug': schema_slug,
         'title': {
             'type': 'string',
             'coerce': (NormalizerUtils.trim),
@@ -339,14 +347,7 @@ def validation_schema_posts_post():
             'required': False,
             'empty': True,
         },
-        'status': {
-            'type': 'string',
-            'required': False,
-            'allowed': ['publish', 'unpublish'],
-            'nullable': True,
-            'empty': True,
-            'default': 'unpublish',
-        },
+        'status': schema_status,
         'publishAt': {
             'type': 'string',
             'coerce': (NormalizerUtils.trim),
@@ -379,7 +380,7 @@ def validation_schema_posts_post():
                         'coerce': (NormalizerUtils.trim),
                         'required': True,
                         'empty': False,
-                        'allowed': MEDIA_ACCEPT_MIMETYPES['image'],
+                        'allowed': media_accept_mimetypes('image', service_configs),
                     },
                     'caption': {
                         'type':'string',
@@ -408,7 +409,7 @@ def validation_schema_posts_post():
                         'coerce': (NormalizerUtils.trim),
                         'required': True,
                         'empty': False,
-                        'allowed': MEDIA_ACCEPT_MIMETYPES['file'],
+                        'allowed': media_accept_mimetypes('file', service_configs),
                     },
                     'caption': {
                         'type':'string',
@@ -463,7 +464,13 @@ def validation_schema_posts_post():
                      }
                  }
             }
-        },
+        }
+    }
+
+
+def validation_schema_posts_get():
+    return {
+        'slug': schema_slug,
         'checkNotExists': {
             'type': 'boolean',
             'coerce': (str, NormalizerUtils.to_bool),
@@ -522,4 +529,10 @@ def validation_schema_posts_post():
                 },
             }
         },
+    }
+
+
+def validation_schema_posts_post_status():
+    return {
+        'status': schema_status,
     }

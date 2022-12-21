@@ -100,8 +100,6 @@ provider:
     CORS_ACCEPT_ORIGINS: ${file(${self:custom.stageConfigFileName}):corsAcceptOrigins}
     DEBUG_LOG_ENABLED: ${file(${self:custom.stageConfigFileName}):debugLogEnabled}
     MEDIA_S3_BUCKET_NAME: ${self:custom.mediaS3BucketName}
-    MEDIA_ACCEPT_MIMETYPES: ${file(./config/stages/common.yml):mediaAcceptMimeTypes}
-    MEDIA_IMAGE_SIZES: ${file(./config/stages/common.yml):mediaImageSizes}
     MEDIA_IMAGE_MAKER_FILE_SIZE_LIMIT: ${file(${self:custom.stageConfigFileName}):mediaImageMakerFileSizeLimit}
     URL_SHORTEN_BASE_URL: ${file(${self:custom.stageConfigFileName}):urlShortenBaseUrl}
     URL_SHORTEN_JUMP_PAGE_URL: ${file(${self:custom.stageConfigFileName}):urlShortenJumpPageUrl}

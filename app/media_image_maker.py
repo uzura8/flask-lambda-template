@@ -3,13 +3,12 @@ import os
 import sys
 import urllib.parse
 from app.aws_s3_handler import AwsS3Handler
-from app.models.dynamodb import Service
+from app.models.dynamodb import Service, ServiceConfig
+from app.common.site import media_accept_mimetypes, get_service_config_value
 from app.common.media import get_mimetype_by_ext
 from app.common.image import Image
 from app.common.log import output_log
 
-MEDIA_ACCEPT_MIMETYPES = json.loads(os.environ.get('MEDIA_ACCEPT_MIMETYPES')).get('image')
-MEDIA_IMAGE_SIZES = json.loads(os.environ.get('MEDIA_IMAGE_SIZES', []))
 FILE_SIZE_LIMIT = int(os.environ.get('MEDIA_IMAGE_MAKER_FILE_SIZE_LIMIT', 1)) # MB
 DEBUG_LOG_ENABLED = os.environ.get('DEBUG_LOG_ENABLED') == 'true'
 
@@ -39,7 +38,7 @@ class MediaImageMaker:
     #ses_region = ''
 
 
-    def __init__(self, service_id):
+    def __init__(self, service_id, options):
         self.debug_log_enabled = DEBUG_LOG_ENABLED
         #self.ses_region = SES_REGION
 
@@ -47,13 +46,9 @@ class MediaImageMaker:
             raise InvalidValueError('ServiceId does not exist')
 
         self.service_id = service_id
-        self.accept_mimetypes = MEDIA_ACCEPT_MIMETYPES
+        self.accept_mimetypes = options.get('accept_mimetypes')
         self.accept_exts = get_exts_by_mimetypes(self.accept_mimetypes)
-        self.image_sizes = MEDIA_IMAGE_SIZES
-
-        #notice_emails_dict = json.loads(COMMENT_IMPORTER_NOTICE_EMAILS)
-        #if self.service_id in notice_emails_dict:
-        #    self.notice_emails = notice_emails_dict[self.service_id]
+        self.image_sizes = options.get('image_sizes')
 
 
     def __del__(self):
@@ -133,20 +128,28 @@ def handler(event=None, context=None):
 
     file_name = file_item[0]
     if file_name != 'raw':
-        return 'File name %s is out of target' % file_name
+        return f'File name {file_name} is out of target'
 
-    allowed_exts = get_exts_by_mimetypes(MEDIA_ACCEPT_MIMETYPES)
+    service_id = path_items[0]
+    service_configs = ServiceConfig.get_all_by_service(service_id, True, True, True)
+    accept_mimetypes = media_accept_mimetypes('image', service_configs)
+    image_sizes = get_service_config_value('mediaUploadImageSizes', service_configs)
+    allowed_exts = get_exts_by_mimetypes(accept_mimetypes)
+
     ext = file_item[-1]
     if ext not in allowed_exts:
-        return 'File extension %s is out of target' % ext
+        return f'File extension {ext} is out of target'
 
     file_size_limit = FILE_SIZE_LIMIT * 1024 * 1024
     if file_size > file_size_limit:
         raise Exception('File size %d is over limit' % file_size)
 
     try:
-        service_id = path_items[0]
-        mim = MediaImageMaker(service_id)
+        options = {
+            'accept_mimetypes': accept_mimetypes,
+            'image_sizes': image_sizes,
+        }
+        mim = MediaImageMaker(service_id, options)
         mim.main(bucket_name, bucket_path)
         output_log('END: media_image_maker.handler: Success')
         return 'Success'

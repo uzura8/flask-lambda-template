@@ -1,3 +1,4 @@
+import json
 from boto3.dynamodb.conditions import Key
 from app.models.dynamodb import Base
 from app.common.date import utc_iso
@@ -6,49 +7,139 @@ from app.common.date import utc_iso
 class ServiceConfig(Base):
     table_name = 'service-config'
 
-    public_attrs = []
+    public_attrs = [
+        'configName',
+        'configVal',
+    ]
     response_attrs = public_attrs + []
-    private_attrs = []
+    private_attrs = [
+        'isJson',
+    ]
     all_attrs = public_attrs + private_attrs
 
-    allowed_names = {
-        'post': [
-            'frontendPostDetailUrlPrefix'
-        ],
-        'urlShortener': [
-            'jumpPageUrl',
-            'jumpPageParamKey',
-            'analysisParamKeyDefault',
-        ],
-    }
+    alloweds = [
+        {
+            'configName': 'frontendPostDetailUrlPrefix',
+            'isJson': False,
+            'default': '',
+        },
+        {
+            'configName': 'mediaUploadAcceptMimetypesImage',
+            'isJson': True,
+            'default': '["image/png","image/gif","image/jpeg"]',
+        },
+        {
+            'configName': 'mediaUploadImageSizes',
+            'isJson': True,
+            'default': '["1200x1200","800x800","400x400","400x400xs"]',
+        },
+        {
+            'configName': 'mediaUploadSizeLimitMBImage',
+            'isJson': False,
+            'default': 5,
+        },
+        {
+            'configName': 'mediaUploadAcceptMimetypesFile',
+            'isJson': True,
+            'default': '["image/png","image/gif","image/jpeg","application/pdf"]',
+        },
+        {
+            'configName': 'mediaUploadSizeLimitMBFile',
+            'isJson': False,
+            'default': 5,
+        },
+        {
+            'configName': 'jumpPageUrl',
+            'isJson': False,
+            'default': '',
+        },
+        {
+            'configName': 'jumpPageParamKey',
+            'isJson': False,
+            'default': '',
+        },
+        {
+            'configName': 'analysisParamKeyDefault',
+            'isJson': False,
+            'default': '',
+        },
+    ]
 
     @classmethod
     def get_val(self, service_id, name):
         item = self.get_one_by_name(service_id, name)
-        return item['configVal'] if item else None
+        return item['configVal']
 
 
     @classmethod
-    def get_one_by_name(self, service_id, name):
+    def get_one_by_name(self, service_id, name, is_json_loads=True, supply_if_empty=False):
         table = self.get_table()
         res = table.query(
             KeyConditionExpression=Key('serviceId').eq(service_id) & Key('configName').eq(name)
         )
-        return res['Items'][0] if 'Items' in res and res['Items'] else None
+
+        item = {}
+        if res.get('Items'):
+            item = res['Items'][0]
+
+        elif supply_if_empty:
+            searched = [ i for i in self.alloweds if i['configName'] == name ]
+            allowed = searched[0] if searched else None
+            if not allowed:
+                return None
+
+            item = {
+                'configName': name,
+                'configVal': allowed['default'],
+                'isJson': allowed['isJson'],
+            }
+
+        if not item:
+            return None
+
+        if item.get('isJson') and is_json_loads:
+            item['configVal'] = json.loads(item['configVal'])
+
+        return item
 
 
     @classmethod
-    def get_all_by_service(self, service_id, as_object=False):
-        items = self.get_all_by_pkey({'key':'serviceId', 'val':service_id})
-        if not items:
-            return None
+    def get_all_by_service(self, service_id, as_object=False, is_json_loads=True, supply_if_empty=False):
+        saveds = self.get_all_by_pkey({'key':'serviceId', 'val':service_id})
+        res = []
+        if supply_if_empty:
+            for allowed in self.alloweds:
+                name = allowed['configName']
+                item = None
+                if saveds:
+                    searched = [ s for s in saveds if s['configName'] == name ]
+                    item = searched[0] if searched else None
+
+                if not item:
+                    item = {
+                        'serviceId': service_id,
+                        'configName': name,
+                        'configVal': allowed['default'],
+                    }
+
+                if allowed['isJson'] and is_json_loads:
+                    item['configVal'] = json.loads(item['configVal'])
+                res.append(item)
+        else:
+            if not saveds:
+                return []
+            for saved in saveds:
+                item = saved
+                if item['isJson'] and is_json_loads:
+                    item['configVal'] = json.loads(item['configVal'])
+                res.append(item)
 
         if not as_object:
-            return items
+            return res
 
         obj = {}
-        for item in items:
-            key = self.conv_save_name_to_key(item['configName'])
+        for item in res:
+            key = item['configName']
             obj[key] = item['configVal']
 
         return obj
@@ -56,6 +147,12 @@ class ServiceConfig(Base):
 
     @classmethod
     def save(self, service_id, name, val):
+        save_val = val
+        is_json = False
+        if isinstance(val, (list, dict)):
+            save_val = json.dumps(val)
+            is_json = True
+
         time = utc_iso(False, True)
         table = self.get_table()
         item = self.get_one_by_name(service_id, name)
@@ -63,13 +160,15 @@ class ServiceConfig(Base):
             item = {
                 'serviceId': service_id,
                 'configName': name,
-                'configVal': val,
+                'configVal': save_val,
+                'isJson': is_json,
                 'updatedAt': time,
             }
             table.put_item(Item=item)
             return item
 
-        if item['configVal'] == val:
+        comp_val = json.dumps(item['configVal']) if item['isJson'] else item['configVal']
+        if save_val == comp_val:
             return item
 
         table.update_item(
@@ -79,7 +178,7 @@ class ServiceConfig(Base):
             },
             AttributeUpdates={
                 'configVal': {
-                    'Value': val
+                    'Value': save_val
                 },
                 'updatedAt': {
                     'Value': time
@@ -90,6 +189,7 @@ class ServiceConfig(Base):
             'serviceId': service_id,
             'configName': name,
             'configVal': val,
+            'isJson': is_json,
             'updatedAt': time,
         }
 
@@ -102,7 +202,6 @@ class ServiceConfig(Base):
             return 1
 
         table = self.get_table()
-        #service_id_name = '#'.join([service_id, name])
         table.update_item(
             Key={
                 'serviceId': service_id,
@@ -112,21 +211,3 @@ class ServiceConfig(Base):
             ExpressionAttributeValues={':incr': 1}
         )
         return self.get_val(service_id, name)
-
-
-    @classmethod
-    def conv_key_to_save_name(self, key):
-        for func, names in self.allowed_names.items():
-            if key in names:
-                return f'{func}-{key}'
-        return ''
-
-
-    @classmethod
-    def conv_save_name_to_key(self, save_name):
-        for func, keys in self.allowed_names.items():
-            for key in keys:
-                name = f'{func}-{key}'
-                if save_name == name:
-                    return key
-        return ''

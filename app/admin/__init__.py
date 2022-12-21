@@ -35,7 +35,7 @@ def check_acl_service_id(service_id, with_configs=False):
         raise InvalidUsage('ServiceId does not exist', 404)
 
     if with_configs:
-        item['configs'] = ServiceConfig.get_all_by_service(service_id, True)
+        item['configs'] = ServiceConfig.get_all_by_service(service_id, True, True, True)
 
     return item
 

@@ -25,8 +25,19 @@ def service_list():
         vals = validate_req_params(validation_schema_services(), request.json)
         if next((x for x in services if x['serviceId'] == vals['serviceId']), None):
             raise InvalidUsage('ServiceId already used', 400)
+
+        configs = None
+        if 'configs' in vals:
+            configs = vals.pop('configs')
+
         service = Service.create(vals)
-        return service
+
+        if configs is not None and any(configs):
+            for name, val in configs.items():
+                ServiceConfig.save(service.serviceId, name, val)
+
+        service['configs'] = ServiceConfig.get_all_by_service(service.serviceId, True, True, True)
+        return jsonify(service), 200
 
     return jsonify(services), 200
 
@@ -47,21 +58,13 @@ def service_detail(service_id):
         if 'configs' in vals:
             configs = vals.pop('configs')
 
-        updated = Service.update(key, vals, True)
+        service = Service.update(key, vals, True)
 
-        saved_confs = {}
         if configs is not None and any(configs):
-            for key, val in configs.items():
-                name = ServiceConfig.conv_key_to_save_name(key)
-                if not name:
-                    continue
-                res = ServiceConfig.save(service_id, name, val)
-                saved_confs[key] = res['configVal']
-        updated['configs'] = saved_confs
+            for name, val in configs.items():
+                ServiceConfig.save(service_id, name, val)
 
-        return jsonify(updated), 200
-
-    service['configs'] = ServiceConfig.get_all_by_service(service_id, True)
+    service['configs'] = ServiceConfig.get_all_by_service(service_id, True, True, True)
     return jsonify(service), 200
 
 
@@ -104,27 +107,88 @@ def validation_schema_services():
             'schema': {
                 'frontendPostDetailUrlPrefix': {
                     'type': 'string',
-                    'coerce': (NormalizerUtils.rtrim),
+                    'coerce': (NormalizerUtils.trim),
                     'valid_url': True,
                     'required': False,
                     'nullable': True,
                     'empty': True,
                     'default': '',
                 },
+                'mediaUploadAcceptMimetypesImage': {
+                    'type': 'list',
+                    'coerce': (NormalizerUtils.split),
+                    'required': False,
+                    'empty': True,
+                    'default': [],
+                    'schema': {
+                        'type': 'string',
+                        'required': False,
+                        'empty': True,
+                        'regex': r'^[0-9a-z_\-]+/[0-9a-z_\-]+$',
+                    }
+                },
+                'mediaUploadImageSizes': {
+                    'type': 'list',
+                    'coerce': (NormalizerUtils.split),
+                    'required': False,
+                    'empty': True,
+                    'default': [],
+                    'schema': {
+                        'type': 'string',
+                        'required': False,
+                        'empty': True,
+                        'regex': r'^[0-9]+x[0-9]+(x[a-z]{1})?$',
+                    }
+                },
+                'mediaUploadSizeLimitMBImage': {
+                    'type': 'integer',
+                    'coerce': int,
+                    'required': False,
+                    'empty': True,
+                    'min': 1,
+                    'max': 50,
+                    'default': 5,
+                },
+                'mediaUploadAcceptMimetypesFile': {
+                    'type': 'list',
+                    'coerce': (NormalizerUtils.split),
+                    'required': False,
+                    'empty': True,
+                    'default': [],
+                    'schema': {
+                        'type': 'string',
+                        'required': False,
+                        'empty': True,
+                        'regex': r'^[0-9a-z_\-]+/[0-9a-z_\-]+$',
+                    }
+                },
+                'mediaUploadSizeLimitMBFile': {
+                    'type': 'integer',
+                    'coerce': int,
+                    'required': False,
+                    'empty': True,
+                    'min': 1,
+                    'max': 50,
+                    'default': 5,
+                },
                 'jumpPageUrl': {
                     'type': 'string',
+                    'coerce': (NormalizerUtils.trim),
+                    'valid_url': True,
                     'required': False,
                     'empty': True,
                     'nullable': True,
                 },
                 'jumpPageParamKey': {
                     'type': 'string',
+                    'coerce': (NormalizerUtils.trim),
                     'required': False,
                     'empty': True,
                     'nullable': True,
                 },
                 'analysisParamKeyDefault': {
                     'type': 'string',
+                    'coerce': (NormalizerUtils.trim),
                     'required': False,
                     'empty': True,
                     'nullable': True,

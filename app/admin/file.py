@@ -1,10 +1,10 @@
-import json
 import os
 import boto3
 from botocore.client import Config
 from flask import jsonify, request
 from flask_cognito import cognito_auth_required, current_cognito_jwt
 from app.models.dynamodb import File, ModelInvalidParamsException
+from app.common.site import media_accept_mimetypes
 from app.common.error import InvalidUsage
 from app.common.request import validate_req_params
 from app.common.media import get_ext_by_mimetype
@@ -12,7 +12,6 @@ from app.validators import NormalizerUtils
 from app.admin import bp, site_before_request, check_acl_service_id
 
 MEDIA_S3_BUCKET_NAME = os.environ.get('MEDIA_S3_BUCKET_NAME', '')
-MEDIA_ACCEPT_MIMETYPES = json.loads(os.environ.get('MEDIA_ACCEPT_MIMETYPES', ''))
 s3_clident = boto3.client('s3', config=Config(signature_version='s3v4'))
 
 
@@ -25,14 +24,14 @@ def before_request():
 @bp.route('/files/<string:service_id>', methods=['POST'])
 @cognito_auth_required
 def create_pre_signed_url(service_id):
-    check_acl_service_id(service_id)
+    service = check_acl_service_id(service_id, True)
 
     file_type = request.json.get('fileType')
     if not file_type or file_type not in ['image', 'file']:
         raise InvalidUsage('fileType is invalid', 400)
 
     schema = validation_schema_files()
-    allowed_mimetype = MEDIA_ACCEPT_MIMETYPES.get(file_type, [])
+    allowed_mimetype = media_accept_mimetypes('image', service['configs'])
     if allowed_mimetype:
         schema['mimeType']['allowed'] = allowed_mimetype
 

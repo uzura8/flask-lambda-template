@@ -124,7 +124,7 @@ def get_new_url_id():
 
 
 def generate_redirect_url(service_id, vals):
-    service_confs = ServiceConfig.get_all_by_service(service_id, True)
+    service_confs = ServiceConfig.get_all_by_service(service_id, True, True, True)
     url = vals.get('url')
     pkey = vals.get('paramKey')
     pval = vals.get('paramValue')
