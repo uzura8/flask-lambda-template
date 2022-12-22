@@ -4,7 +4,7 @@
   "baseUrl": "/",
   "isSSL": false,
   "siteName": "Sample Site",
-  voteTypesDefault": ["like", "dislike"],
+  "voteTypesDefault": ["like", "dislike"],
   "isEnabledComment": true,
   "adminAuthHeader": "Authorization",
   "adminAuthHeaderTokenPrefix": "Bearer",
