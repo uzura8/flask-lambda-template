@@ -12,9 +12,6 @@ from app.common.url import join_query
 from app.validators import NormalizerUtils
 from app.admin import bp, site_before_request, check_acl_service_id
 
-JUMP_PAGE_URL = os.environ.get('URL_SHORTEN_JUMP_PAGE_URL')
-JUMP_PAGE_QUERY_KEY = os.environ.get('URL_SHORTEN_JUMP_PAGE_QUERY_KEY')
-
 
 @bp.before_request
 @site_before_request

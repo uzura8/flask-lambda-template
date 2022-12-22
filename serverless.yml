@@ -102,8 +102,6 @@ provider:
     MEDIA_S3_BUCKET_NAME: ${self:custom.mediaS3BucketName}
     MEDIA_IMAGE_MAKER_FILE_SIZE_LIMIT: ${file(${self:custom.stageConfigFileName}):mediaImageMakerFileSizeLimit}
     URL_SHORTEN_BASE_URL: ${file(${self:custom.stageConfigFileName}):urlShortenBaseUrl}
-    URL_SHORTEN_JUMP_PAGE_URL: ${file(${self:custom.stageConfigFileName}):urlShortenJumpPageUrl}
-    URL_SHORTEN_JUMP_PAGE_QUERY_KEY: ${file(${self:custom.stageConfigFileName}):urlShortenJumpPageQueryKey}
     COMMENT_IMPORTER_COLUMN_CONVERSION_TABLE: ${file(./config/stages/common.yml):commentImporterColumnConversionTable}
     COMMENT_IMPORTER_CONTENT_LIST: ${file(./config/stages/common.yml):commentImporterContentList}
     COMMENT_IMPORTER_SIZE_LIMIT: ${file(${self:custom.stageConfigFileName}):commentImportS3BucketSizeLimit}
