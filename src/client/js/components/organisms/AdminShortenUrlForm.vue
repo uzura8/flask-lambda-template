@@ -14,6 +14,7 @@
   </b-field>
 
   <b-field
+    v-if="isSetJumpPageConfigs"
     :label="$t('form.isViaJumpPageLabel')"
     :type="checkEmpty(errors.isViaJumpPage) ? '' : 'is-danger'"
     :message="checkEmpty(errors.isViaJumpPage) ? '' : errors.isViaJumpPage[0]"
@@ -145,6 +146,7 @@ export default{
       isViaJumpPage: false,
       fieldKeys: ['name', 'description', 'url', 'isViaJumpPage', 'paramKey', 'paramValue'],
       errors: [],
+      serviceConfigs: null,
     }
   },
 
@@ -163,7 +165,16 @@ export default{
       return new URL(this.url)
     },
 
+    isSetJumpPageConfigs() {
+      if (!this.serviceConfigs) return false
+      if (common.checkObjHasProp(this.serviceConfigs, 'jumpPageUrl') === false) return false
+      if (!this.serviceConfigs.jumpPageUrl) return false
+      if (!this.serviceConfigs.jumpPageParamKey) return false
+      return true
+    },
+
     generatedUrl() {
+      if (!this.serviceConfigs) return ''
       if (this.checkEmpty(this.url) === true) return ''
       if (str.checkUrl(this.url) === false) return ''
 
@@ -183,12 +194,12 @@ export default{
         ]
         const targetUrl = items.join('')
 
-        const parsedUrl = new URL(config.shortenUrl.viaJumpPage.url)
+        const parsedUrl = new URL(this.serviceConfigs.jumpPageUrl)
         const delimitter = parsedUrl.search ? '&' : '?'
         items = [
-          config.shortenUrl.viaJumpPage.url,
+          this.serviceConfigs.jumpPageUrl,
           delimitter,
-          config.shortenUrl.viaJumpPage.paramKey,
+          this.serviceConfigs.jumpPageParamKey,
           '=',
           encodeURIComponent(targetUrl),
           addedQuery ? '&' : '',
@@ -229,7 +240,7 @@ export default{
     if (this.isEdit === true) {
       this.setShortenUrl()
     }
-    await this.setAnalysisParamKeyDefault()
+    await this.setServiceConfigs()
   },
 
   methods: {
@@ -251,14 +262,16 @@ export default{
       this.paramValue = ''
     },
 
-    async setAnalysisParamKeyDefault() {
+    async setServiceConfigs() {
       try {
         this.$store.dispatch('setLoading', true)
         const service = await Admin.getServices(this.serviceId, null, this.adminUserToken)
         this.$store.dispatch('setLoading', false)
-
-        if (common.checkObjHasProp(service, 'configs') && service.configs.analysisParamKeyDefault) {
-          if (!this.paramKey) this.paramKey = service.configs.analysisParamKeyDefault
+        if (common.checkObjHasProp(service, 'configs')) {
+          this.serviceConfigs = service.configs
+        }
+        if (common.checkObjHasProp(this.serviceConfigs, 'analysisParamKeyDefault')) {
+          if (!this.paramKey) this.paramKey = this.serviceConfigs.analysisParamKeyDefault
         }
       } catch (err) {
         console.log(err);//!!!!!!

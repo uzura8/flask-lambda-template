@@ -21,10 +21,6 @@
   "tinyMCEApiKey": null,
   "shortenUrl": {
     "redirectBaseUrl": "https://rd.example.com/",
-    "viaJumpPage": {
-      "url": "https://example.com/rd/redirect.htm",
-      "paramKey": "url"
-    },
     "waitingTimeForQrCodeCreated": 12
   }
 }
