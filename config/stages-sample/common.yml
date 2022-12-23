@@ -1,7 +1,7 @@
 service: 'your-project'
 awsAccountId: 'Your-AWS-Acconnt-ID'
 defaultRegion: 'ap-northeast-1'
-deploymentBucketName: 'your-serverless-deployment'
+deploymentBucketName: 'your-deployment'
 cognitoJwtHeaderName: 'Authorization'
 cognitoJwtHeaderPrefix: 'Bearer'
 

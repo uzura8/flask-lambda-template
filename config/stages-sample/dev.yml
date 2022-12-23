@@ -8,6 +8,7 @@ logsRestApiFullExecutionData: true # Optional configuration which specifies whet
 debugLogEnabled: true
 
 appMemorySize: 128 # MB
+appTimeout: 12 # s
 
 mediaS3BucketName: "media-dev.example.com"
 mediaImageMakerMemorySize: 256 # MB

@@ -150,6 +150,7 @@ functions:
     events:
       - http: ANY /
       - http: ANY /{proxy+}
+    timeout: ${file(${self:custom.stageConfigFileName}):appTimeout}
     provisionedConcurrency: 2
 
   mediaImageMaker:
@@ -198,7 +199,7 @@ functions:
           rules:
             - prefix: ${self:custom.commentImportS3BucketPath}/
             - suffix: .csv
-          existing: false # If use existing bucket, set true
+          existing: true # If use existing bucket, set true
           forceDeploy: true
 
   commentTruncater:

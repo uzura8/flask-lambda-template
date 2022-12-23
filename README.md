@@ -2,7 +2,9 @@
 
 Constructed by
 
-* Serverside: Flask + Lambda + APIGateway (deploy by serverside framework)
+* Serverside:
+    + Flask + Lambda + APIGateway (deploy by Serverless Framework)
+    + DynamoDB
 * Frontend: VueJS
 
 ## Instration
