@@ -31,7 +31,7 @@ def create_pre_signed_url(service_id):
         raise InvalidUsage('fileType is invalid', 400)
 
     schema = validation_schema_files()
-    allowed_mimetype = media_accept_mimetypes('image', service['configs'])
+    allowed_mimetype = media_accept_mimetypes(file_type, service['configs'])
     if allowed_mimetype:
         schema['mimeType']['allowed'] = allowed_mimetype
 
