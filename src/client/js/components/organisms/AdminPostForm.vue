@@ -414,9 +414,9 @@ export default{
         await this.setSlug()
       }
     }
-    this.setCategories()
-    this.setTags()
-    this.setUploaderOptions()
+    await this.setCategories()
+    await this.setTags()
+    await this.setUploaderOptions()
   },
 
   methods: {

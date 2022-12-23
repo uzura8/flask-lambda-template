@@ -60,7 +60,6 @@
 <script>
 import { ulid } from 'ulid'
 import { Admin } from '@/api'
-import config from '@/config/config'
 import util from '@/util'
 import FileUploaderImage from '@/components/organisms/FileUploaderImage'
 import FileUploaderFile from '@/components/organisms/FileUploaderFile'

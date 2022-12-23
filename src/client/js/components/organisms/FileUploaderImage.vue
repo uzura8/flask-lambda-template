@@ -81,7 +81,6 @@
 <script>
 import axios from 'axios'
 import { Admin } from '@/api'
-import config from '@/config/config'
 import util from '@/util'
 import FbImg from '@/components/atoms/FbImg'
 import EbDropdown from '@/components/molecules/EbDropdown'
@@ -133,7 +132,8 @@ export default{
     },
 
     sizes() {
-      return config.media.upload.image.sizes
+      if (this.checkEmpty(this.uploaderOptions)) return []
+      return this.uploaderOptions.sizes
     },
   },
 
