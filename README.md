@@ -59,7 +59,7 @@ pip install -r pytz Flask-WTF
 
 #### Create AWS S3 Bucket for terraform state and frontend config
 
-Create S3 Buckets like below in us-east-1 region
+Create S3 Buckets like below in ap-northeast-1 region
 
 * __your-serverless-deployment__
     + Store deployment state files by terraformand and serverless framework
@@ -67,9 +67,6 @@ Create S3 Buckets like below in us-east-1 region
 * __your-serverless-configs__
     + Store config files for app
     + Create directory "your-project-name/frontend/prd" and "your-project-name/frontend/dev"
-
-
-named "terraform-state-hoge" on "us-east-1" region
 
 #### 1. Edit Terraform config file
 
@@ -98,7 +95,7 @@ domain_media_site_dev  = "your-domain-media-dev.example.com"
 ```bash
 export AWS_SDK_LOAD_CONFIG=1
 export AWS_PROFILE=your-aws-profile-name
-export AWS_REGION="us-east-1"
+export AWS_REGION="ap-northeast-1"
 ```
 
 #### 3. Execute terraform init
@@ -106,7 +103,7 @@ export AWS_REGION="us-east-1"
 Command Example to init
 
 ```bash
-terraform init -backend-config="bucket=your-serverless-deployment" -backend-config="key=terraform/your-project/terraform.tfstate" -backend-config="region=us-east-1" -backend-config="profile=your-aws-profile-name"
+terraform init -backend-config="bucket=your-deployment" -backend-config="key=terraform/your-project/terraform.tfstate" -backend-config="region=ap-northeast-1" -backend-config="profile=your-aws-profile-name"
 ```
 
 #### 4. Execute terraform apply
@@ -122,10 +119,10 @@ Create Admin User by aws-cli
 ```bash
 export AWS_SDK_LOAD_CONFIG=1
 export AWS_PROFILE=your-aws-profile-name
-export AWS_DEFAULT_REGION="us-east-1"
+export AWS_DEFAULT_REGION="ap-northeast-1"
 
 aws cognito-idp admin-create-user \
---user-pool-id us-east-1_xxxxxxxxx \
+--user-pool-id ap-northeast-1_xxxxxxxxx \
 --username your-username \
 --user-attributes \
   Name=email,Value=sample@example.com \
@@ -140,7 +137,7 @@ Update password as parmanent
 
 ```bash
 aws cognito-idp admin-set-user-password \
---user-pool-id us-east-1_xxxxxxxxx \
+--user-pool-id ap-northeast-1_xxxxxxxxx \
 --username your-username \
 --password 'your-parmanent-password' \
 --permanent
@@ -166,19 +163,7 @@ aws cognito-idp admin-set-user-password \
             "GET"
         ],
         "AllowedOrigins": [
-            "https://your-domain-api.example.com"
-        ],
-        "ExposeHeaders": []
-    },
-    {
-        "AllowedHeaders": [
-            "*"
-        ],
-        "AllowedMethods": [
-            "GET"
-        ],
-        "AllowedOrigins": [
-            "*"
+            "https://your-domain.example.com"
         ],
         "ExposeHeaders": []
     }
@@ -201,7 +186,7 @@ vi config/stages/*
 
 service: 'your-project-name'
 awsAccountId: 'your-aws-acconnt-id'
-defaultRegion: 'us-east-1'
+defaultRegion: 'ap-northeast-1'
 deploymentBucketName: 'your-serverless-deployment'
  ...
 ```
@@ -229,7 +214,7 @@ Execute below command
 ```bash
 export AWS_SDK_LOAD_CONFIG=1
 export AWS_PROFILE="your-profile-name"
-export AWS_REGION="us-east-1"
+export AWS_REGION="ap-northeast-1"
 
 sls create_domain # Deploy for dev
 ```
@@ -247,7 +232,7 @@ Execute below command
 ```bash
 export AWS_SDK_LOAD_CONFIG=1
 export AWS_PROFILE="your-profile-name"
-export AWS_REGION="us-east-1"
+export AWS_REGION="ap-northeast-1"
 
 sls deploy # Deploy for dev
 ```
@@ -336,10 +321,10 @@ vi src/client/js/config/cognito-client-config.json
 
 ```json
 {
-  "Region": "us-east-1",
-  "UserPoolId": "us-east-1_xxxxxxxxx",
+  "Region": "ap-northeast-1",
+  "UserPoolId": "ap-northeast-1_xxxxxxxxx",
   "ClientId": "xxxxxxxxxxxxxxxxxxxxxxxxxx",
-  "IdentityPoolId": "us-east-1:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+  "IdentityPoolId": "ap-northeast-1:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 }
 ```
 
