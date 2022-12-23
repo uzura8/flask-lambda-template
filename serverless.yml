@@ -143,8 +143,9 @@ package:
     - terraform/**
 
 functions:
-  app:
+  api:
     handler: wsgi_handler.handler
+    name: ${self:service}-${self:provider.stage}-api
     memorySize: ${file(${self:custom.stageConfigFileName}):appMemorySize}
     events:
       - http: ANY /
@@ -153,8 +154,9 @@ functions:
 
   mediaImageMaker:
     handler: app/media_image_maker.handler
+    name: ${self:service}-${self:provider.stage}-mediaImageMaker
     layers:
-      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p38-Pillow:5  # Ref https://github.com/keithrozario/Klayers/tree/master/deployments
+      - arn:aws:lambda:ap-northeast-1:770693421928:layer:Klayers-p38-Pillow:5 # Ref https://github.com/keithrozario/Klayers/tree/master/deployments
     memorySize: ${file(${self:custom.stageConfigFileName}):mediaImageMakerMemorySize}
     timeout: ${file(${self:custom.stageConfigFileName}):mediaImageMakerTimeout}
     events:
@@ -170,8 +172,9 @@ functions:
 
   urlShortenQrcodeMaker:
     handler: app/url_shorten_qrcode_maker.handler
+    name: ${self:service}-${self:provider.stage}-urlShortenQrcodeMaker
     layers:
-      - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p38-Pillow:5  # Ref https://github.com/keithrozario/Klayers/tree/master/deployments
+      - arn:aws:lambda:ap-northeast-1:770693421928:layer:Klayers-p38-Pillow:5 # Ref https://github.com/keithrozario/Klayers/tree/master/deployments
     memorySize: ${file(${self:custom.stageConfigFileName}):urlShortenQrcodeMakerMemorySize}
     timeout: ${file(${self:custom.stageConfigFileName}):urlShortenQrcodeMakerTimeout}
     events:
@@ -184,6 +187,7 @@ functions:
 
   commentImporter:
     handler: app/comment_importer.handler
+    name: ${self:service}-${self:provider.stage}-commentImporter
     memorySize: ${file(${self:custom.stageConfigFileName}):commentImportMemorySize}
     timeout: ${file(${self:custom.stageConfigFileName}):commentImportTimeout}
     events:
@@ -199,6 +203,7 @@ functions:
 
   commentTruncater:
     handler: app/comment_truncater.handler
+    name: ${self:service}-${self:provider.stage}-commentTruncater
     memorySize: ${file(${self:custom.stageConfigFileName}):commentImportMemorySize}
     timeout: ${file(${self:custom.stageConfigFileName}):commentImportTimeout}
     maximumRetryAttempts: 1

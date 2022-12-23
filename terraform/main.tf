@@ -1,6 +1,7 @@
 variable "prj_prefix" {}
 variable "region_api" {}
 variable "region_site" {}
+variable "region_acm" {}
 variable "route53_zone_id" {}
 variable "domain_api_dev" {}
 variable "domain_api_prd" {}
@@ -17,6 +18,11 @@ provider "aws" {
 provider "aws" {
   region = var.region_site
   alias  = "site"
+}
+
+provider "aws" {
+  region = var.region_acm
+  alias  = "acm"
 }
 
 terraform {
@@ -83,7 +89,7 @@ resource "aws_acm_certificate" "api_prd" {
 }
 
 resource "aws_acm_certificate" "static_site_prd" {
-  provider          = aws.site
+  provider          = aws.acm
   domain_name       = local.fqdn.static_site_prd
   validation_method = "DNS"
 
@@ -93,7 +99,7 @@ resource "aws_acm_certificate" "static_site_prd" {
   }
 }
 resource "aws_acm_certificate" "static_site_dev" {
-  provider          = aws.site
+  provider          = aws.acm
   domain_name       = local.fqdn.static_site_dev
   validation_method = "DNS"
 
@@ -104,7 +110,7 @@ resource "aws_acm_certificate" "static_site_dev" {
 }
 
 resource "aws_acm_certificate" "media_site_prd" {
-  provider          = aws.site
+  provider          = aws.acm
   domain_name       = local.fqdn.media_site_prd
   validation_method = "DNS"
 
@@ -114,7 +120,7 @@ resource "aws_acm_certificate" "media_site_prd" {
   }
 }
 resource "aws_acm_certificate" "media_site_dev" {
-  provider          = aws.site
+  provider          = aws.acm
   domain_name       = local.fqdn.media_site_dev
   validation_method = "DNS"
 
@@ -231,22 +237,22 @@ resource "aws_acm_certificate_validation" "api_prd" {
   validation_record_fqdns = [for record in aws_route53_record.api_prd_acm_c : record.fqdn]
 }
 resource "aws_acm_certificate_validation" "static_site_prd" {
-  provider                = aws.site
+  provider                = aws.acm
   certificate_arn         = aws_acm_certificate.static_site_prd.arn
   validation_record_fqdns = [for record in aws_route53_record.static_site_prd_acm_c : record.fqdn]
 }
 resource "aws_acm_certificate_validation" "static_site_dev" {
-  provider                = aws.site
+  provider                = aws.acm
   certificate_arn         = aws_acm_certificate.static_site_dev.arn
   validation_record_fqdns = [for record in aws_route53_record.static_site_dev_acm_c : record.fqdn]
 }
 resource "aws_acm_certificate_validation" "media_site_prd" {
-  provider                = aws.site
+  provider                = aws.acm
   certificate_arn         = aws_acm_certificate.media_site_prd.arn
   validation_record_fqdns = [for record in aws_route53_record.media_site_prd_acm_c : record.fqdn]
 }
 resource "aws_acm_certificate_validation" "media_site_dev" {
-  provider                = aws.site
+  provider                = aws.acm
   certificate_arn         = aws_acm_certificate.media_site_dev.arn
   validation_record_fqdns = [for record in aws_route53_record.media_site_dev_acm_c : record.fqdn]
 }
@@ -318,7 +324,7 @@ data "aws_cloudfront_cache_policy" "managed_caching_disabled" {
 ## Distribution
 resource "aws_cloudfront_distribution" "static_site_prd" {
   origin {
-    domain_name = "${local.bucket.static_site_prd}.s3.us-east-1.amazonaws.com"
+    domain_name = "${local.bucket.static_site_prd}.s3.${var.region_site}.amazonaws.com"
     origin_id   = "S3-${local.fqdn.static_site_prd}"
     s3_origin_config {
       origin_access_identity = aws_cloudfront_origin_access_identity.static_site_prd.cloudfront_access_identity_path
@@ -384,7 +390,7 @@ resource "aws_cloudfront_distribution" "static_site_prd" {
 }
 resource "aws_cloudfront_distribution" "static_site_dev" {
   origin {
-    domain_name = "${local.bucket.static_site_dev}.s3.us-east-1.amazonaws.com"
+    domain_name = "${local.bucket.static_site_dev}.s3.${var.region_site}.amazonaws.com"
     origin_id   = "S3-${local.fqdn.static_site_dev}"
     s3_origin_config {
       origin_access_identity = aws_cloudfront_origin_access_identity.static_site_dev.cloudfront_access_identity_path
@@ -451,7 +457,7 @@ resource "aws_cloudfront_distribution" "static_site_dev" {
 
 resource "aws_cloudfront_distribution" "media_site_prd" {
   origin {
-    domain_name = "${local.bucket.media_site_prd}.s3.us-east-1.amazonaws.com"
+    domain_name = "${local.bucket.media_site_prd}.s3.${var.region_site}.amazonaws.com"
     origin_id   = "S3-${local.fqdn.media_site_prd}"
     s3_origin_config {
       origin_access_identity = aws_cloudfront_origin_access_identity.media_site_prd.cloudfront_access_identity_path
@@ -517,7 +523,7 @@ resource "aws_cloudfront_distribution" "media_site_prd" {
 }
 resource "aws_cloudfront_distribution" "media_site_dev" {
   origin {
-    domain_name = "${local.bucket.media_site_dev}.s3.us-east-1.amazonaws.com"
+    domain_name = "${local.bucket.media_site_dev}.s3.${var.region_site}.amazonaws.com"
     origin_id   = "S3-${local.fqdn.media_site_dev}"
     s3_origin_config {
       origin_access_identity = aws_cloudfront_origin_access_identity.media_site_dev.cloudfront_access_identity_path
@@ -880,6 +886,7 @@ resource "aws_cognito_user_pool" "prd" {
 }
 
 resource "aws_cognito_user_pool_client" "prd" {
+  provider        = aws.api
   name            = join("-", [var.prj_prefix, "web_client"])
   user_pool_id    = aws_cognito_user_pool.prd.id
   generate_secret = false
