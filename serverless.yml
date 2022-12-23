@@ -198,7 +198,7 @@ functions:
           rules:
             - prefix: ${self:custom.commentImportS3BucketPath}/
             - suffix: .csv
-          existing: true # If use existing bucket, set true
+          existing: false # If use existing bucket, set true
           forceDeploy: true
 
   commentTruncater:
