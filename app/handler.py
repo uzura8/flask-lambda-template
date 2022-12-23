@@ -85,13 +85,11 @@ def add_cors_headers(response):
         response.headers.add('Access-Control-Allow-Origin', r)
 
     if not CORS_ACCEPT_ORIGINS or r is not None and r in CORS_ACCEPT_ORIGINS:
-        response.headers.add('Access-Control-Allow-Credentials', 'true')
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
-        response.headers.add('Access-Control-Allow-Headers', 'Cache-Control')
-        response.headers.add('Access-Control-Allow-Headers', 'X-Requested-With')
-        response.headers.add('Access-Control-Allow-Headers', 'Authorization')
-        response.headers.add('Access-Control-Allow-Headers', 'Time-Zone')
+        allow_headers = ['X-Requested-With', 'X-HTTP-Method-Override', 'Content-Type',
+                         'Cache-Control', 'Accept', 'Authorization', 'Time-Zone']
+        response.headers.add('Access-Control-Allow-Headers', ','.join(allow_headers))
         response.headers.add('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE')
+        response.headers.add('Access-Control-Allow-Credentials', 'true')
 
     return response
 
