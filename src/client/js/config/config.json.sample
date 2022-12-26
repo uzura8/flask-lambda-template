@@ -3,7 +3,10 @@
   "port": null,
   "baseUrl": "/",
   "isSSL": false,
-  "siteName": "Sample Site",
+  "logoUrls": {
+    "site": "/assets/img/logo.png",
+    "admin": "/assets/img/logo-w.png"
+  },
   "voteTypesDefault": ["like", "dislike"],
   "isEnabledComment": true,
   "adminAuthHeader": "Authorization",

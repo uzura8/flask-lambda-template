@@ -3,7 +3,7 @@
   <div class="navbar-brand">
     <a class="navbar-item" href="">
     <router-link to="/admin" class="navbar-item">
-      <img src="https://bulma.io/images/bulma-logo.png" alt="Sample Site" width="112" height="28">
+      <img :src="logoUrl" width="112" height="28">
     </router-link>
     </a>
     <div class="navbar-burger burger"
@@ -38,6 +38,7 @@
 </template>
 
 <script>
+import config from '@/config/config'
 
 export default {
   name: 'EbAdminNavbar',
@@ -49,6 +50,10 @@ export default {
   computed: {
     isHeaderMenuOpen: function () {
       return this.$store.state.common.isHeaderMenuOpen
+    },
+
+    logoUrl: function () {
+      return config.logoUrls.admin
     },
   },
 
