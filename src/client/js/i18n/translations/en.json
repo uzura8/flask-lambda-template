@@ -212,6 +212,11 @@
     "usernameOf": "Username of {service}",
     "userRoleAdmin": "Admin",
     "userRoleNormal": "Normal",
+    "userRoles": {
+      "admin": "Administrator",
+      "editor": "Editor",
+      "viewer": "Viewer"
+    },
     "service": "Service",
     "editorMode": "Editor Mode",
     "richText": "Rich Text",

@@ -5,6 +5,7 @@
     <p class="subtitle is-5">ServiceID: {{ serviceId }}</p>
 
     <router-link
+      v-if="hasEditorRole"
       :to="`/admin/posts/${this.serviceId}/create`"
       class="button"
     >{{ $t('common.createNew') }}</router-link>

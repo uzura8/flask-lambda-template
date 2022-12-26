@@ -4,6 +4,7 @@
     <h1 class="title">{{ $t('page.ShortenUrlList') }}</h1>
 
     <router-link
+      v-if="hasEditorRole"
       :to="`/admin/shorten-urls/${serviceId}/create`"
       class="button"
     >{{ $t('common.createNew') }}</router-link>

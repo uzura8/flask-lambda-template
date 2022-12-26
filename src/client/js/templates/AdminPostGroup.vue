@@ -12,7 +12,10 @@
     <p class="subtitle is-5">{{ postGroupLabel }}</p>
   </div>
 
-  <div class="is-pulled-right">
+  <div
+    v-if="hasEditorRole"
+    class="is-pulled-right"
+  >
     <eb-dropdown
       position="is-bottom-left"
     >
@@ -49,6 +52,7 @@
   <div class="mt-6">
     <span>
       <button
+        v-if="hasEditorRole"
         class="button"
         @click="isPostModalActive = true"
       >
@@ -109,7 +113,10 @@
         class="columns is-mobile is-vcentered is-1"
       >
         <div class="column is-1 is-size-6">
-          <button class="button is-small handle">
+          <button
+            v-if="hasEditorRole"
+            class="button is-small handle"
+          >
             <span class="icon is-small">
               <i class="fas fa-sort"></i>
             </span>
@@ -126,6 +133,7 @@
 
         <div class="column is-1 is-size-6">
           <button
+            v-if="hasEditorRole"
             @click="deletePostGroupItem(post.postId)"
             class="button is-small"
           >

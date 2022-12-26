@@ -50,6 +50,7 @@
         </a>
 
         <router-link
+          v-if="hasEditorRole"
           :to="`/admin/posts/${serviceId}/${post.postId}/edit`"
           class="dropdown-item"
         >
@@ -60,7 +61,7 @@
         </router-link>
 
         <a
-          v-if="isPublishItem"
+          v-if="hasEditorRole && isPublishItem"
           @click="updateStatus(false)"
           class="dropdown-item is-clickable"
         >
@@ -71,7 +72,7 @@
         </a>
 
         <a
-          v-else
+          v-else-if="hasEditorRole && !isPublishItem"
           @click="confirmPublish()"
           class="dropdown-item is-clickable"
         >
@@ -82,6 +83,7 @@
         </a>
 
         <a
+          v-if="hasEditorRole"
           @click="confirmDelete()"
           class="dropdown-item is-clickable"
         >

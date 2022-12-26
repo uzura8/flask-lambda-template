@@ -1,10 +1,7 @@
-from flask import jsonify, request
+from flask import jsonify
 from flask_cognito import cognito_auth_required, current_cognito_jwt
 from app.models.dynamodb import Service
-from app.common.error import InvalidUsage
-from app.common.request import validate_req_params
-from app.validators import NormalizerUtils
-from app.admin import bp, site_before_request, admin_role_admin_required
+from app.admin import bp, site_before_request, admin_role_editor_required
 
 
 @bp.before_request
@@ -15,7 +12,7 @@ def before_request():
 
 @bp.route('/account/services', methods=['GET'])
 @cognito_auth_required
-@admin_role_admin_required
+@admin_role_editor_required
 def account_service_list():
     accept_sids = current_cognito_jwt.get('custom:acceptServiceIds').split(',')
     if not accept_sids:

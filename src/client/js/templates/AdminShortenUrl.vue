@@ -12,6 +12,7 @@
 
   <div class="is-pulled-right">
     <eb-dropdown
+      v-if="hasEditorRole"
       position="is-bottom-left"
     >
       <span

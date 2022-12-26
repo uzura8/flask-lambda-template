@@ -12,6 +12,8 @@ from app.admin import bp, site_before_request, admin_role_admin_required
 COGNITO_REGION = os.environ.get('COGNITO_REGION', '')
 COGNITO_USERPOOL_ID = os.environ.get('COGNITO_USERPOOL_ID', '')
 
+roles = ['admin', 'editor', 'viewer']
+
 cognito = boto3.client('cognito-idp', COGNITO_REGION)
 
 
@@ -38,13 +40,19 @@ def user_list():
 def user_detail(username):
     if request.method == 'POST':
         schema = validation_schema_users_post()
+        attrs = []
         vals = validate_req_params(schema, request.json)
-        attr = {'Name':'custom:acceptServiceIds', 'Value':','.join(vals['serviceIds'])}
+        if vals.get('serviceIds'):
+            attrs.append({'Name':'custom:acceptServiceIds', 'Value':','.join(vals['serviceIds'])})
+
+        if vals.get('role'):
+            attrs.append({'Name':'custom:role', 'Value':vals['role']})
+
         try:
             res = cognito.admin_update_user_attributes(
                 UserPoolId = COGNITO_USERPOOL_ID,
                 Username=username,
-                UserAttributes=[attr]
+                UserAttributes=attrs
             )
         except cognito.exceptions.UserNotFoundException:
             raise InvalidUsage('User does not exist', 404)
@@ -101,8 +109,19 @@ def validation_schema_users_post():
             'maxlength': 128,
             'regex': r'^[0-9a-zA-Z_\-]+$',
         },
+        'role' : {
+            'type': 'string',
+            'coerce': (NormalizerUtils.trim),
+            'required': False,
+            'empty': True,
+            'nullable': True,
+            'allowed': roles,
+        },
         'serviceIds' : {
             'type': 'list',
+            'required': False,
+            'empty': True,
+            'nullable': True,
             'schema': {
                 'type': 'string',
                 'coerce': (str, NormalizerUtils.trim),

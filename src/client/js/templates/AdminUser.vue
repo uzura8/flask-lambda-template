@@ -23,7 +23,20 @@
         </tr>
         <tr>
           <th>Role</th>
-          <td v-text="user.role == 'admin' ? $t('term.userRoleAdmin') : $t('term.userRoleNormal')"></td>
+          <td>
+            <b-select
+              v-model="selectedRole"
+              @input="updateRole()"
+            >
+              <option
+                v-for="role in roles"
+                :value="role"
+                :key="role"
+              >
+                {{ $t(`term.userRoles.${role}`) }}
+              </option>
+            </b-select>
+          </td>
         </tr>
         <tr>
           <th>Status</th>
@@ -67,7 +80,7 @@
 </template>
 <script>
 import { Admin } from '@/api'
-import arr from '@/util'
+import common from '@/util/common'
 
 export default{
   name: 'AdminUser',
@@ -79,6 +92,8 @@ export default{
     return {
       services: null,
       user: null,
+      roles: ['admin', 'editor', 'viewer'],
+      selectedRole: '',
       selectedServiceIds: null,
       selectedServiceIdsError: '',
     }
@@ -117,6 +132,7 @@ export default{
       this.$store.dispatch('setLoading', true)
       try {
         this.user = await Admin.getUsers(this.username, params_copied, this.adminUserToken)
+        if (common.checkObjHasProp(this.user, 'role')) this.selectedRole = this.user.role
         this.$store.dispatch('setLoading', false)
       } catch (err) {
         console.log(err);//!!!!!!
@@ -138,8 +154,29 @@ export default{
       }
     },
 
+    async updateRole() {
+      if (this.validateRole() === false) {
+        this.showGlobalMessage(this.$t('msg.InvalidInput'))
+        return
+      }
+
+      try {
+        let vals = { role: this.selectedRole }
+        this.$store.dispatch('setLoading', true)
+        const res = await Admin.updateUser(this.username, vals, this.adminUserToken)
+        this.$store.dispatch('setLoading', false)
+        this.showGlobalMessage(this.$t('msg.Updated'), 'is-success')
+      } catch (err) {
+        console.log(err);//!!!!!!
+        this.$store.dispatch('setLoading', false)
+        this.handleApiError(err, this.$t('msg["Update failed"]'))
+      }
+    },
+
     async updateServiceIds() {
       if (this.validateServiceIds() === false) {
+        this.showGlobalMessage(this.$t('msg.InvalidInput'))
+        return
       }
 
       try {
@@ -162,6 +199,10 @@ export default{
       if (! this.user.acceptServiceIds) return
 
       this.selectedServiceIds = this.user.acceptServiceIds
+    },
+
+    validateRole() {
+      return this.roles.includes(this.selectedRole)
     },
 
     validateServiceIds() {

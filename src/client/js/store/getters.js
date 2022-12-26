@@ -12,11 +12,33 @@ export default {
     return Boolean(state.adminUser)
   },
 
+  adminRole: state => () => {
+    if (state.adminUser == null) return
+    if (utilCommon.checkObjHasProp(state.adminUser, 'attributes') === false) return
+    if (utilCommon.checkObjHasProp(state.adminUser.attributes, 'role') === false) return
+    return state.adminUser.attributes.role
+  },
+
+  checkAdminRole: state => (role) => {
+    if (state.adminUser == null) return false
+    if (utilCommon.checkObjHasProp(state.adminUser, 'attributes') === false) return false
+    if (utilCommon.checkObjHasProp(state.adminUser.attributes, 'role') === false) return false
+    return state.adminUser.attributes.role === role
+  },
+
   hasAdminRole: state => () => {
     if (state.adminUser == null) return false
-    if ('attributes' in state.adminUser === false) return false
-    if ('role' in state.adminUser.attributes === false) return false
+    if (utilCommon.checkObjHasProp(state.adminUser, 'attributes') === false) return false
+    if (utilCommon.checkObjHasProp(state.adminUser.attributes, 'role') === false) return false
     return state.adminUser.attributes.role === 'admin'
+  },
+
+  hasEditorRole: state => () => {
+    if (state.adminUser == null) return false
+    if (utilCommon.checkObjHasProp(state.adminUser, 'attributes') === false) return false
+    if (utilCommon.checkObjHasProp(state.adminUser.attributes, 'role') === false) return false
+    const editorRoles = ['admin', 'editor']
+    return editorRoles.includes(state.adminUser.attributes.role)
   },
 
   adminUserAcceptServiceIds: state => () => {

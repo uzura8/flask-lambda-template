@@ -27,11 +27,19 @@ export default {
     },
 
     hasAdminRole() {
-      if (this.isAdminUser === false) return false
-      if (this.$store.state.adminUser == null) return false
-      if ('attributes' in this.$store.state.adminUser === false) return false
-      if ('role' in this.$store.state.adminUser.attributes === false) return false
-      return this.$store.state.adminUser.attributes.role === 'admin'
+      return this.$store.getters.hasAdminRole()
+    },
+
+    checkAdminRole(role) {
+      return this.$store.getters.checkAdminRole(role)
+    },
+
+    hasEditorRole(role) {
+      return this.$store.getters.hasEditorRole()
+    },
+
+    adminRole() {
+      return this.$store.getters.adminRole()
     },
 
     adminUserAcceptServiceIds() {

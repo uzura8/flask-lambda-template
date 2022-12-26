@@ -213,6 +213,11 @@
     "usernameOf": "{service} のユーザネーム",
     "userRoleAdmin": "管理者",
     "userRoleNormal": "一般",
+    "userRoles": {
+      "admin": "管理者",
+      "editor": "編集者",
+      "viewer": "閲覧者"
+    },
     "service": "サービス",
     "editorMode": "エディタモード",
     "richText": "リッチテキスト",

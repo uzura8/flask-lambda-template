@@ -19,7 +19,7 @@
             <router-link :to="`/admin/users/${user.username}`">{{ user.username }}</router-link>
           </td>
           <td>{{ user.email }}</td>
-          <td v-text="user.role == 'admin' ? $t('term.userRoleAdmin') : $t('term.userRoleNormal')"></td>
+          <td>{{ $t(`term.userRoles.${user.role}`) }}</td>
           <td v-text="user.acceptServiceIds.join(', ')"></td>
         </tr>
       </tbody>

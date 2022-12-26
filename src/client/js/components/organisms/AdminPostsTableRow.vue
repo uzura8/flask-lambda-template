@@ -11,6 +11,7 @@
     <td v-text="'category' in post && post.category ? post.category.label : '-'"></td>
     <td>
       <router-link
+        v-if="hasEditorRole"
         :to="`/admin/posts/${serviceId}/${post.postId}/edit`"
         class="button is-small"
       >
@@ -18,6 +19,9 @@
           <i class="fas fa-pen"></i>
         </span>
       </router-link>
+
+      <span v-else>-</span>
+
     </td>
     <td class="is-size-7"><inline-time :datetime="post.publishAt"></inline-time></td>
     <td class="is-size-7"><inline-time :datetime="post.updatedAt"></inline-time></td>

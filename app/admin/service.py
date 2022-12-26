@@ -1,12 +1,11 @@
-import json
-import os
 from flask import jsonify, request
 from flask_cognito import cognito_auth_required
 from app.models.dynamodb import Service, ServiceConfig
 from app.common.error import InvalidUsage
 from app.common.request import validate_req_params
 from app.validators import NormalizerUtils
-from app.admin import bp, site_before_request, admin_role_admin_required
+from app.admin import bp, site_before_request, admin_role_admin_required,\
+        check_acl_service_id, admin_role_editor_required
 
 
 @bp.before_request
@@ -44,12 +43,9 @@ def service_list():
 
 @bp.route('/services/<string:service_id>', methods=['POST', 'GET'])
 @cognito_auth_required
-@admin_role_admin_required
+@admin_role_editor_required
 def service_detail(service_id):
-    key = {'p': {'key':'serviceId', 'val':service_id}}
-    service = Service.get_one(key)
-    if not service:
-        raise InvalidUsage('ServiceId does not exist', 404)
+    service = check_acl_service_id(service_id, True)
 
     if request.method == 'POST':
         alloweds = ['label', 'functions', 'configs']
@@ -58,6 +54,7 @@ def service_detail(service_id):
         if 'configs' in vals:
             configs = vals.pop('configs')
 
+        key = {'p': {'key':'serviceId', 'val':service_id}}
         service = Service.update(key, vals, True)
 
         if configs is not None and any(configs):

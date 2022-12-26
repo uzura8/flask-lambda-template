@@ -13,6 +13,7 @@
     </td>
     <td>
       <router-link
+        v-if="hasEditorRole"
         :to="`/admin/shorten-urls/${serviceId}/${shortenUrl.urlId}/edit`"
         class="button is-small"
       >
@@ -20,6 +21,9 @@
           <i class="fas fa-pen"></i>
         </span>
       </router-link>
+
+      <span v-else>-</span>
+
     </td>
     <td class="is-size-7"><inline-time :datetime="shortenUrl.createdAt"></inline-time></td>
   </tr>
