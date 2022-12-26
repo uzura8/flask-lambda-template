@@ -1,5 +1,4 @@
 import json
-import os
 import traceback
 from urllib.parse import quote
 from flask import jsonify, request
@@ -10,7 +9,7 @@ from app.common.string import random_str
 from app.common.request import validate_req_params
 from app.common.url import join_query
 from app.validators import NormalizerUtils
-from app.admin import bp, site_before_request, check_acl_service_id
+from app.admin import bp, site_before_request, check_acl_service_id, admin_role_editor_required
 
 
 @bp.before_request
@@ -21,6 +20,7 @@ def before_request():
 
 @bp.route('/shorten-urls/<string:service_id>', methods=['POST', 'GET'])
 @cognito_auth_required
+@admin_role_editor_required
 def url_list(service_id):
     check_acl_service_id(service_id)
 
@@ -68,8 +68,10 @@ def url_list(service_id):
     return jsonify(res), 200
 
 
-@bp.route('/shorten-urls/<string:service_id>/<string:url_id>', methods=['POST', 'GET', 'HEAD', 'DELETE'])
+@bp.route('/shorten-urls/<string:service_id>/<string:url_id>',
+          methods=['POST', 'GET', 'HEAD', 'DELETE'])
 @cognito_auth_required
+@admin_role_editor_required
 def url_detail(service_id, url_id):
     validate_req_params(validation_schema_url_id(), {'urlId': url_id})
     query_keys = {'p': {'key':'urlId', 'val':url_id}}

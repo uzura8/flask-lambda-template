@@ -1,6 +1,6 @@
 import os
 from functools import wraps
-from flask import Blueprint, current_app, jsonify, abort
+from flask import Blueprint, current_app, jsonify, abort, request
 from flask_cognito import cognito_auth_required, current_cognito_jwt
 from app.common.error import InvalidUsage
 from app.models.dynamodb import Service, ServiceConfig
@@ -15,11 +15,26 @@ def site_before_request(f):
     return wrapper
 
 
-def admin_role_required(f):
+def admin_role_admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if current_cognito_jwt.get('custom:role') != 'admin':
             raise InvalidUsage('Forbidden', 403)
+
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+def admin_role_editor_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        role = current_cognito_jwt.get('custom:role')
+        if role not in ['admin', 'editor', 'viewer']:
+            raise InvalidUsage('Forbidden', 403)
+
+        if role == 'viewer':
+            if request.method in ['POST', 'PUT', 'DELETE']:
+                raise InvalidUsage('Forbidden', 403)
 
         return f(*args, **kwargs)
     return decorated_function

@@ -8,7 +8,7 @@ from app.common.error import InvalidUsage
 from app.common.request import validate_req_params
 from app.common.string import validate_uuid
 from app.validators import NormalizerUtils
-from app.admin import bp, site_before_request, check_acl_service_id
+from app.admin import bp, site_before_request, check_acl_service_id, admin_role_editor_required
 
 
 @bp.before_request
@@ -19,6 +19,7 @@ def before_request():
 
 @bp.route('/posts/<string:service_id>', methods=['POST', 'GET'])
 @cognito_auth_required
+@admin_role_editor_required
 def post_list(service_id):
     service = check_acl_service_id(service_id, True)
 
@@ -72,6 +73,7 @@ def post_list(service_id):
 
 @bp.route('/posts/<string:service_id>/slug', methods=['GET'])
 @cognito_auth_required
+@admin_role_editor_required
 def slug_util(service_id):
     check_acl_service_id(service_id)
     params = {}
@@ -86,6 +88,7 @@ def slug_util(service_id):
 
 @bp.route('/posts/<string:service_id>/<string:identifer>', methods=['POST', 'GET', 'HEAD', 'DELETE'])
 @cognito_auth_required
+@admin_role_editor_required
 def post_detail(service_id, identifer):
     service = check_acl_service_id(service_id, True)
     post = get_post_by_identifer(service_id, identifer)
@@ -159,6 +162,7 @@ def post_detail(service_id, identifer):
 
 @bp.route('/posts/<string:service_id>/<string:identifer>/status', methods=['POST'])
 @cognito_auth_required
+@admin_role_editor_required
 def post_status(service_id, identifer):
     service = check_acl_service_id(service_id)
     saved = get_post_by_identifer(service_id, identifer)

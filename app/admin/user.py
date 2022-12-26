@@ -7,7 +7,7 @@ from flask_cognito import cognito_auth_required
 from app.validators import NormalizerUtils
 from app.common.request import validate_req_params
 from app.common.error import InvalidUsage
-from app.admin import bp, site_before_request, admin_role_required
+from app.admin import bp, site_before_request, admin_role_admin_required
 
 COGNITO_REGION = os.environ.get('COGNITO_REGION', '')
 COGNITO_USERPOOL_ID = os.environ.get('COGNITO_USERPOOL_ID', '')
@@ -23,7 +23,7 @@ def before_request():
 
 @bp.route('/users', methods=['GET'])
 @cognito_auth_required
-@admin_role_required
+@admin_role_admin_required
 def user_list():
     res = cognito.list_users(
         UserPoolId = COGNITO_USERPOOL_ID
@@ -34,7 +34,7 @@ def user_list():
 
 @bp.route('/users/<string:username>', methods=['GET', 'POST'])
 @cognito_auth_required
-@admin_role_required
+@admin_role_admin_required
 def user_detail(username):
     if request.method == 'POST':
         schema = validation_schema_users_post()

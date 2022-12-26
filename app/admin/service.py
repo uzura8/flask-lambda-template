@@ -6,7 +6,7 @@ from app.models.dynamodb import Service, ServiceConfig
 from app.common.error import InvalidUsage
 from app.common.request import validate_req_params
 from app.validators import NormalizerUtils
-from app.admin import bp, site_before_request, admin_role_required
+from app.admin import bp, site_before_request, admin_role_admin_required
 
 
 @bp.before_request
@@ -17,7 +17,7 @@ def before_request():
 
 @bp.route('/services', methods=['POST', 'GET'])
 @cognito_auth_required
-@admin_role_required
+@admin_role_admin_required
 def service_list():
     services = Service.scan()
     services = sorted(services, key=lambda x: x['serviceId'])
@@ -44,7 +44,7 @@ def service_list():
 
 @bp.route('/services/<string:service_id>', methods=['POST', 'GET'])
 @cognito_auth_required
-@admin_role_required
+@admin_role_admin_required
 def service_detail(service_id):
     key = {'p': {'key':'serviceId', 'val':service_id}}
     service = Service.get_one(key)

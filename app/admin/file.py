@@ -9,7 +9,7 @@ from app.common.error import InvalidUsage
 from app.common.request import validate_req_params
 from app.common.media import get_ext_by_mimetype
 from app.validators import NormalizerUtils
-from app.admin import bp, site_before_request, check_acl_service_id
+from app.admin import bp, site_before_request, check_acl_service_id, admin_role_editor_required
 
 MEDIA_S3_BUCKET_NAME = os.environ.get('MEDIA_S3_BUCKET_NAME', '')
 s3_clident = boto3.client('s3', config=Config(signature_version='s3v4'))
@@ -23,6 +23,7 @@ def before_request():
 
 @bp.route('/files/<string:service_id>', methods=['POST'])
 @cognito_auth_required
+@admin_role_editor_required
 def create_pre_signed_url(service_id):
     service = check_acl_service_id(service_id, True)
 
@@ -62,6 +63,7 @@ def create_pre_signed_url(service_id):
 
 @bp.route('/files/<string:service_id>/<string:file_id>', methods=['GET', 'DELETE'])
 @cognito_auth_required
+@admin_role_editor_required
 def file_detail(service_id, file_id):
     check_acl_service_id(service_id)
     query_keys = {'p': {'key':'fileId', 'val':file_id}}

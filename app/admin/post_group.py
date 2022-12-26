@@ -1,5 +1,3 @@
-import json
-import os
 import traceback
 from flask import jsonify, request
 from flask_cognito import cognito_auth_required, current_cognito_jwt
@@ -8,7 +6,7 @@ from app.common.error import InvalidUsage
 from app.common.date import utc_iso
 from app.common.request import validate_req_params
 from app.validators import NormalizerUtils
-from app.admin import bp, site_before_request, check_acl_service_id
+from app.admin import bp, site_before_request, check_acl_service_id, admin_role_editor_required
 
 reserved_slugs = PostGroup.get_reserved_values('slug')
 
@@ -20,8 +18,9 @@ def before_request():
 
 @bp.route('/posts/<string:service_id>/groups', methods=['POST', 'GET'])
 @cognito_auth_required
+@admin_role_editor_required
 def post_group_list(service_id):
-    service = check_acl_service_id(service_id)
+    check_acl_service_id(service_id)
 
     if request.method == 'POST':
         schema = validation_schema_group_list_post()
@@ -57,6 +56,7 @@ def post_group_list(service_id):
 
 @bp.route('/posts/<string:service_id>/groups/slug', methods=['GET'])
 @cognito_auth_required
+@admin_role_editor_required
 def post_group_detail_slug(service_id):
     check_acl_service_id(service_id)
     params = {}
@@ -69,8 +69,10 @@ def post_group_detail_slug(service_id):
     return jsonify(is_not_exists), 200
 
 
-@bp.route('/posts/<string:service_id>/groups/<string:slug>', methods=['POST', 'GET', 'HEAD', 'DELETE'])
+@bp.route('/posts/<string:service_id>/groups/<string:slug>',
+          methods=['POST', 'GET', 'HEAD', 'DELETE'])
 @cognito_auth_required
+@admin_role_editor_required
 def post_group_detail(service_id, slug):
     check_acl_service_id(service_id)
     query_key = '#'.join([service_id, slug])
