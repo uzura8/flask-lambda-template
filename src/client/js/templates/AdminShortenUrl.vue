@@ -66,7 +66,15 @@
 
     <div class="field">
       <label class="label">{{ $t('common.paramsFor', {target: $t('term.accessAnalysis')}) }}</label>
-      <div class="control" v-text="`${shortenUrl.paramKey}=${shortenUrl.paramValue}`"></div>
+      <div
+        v-if="shortenUrl.paramKey"
+        v-text="`${shortenUrl.paramKey}=${shortenUrl.paramValue}`"
+        class="control"
+      ></div>
+      <div
+        v-else
+        class="control"
+      >{{ $t('msg.Unregistered') }}</div>
     </div>
 
     <div class="field mt-5">

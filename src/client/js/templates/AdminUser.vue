@@ -106,7 +106,7 @@ export default{
 
     serviceIds () {
       let serviceIds = []
-      this.services.map(item => serviceIds.push(item))
+      this.services.map(item => serviceIds.push(item.serviceId))
       return serviceIds
     },
   },
@@ -174,10 +174,10 @@ export default{
     },
 
     async updateServiceIds() {
-      if (this.validateServiceIds() === false) {
-        this.showGlobalMessage(this.$t('msg.InvalidInput'))
-        return
-      }
+      //if (this.validateServiceIds() === false) {
+      //  this.showGlobalMessage(this.$t('msg.InvalidInput'))
+      //  return
+      //}
 
       try {
         let vals = {}
@@ -207,8 +207,10 @@ export default{
 
     validateServiceIds() {
       if (this.selectedServiceIds.length === 0) return true
-      const res = this.selectedServiceIds.filter(item => this.serviceIds.includes(item) === false)
-      return res.length === 0
+      for (let i = 0, n = this.selectedServiceIds.length; i < n; i++) {
+        if (this.serviceIds.includes(this.selectedServiceIds[i]) === false) return false
+      }
+      return true
     },
   },
 }

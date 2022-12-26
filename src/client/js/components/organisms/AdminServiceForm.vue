@@ -330,8 +330,8 @@ export default{
         vals.configs.mediaUploadSizeLimitMBImage = this.mediaUploadSizeLimitMBImage
         vals.configs.mediaUploadAcceptMimetypesFile = this.mediaUploadAcceptMimetypesFile
         vals.configs.mediaUploadSizeLimitMBFile = this.mediaUploadSizeLimitMBFile
-        if (this.jumpPageUrl) vals.configs.jumpPageUrl = this.jumpPageUrl
-        if (this.jumpPageParamKey) vals.configs.jumpPageParamKey = this.jumpPageParamKey
+        vals.configs.jumpPageUrl = this.jumpPageUrl
+        vals.configs.jumpPageParamKey = this.jumpPageParamKey
         vals.configs.analysisParamKeyDefault = this.analysisParamKeyDefault
 
         this.$store.dispatch('setLoading', true)
@@ -379,11 +379,6 @@ export default{
       this.fieldKeys.map(field => {
         this.validate(field)
       })
-      if (!this.checkEmpty(this.jumpPageUrl) && this.checkEmpty(this.jumpPageParamKey)
-        || this.checkEmpty(this.jumpPageUrl) && !this.checkEmpty(this.jumpPageParamKey)) {
-        if (this.checkEmpty(this.jumpPageUrl)) this.errors.jumpPageUrl.push(this.$t('msg["Input required"]'))
-        if (this.checkEmpty(this.jumpPageParamKey)) this.errors.jumpPageParamKey.push(this.$t('msg["Input required"]'))
-      }
       if (this.hasErrors) {
         this.globalError = this.$t("msg['Correct inputs with error']")
       } else if (this.isEmptyAllFields) {
