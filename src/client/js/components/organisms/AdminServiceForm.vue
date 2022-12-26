@@ -42,6 +42,17 @@
     class="pl-5 pt-2 pb-4"
   >
     <b-field
+      :label="$t('form.outerSiteUrl')"
+      :type="checkEmpty(errors.outerSiteUrl) ? '' : 'is-danger'"
+      :message="checkEmpty(errors.outerSiteUrl) ? '' : errors.outerSiteUrl[0]"
+    >
+      <b-input
+        v-model="outerSiteUrl"
+        @blur="validate('outerSiteUrl')"
+      ></b-input>
+    </b-field>
+
+    <b-field
       :label="$t('form.frontendPostDetailUrlPrefix')"
       :type="checkEmpty(errors.frontendPostDetailUrlPrefix) ? '' : 'is-danger'"
       :message="checkEmpty(errors.frontendPostDetailUrlPrefix) ? '' : errors.frontendPostDetailUrlPrefix[0]"
@@ -208,6 +219,7 @@ export default{
       serviceIdInput: '',
       label: '',
       functions: [],
+      outerSiteUrl: '',
       frontendPostDetailUrlPrefix: '',
       mediaUploadAcceptMimetypesImage: '',
       mediaUploadImageSizes: '',
@@ -221,6 +233,7 @@ export default{
         'serviceIdInput',
         'label',
         'functions',
+        'outerSiteUrl',
         'frontendPostDetailUrlPrefix',
         'mediaUploadAcceptMimetypesImage',
         'mediaUploadImageSizes',
@@ -242,6 +255,7 @@ export default{
     isEmptyAllFields() {
       if (!this.isEdit && !this.checkEmpty(this.serviceIdInput)) return false
       if (!this.checkEmpty(this.label)) return false
+      if (!this.checkEmpty(this.outerSiteUrl)) return false
       if (!this.checkEmpty(this.frontendPostDetailUrlPrefix)) return false
       if (!this.checkEmpty(this.mediaUploadAcceptMimetypesImage)) return false
       if (!this.checkEmpty(this.mediaUploadImageSizes)) return false
@@ -275,6 +289,7 @@ export default{
       this.label = this.service.label != null ? String(this.service.label) : ''
       this.functions = this.service.functions != null ? this.service.functions : []
       if (common.checkObjHasProp(this.service, 'configs')) {
+        this.outerSiteUrl = this.service.configs.outerSiteUrl != null ? String(this.service.configs.outerSiteUrl) : ''
         this.frontendPostDetailUrlPrefix = this.service.configs.frontendPostDetailUrlPrefix != null ? String(this.service.configs.frontendPostDetailUrlPrefix) : ''
         this.mediaUploadAcceptMimetypesImage = this.service.configs.mediaUploadAcceptMimetypesImage != null ? String(this.service.configs.mediaUploadAcceptMimetypesImage) : ''
         this.mediaUploadImageSizes = this.service.configs.mediaUploadImageSizes != null ? String(this.service.configs.mediaUploadImageSizes) : ''
@@ -285,6 +300,7 @@ export default{
         this.jumpPageParamKey = this.service.configs.jumpPageParamKey != null ? String(this.service.configs.jumpPageParamKey) : ''
         this.analysisParamKeyDefault = this.service.configs.analysisParamKeyDefault != null ? String(this.service.configs.analysisParamKeyDefault) : ''
       } else {
+        this.outerSiteUrl = ''
         this.frontendPostDetailUrlPrefix = ''
         this.mediaUploadAcceptMimetypesImage = ''
         this.mediaUploadImageSizes = ''
@@ -301,6 +317,7 @@ export default{
       this.serviceIdInput = ''
       this.label = ''
       this.functions = []
+      this.outerSiteUrl = ''
       this.frontendPostDetailUrlPrefix = ''
       this.mediaUploadAcceptMimetypesImage = ''
       this.mediaUploadImageSizes = ''
@@ -324,6 +341,7 @@ export default{
         vals.functions = this.functions
 
         vals.configs = {}
+        vals.configs.outerSiteUrl = this.outerSiteUrl
         vals.configs.frontendPostDetailUrlPrefix = this.frontendPostDetailUrlPrefix
         vals.configs.mediaUploadAcceptMimetypesImage = this.mediaUploadAcceptMimetypesImage
         vals.configs.mediaUploadImageSizes = this.mediaUploadImageSizes

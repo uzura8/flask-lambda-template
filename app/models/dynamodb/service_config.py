@@ -19,6 +19,11 @@ class ServiceConfig(Base):
 
     alloweds = [
         {
+            'configName': 'outerSiteUrl',
+            'isJson': False,
+            'default': '',
+        },
+        {
             'configName': 'frontendPostDetailUrlPrefix',
             'isJson': False,
             'default': '',

@@ -102,6 +102,15 @@ def validation_schema_services():
             'empty': True,
             'nullable': True,
             'schema': {
+                'outerSiteUrl': {
+                    'type': 'string',
+                    'coerce': (NormalizerUtils.trim),
+                    'valid_url': True,
+                    'required': False,
+                    'nullable': True,
+                    'empty': True,
+                    'default': '',
+                },
                 'frontendPostDetailUrlPrefix': {
                     'type': 'string',
                     'coerce': (NormalizerUtils.trim),
