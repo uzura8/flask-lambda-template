@@ -31,7 +31,6 @@
         v-if="isAdminUser"
         to="/admin/signout" class="navbar-item"
       >{{ $t('common.signOut') }}</router-link>
-      <router-link to="/" class="navbar-item">{{ $t('page.siteTop') }}</router-link>
     </div>
   </div>
 </nav>
