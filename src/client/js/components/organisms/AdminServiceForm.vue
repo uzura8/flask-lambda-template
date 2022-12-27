@@ -219,6 +219,7 @@ export default{
       serviceIdInput: '',
       label: '',
       functions: [],
+      defaultConfigs: null,
       outerSiteUrl: '',
       frontendPostDetailUrlPrefix: '',
       mediaUploadAcceptMimetypesImage: '',
@@ -279,13 +280,17 @@ export default{
     },
   },
 
-  created() {
-    this.setService()
+  async created() {
+    if (this.isEdit) {
+      this.setService()
+    } else {
+      await this.setDefaultConfigs()
+      this.resetConfigInputs()
+    }
   },
 
   methods: {
     setService() {
-      if (!this.isEdit) return
       this.label = this.service.label != null ? String(this.service.label) : ''
       this.functions = this.service.functions != null ? this.service.functions : []
       if (common.checkObjHasProp(this.service, 'configs')) {
@@ -300,16 +305,7 @@ export default{
         this.jumpPageParamKey = this.service.configs.jumpPageParamKey != null ? String(this.service.configs.jumpPageParamKey) : ''
         this.analysisParamKeyDefault = this.service.configs.analysisParamKeyDefault != null ? String(this.service.configs.analysisParamKeyDefault) : ''
       } else {
-        this.outerSiteUrl = ''
-        this.frontendPostDetailUrlPrefix = ''
-        this.mediaUploadAcceptMimetypesImage = ''
-        this.mediaUploadImageSizes = ''
-        this.mediaUploadSizeLimitMBImage = ''
-        this.mediaUploadAcceptMimetypesFile = ''
-        this.mediaUploadSizeLimitMBFile = ''
-        this.jumpPageUrl = ''
-        this.jumpPageParamKey = ''
-        this.analysisParamKeyDefault = ''
+        this.resetConfigInputs()
       }
     },
 
@@ -317,16 +313,22 @@ export default{
       this.serviceIdInput = ''
       this.label = ''
       this.functions = []
-      this.outerSiteUrl = ''
-      this.frontendPostDetailUrlPrefix = ''
-      this.mediaUploadAcceptMimetypesImage = ''
-      this.mediaUploadImageSizes = ''
-      this.mediaUploadSizeLimitMBImage = ''
-      this.mediaUploadAcceptMimetypesFile = ''
-      this.mediaUploadSizeLimitMBFile = ''
-      this.jumpPageUrl = ''
-      this.jumpPageParamKey = ''
-      this.analysisParamKeyDefault = ''
+      this.resetConfigInputs()
+    },
+
+    resetConfigInputs() {
+      this.defaultConfigs.map((config) => {
+        this[config.configName] = config.configVal.toString()
+      })
+    },
+
+    async setDefaultConfigs() {
+      try {
+        this.defaultConfigs = await Admin.getServiceConfigs(this.adminUserToken)
+      } catch (err) {
+        console.log(err)
+        this.showGlobalMessage(this.$t('msg["Server error"]'))
+      }
     },
 
     async save(forcePublish = false) {
@@ -416,7 +418,9 @@ export default{
     validateStringFieldCommon(field) {
       this.initError(field)
       if (this[field] === null) this[field] = ''
-      this[field] = this[field].trim()
+      if (typeof this[field] === 'string') {
+        this[field] = this[field].trim()
+      }
     },
 
     async validateServiceIdInput() {

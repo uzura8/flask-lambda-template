@@ -33,19 +33,29 @@ def service_list():
 
         if configs is not None and any(configs):
             for name, val in configs.items():
-                ServiceConfig.save(service.serviceId, name, val)
+                ServiceConfig.save(service['serviceId'], name, val)
 
-        service['configs'] = ServiceConfig.get_all_by_service(service.serviceId, True, True, True)
+        service['configs'] = ServiceConfig.get_all_by_service(service['serviceId'], True, True, True)
         return jsonify(service), 200
 
     return jsonify(services), 200
 
 
+@bp.route('/services/configs', methods=['GET'])
+@cognito_auth_required
+def service_configs():
+    configs = ServiceConfig.get_alloweds()
+    return jsonify(configs), 200
+
+
 @bp.route('/services/<string:service_id>', methods=['POST', 'GET'])
 @cognito_auth_required
-@admin_role_editor_required
+@admin_role_admin_required
 def service_detail(service_id):
-    service = check_acl_service_id(service_id, True)
+    key = {'p': {'key':'serviceId', 'val':service_id}}
+    service = Service.get_one(key)
+    if not service:
+        raise InvalidUsage('ServiceId does not exist', 404)
 
     if request.method == 'POST':
         alloweds = ['label', 'functions', 'configs']
@@ -54,7 +64,6 @@ def service_detail(service_id):
         if 'configs' in vals:
             configs = vals.pop('configs')
 
-        key = {'p': {'key':'serviceId', 'val':service_id}}
         service = Service.update(key, vals, True)
 
         if configs is not None and any(configs):
@@ -125,6 +134,7 @@ def validation_schema_services():
                     'coerce': (NormalizerUtils.split),
                     'required': False,
                     'empty': True,
+                    'nullable': True,
                     'default': [],
                     'schema': {
                         'type': 'string',
@@ -138,6 +148,7 @@ def validation_schema_services():
                     'coerce': (NormalizerUtils.split),
                     'required': False,
                     'empty': True,
+                    'nullable': True,
                     'default': [],
                     'schema': {
                         'type': 'string',
@@ -151,6 +162,7 @@ def validation_schema_services():
                     'coerce': int,
                     'required': False,
                     'empty': True,
+                    'nullable': True,
                     'min': 1,
                     'max': 50,
                     'default': 5,
@@ -160,6 +172,7 @@ def validation_schema_services():
                     'coerce': (NormalizerUtils.split),
                     'required': False,
                     'empty': True,
+                    'nullable': True,
                     'default': [],
                     'schema': {
                         'type': 'string',
@@ -173,6 +186,7 @@ def validation_schema_services():
                     'coerce': int,
                     'required': False,
                     'empty': True,
+                    'nullable': True,
                     'min': 1,
                     'max': 50,
                     'default': 5,

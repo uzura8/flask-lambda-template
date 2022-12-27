@@ -17,6 +17,20 @@ export default {
     })
   },
 
+  getServiceConfigs: (token = null) => {
+    return new Promise((resolve, reject) => {
+      const options = utilUri.getReqOptions({}, token)
+      const uri = 'admin/services/configs'
+      client.get(uri, options)
+        .then((res) => {
+          resolve(res.data)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+
   createService: (vals, token = null) => {
     return new Promise((resolve, reject) => {
       const options = utilUri.getReqOptions(null, token)

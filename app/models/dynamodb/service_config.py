@@ -70,6 +70,19 @@ class ServiceConfig(Base):
         },
     ]
 
+
+    @classmethod
+    def get_alloweds(self):
+        res = []
+        for item in self.alloweds:
+            val = json.loads(item['default']) if item['isJson'] else item['default']
+            res.append({
+                'configName': item['configName'],
+                'configVal': val,
+            })
+        return res
+
+
     @classmethod
     def get_val(self, service_id, name):
         item = self.get_one_by_name(service_id, name)
