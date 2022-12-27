@@ -219,7 +219,7 @@ export default{
       serviceIdInput: '',
       label: '',
       functions: [],
-      defaultConfigs: null,
+      defaultConfigs: [],
       outerSiteUrl: '',
       frontendPostDetailUrlPrefix: '',
       mediaUploadAcceptMimetypesImage: '',
