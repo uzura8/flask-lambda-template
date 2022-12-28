@@ -310,7 +310,7 @@ vi src/client/js/config/config.json
     "url": "https://your-domain-media.example.com",
  ...
   },
-  "tinyMCEApiKey": "ggo8q5i8bjt96lyz6637of9qcpcy2215i6i8h2ue2ydwl9nc"
+  "tinyMCEApiKey": "your-tinyMCE-api-key"
 }
 ```
 
