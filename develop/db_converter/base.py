@@ -111,7 +111,7 @@ class DbConverterBase():
 
     def save_exc_table(self, table_name, data):
         path = '%s/%s.json' % (self.logs_dir, table_name)
-        json_file = open(path, mode='w')
+        json_file = open(path, mode='w', encoding='utf-8')
         json.dump(data, json_file, default=self.encode_decimal)
         json_file.close()
 
