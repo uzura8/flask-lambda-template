@@ -45,7 +45,7 @@ def posts(service_id):
     if tag_id:
         body = Post.query_all_by_tag_id(tag_id, vals)
     else:
-        body = Post.query_all('statusPublishAtGsi', service_id, vals)
+        body = Post.query_all('statusPublishAtGsi', service_id, vals, True)
 
     return jsonify(body), 200
 
