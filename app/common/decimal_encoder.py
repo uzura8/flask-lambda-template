@@ -1,13 +1,22 @@
 import json
-import decimal
+from decimal import Decimal
+from boto3.dynamodb.types import Binary
 
 
 class DecimalEncoder(json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, decimal.Decimal):
-            if o % 1 > 0:
-                return float(o)
+    def default(self, obj):
+        if isinstance(obj, Decimal):
+            if int(obj) == obj:
+                return int(obj)
+            return float(obj)
+        if isinstance(obj, Binary):
+            return obj.value
+        if isinstance(obj, bytes):
+            return obj.decode()
+        if isinstance(obj, set):
+            return list(obj)
 
-            return int(o)
-
-        return json.JSONEncoder.default(self, o)
+        try:
+            return str(obj)
+        except Exception:
+            return None
