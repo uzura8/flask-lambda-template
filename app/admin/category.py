@@ -21,7 +21,7 @@ def handle_categories(service_id):
         raise InvalidUsage('ServiceId does not exist', 404)
 
     if request.method == 'POST':
-        vals = validate_req_params(validation_schema(), request.json)
+        vals = validate_req_params(validation_schema_categories_post(), request.json)
         item = Category.get_one_by_slug(service_id, vals['slug'])
         if item:
             raise InvalidUsage('Slug already used', 400)
@@ -30,12 +30,28 @@ def handle_categories(service_id):
         body = Category.create(vals)
 
     else:
-        body = Category.get_all_by_service_id(service_id)
+        params = validate_req_params(validation_schema_categories_get(), request.args)
+        if params.get('withChildren'):
+            body = Category.get_all_by_service_id(service_id)
+        else:
+            body = Category.get_children_by_parent_path(service_id, '0', False, True, False)
 
     return jsonify(body), 200
 
 
-def validation_schema():
+def validation_schema_categories_get():
+    return {
+        'withChildren': {
+            'type': 'boolean',
+            'coerce': (str, NormalizerUtils.to_bool),
+            'required': False,
+            'empty': False,
+            'default': False,
+        },
+    }
+
+
+def validation_schema_categories_post():
     return {
         'slug': {
             'type': 'string',

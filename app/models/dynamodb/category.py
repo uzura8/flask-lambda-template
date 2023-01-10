@@ -210,7 +210,7 @@ class Category(Base):
                     break
 
         # If nest not exists, return original
-        if categories and not res.values():
+        if categories and not res:
             return [ self.to_response(c) if for_response else c for c in categories ]
 
-        return res.values()
+        return res
