@@ -7,7 +7,7 @@ from app.common.string import new_uuid
 class Base():
     __abstract__ = True
 
-    IS_LOCAL = bool(os.environ.get('IS_LOCAL'))
+    IS_LOCAL = os.getenv('IS_LOCAL', 'False').lower() == 'true'
     PRJ_PREFIX = os.environ['PRJ_PREFIX']
 
     reserved_values = None
@@ -60,11 +60,15 @@ class Base():
 
 
     @classmethod
-    def scan(self, options=None):
+    def scan(self, options=None, is_return_raw=False):
         if options is None:
             options = {}
         table = self.get_table()
         res = table.scan(**options)
+
+        if is_return_raw:
+            return res
+
         return res.get('Items', [])
 
 

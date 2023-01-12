@@ -254,7 +254,7 @@ class Post(Base):
 
         item = Post.get_one_by_slug(service_id, vals['slug'])
         if item:
-            raise ModelInvalidParamsException('Slug already used')
+            raise ModelInvalidParamsException('Slug already used: ' + vals['slug'])
 
         if vals.get('category'):
             cate = Category.get_one_by_slug(service_id, vals['category'])

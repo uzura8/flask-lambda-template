@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if test $IS_LOCAL -eq 1 ; then
+if [ $IS_LOCAL = "True" ]; then
   URL="http://localhost:5000/api"
 else
   URL=$BASE_URL

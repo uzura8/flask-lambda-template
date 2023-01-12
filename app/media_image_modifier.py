@@ -3,11 +3,10 @@ from app.aws_s3_handler import AwsS3Handler
 from app.models.dynamodb import Service
 from app.common.media import get_mimetype_by_ext, get_exts_by_mimetypes
 from app.common.image import Image
-from app.common.log import output_log
 
 
-class MediaImageMaker:
-    s3handler = None
+class MediaImageModifier:
+    media_image_maker = None
     service_id = ''
     bucket_dir_path = ''
 
@@ -59,7 +58,6 @@ class MediaImageMaker:
             return
 
         width, height, resize_type = self.conv_size_str_to_list(size_str)
-        output_log(['func:make_thumbnail', width, height, resize_type])
         upload_key = self.get_obj_key_by_size(size_str)
         resized_blob = self.image_raw.resize(width, height, resize_type)
         self.s3handler.upload(resized_blob, upload_key, self.mimetype)

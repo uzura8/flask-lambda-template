@@ -3,7 +3,7 @@ from pprint import pprint
 import boto3
 from boto3.dynamodb.conditions import Key
 
-IS_LOCAL = bool(os.environ.get('IS_LOCAL'))
+IS_LOCAL = os.getenv('IS_LOCAL', 'False').lower() == 'true'
 
 
 class DynamoDBHandler:

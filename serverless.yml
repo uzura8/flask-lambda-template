@@ -154,7 +154,7 @@ functions:
     provisionedConcurrency: 2
 
   mediaImageMaker:
-    handler: app/media_image_maker.handler
+    handler: app/media_image_maker_handler.handler
     name: ${self:service}-${self:provider.stage}-mediaImageMaker
     layers:
       - arn:aws:lambda:ap-northeast-1:770693421928:layer:Klayers-p38-Pillow:5 # Ref https://github.com/keithrozario/Klayers/tree/master/deployments
@@ -170,6 +170,14 @@ functions:
           #  #- suffix: .jpg
           existing: true # If use existing bucket, set true
           forceDeploy: true
+
+  mediaImageModifier:
+    handler: app/media_image_modifier_handler.handler
+    name: ${self:service}-${self:provider.stage}-mediaImageModifier
+    layers:
+      - arn:aws:lambda:ap-northeast-1:770693421928:layer:Klayers-p38-Pillow:5 # Ref https://github.com/keithrozario/Klayers/tree/master/deployments
+    memorySize: ${file(${self:custom.stageConfigFileName}):mediaImageMakerMemorySize}
+    timeout: ${file(${self:custom.stageConfigFileName}):mediaImageMakerTimeout}
 
   urlShortenQrcodeMaker:
     handler: app/url_shorten_qrcode_maker.handler

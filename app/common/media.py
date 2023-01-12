@@ -28,3 +28,10 @@ def get_ext_by_path(filepath):
     dirname, basename = os.path.split(filepath)
     basename_without_ext, ext = basename.split('.', 1)
     return ext
+
+
+def get_exts_by_mimetypes(mimetypes):
+    exts = [ mt.split('/')[1] for mt in mimetypes ]
+    if 'jpeg' in exts:
+        exts.append('jpg')
+    return exts
