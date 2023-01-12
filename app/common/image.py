@@ -24,13 +24,13 @@ class Image():
         self.proc_img = self.ori_img
         self.rotate()
         if resize_type == 'relative_crop':
-            self.resize_relative_crop(width, height)
+            img = self.resize_relative_crop(width, height)
         elif resize_type == 'square_crop':
-            self.resize_square_crop(width)
+            img = self.resize_square_crop(width)
         else:
-            self.resize_relative(width, height)
+            img = self.resize_relative(width, height)
 
-        return self.save()
+        return self.save(img)
 
 
     def get_exifs(self, fmt='json'):
@@ -61,49 +61,57 @@ class Image():
         self.proc_img = convert_image[orientation](self.proc_img)
 
 
-    def save(self):
+    def save(self, img):
         with io.BytesIO() as out_img:
-            if self.proc_img.format == 'jpeg':
+            if img.format == 'jpeg':
                 if self.is_rm_prof:
-                    self.proc_img.save(out_img, 'jpeg', quality=95)
+                    img.save(out_img, 'jpeg', quality=95)
                 else:
-                    self.proc_img.save(out_img, 'jpeg', quality=95,
-                                icc_profile=self.proc_img.info.get('icc_profile'))
+                    img.save(out_img, 'jpeg', quality=95,
+                                icc_profile=img.info.get('icc_profile'))
             else:
-                self.proc_img.save(out_img, self.img_format)
+                img.save(out_img, self.img_format)
 
             return out_img.getvalue()
 
 
     def resize_relative(self, width, height):
-        self.proc_img.thumbnail((width, height), PilImage.ANTIALIAS)
+        copied_img = self.proc_img.copy()
+        copied_img.thumbnail((width, height), PilImage.ANTIALIAS)
+        return copied_img
 
 
     def resize_relative_crop(self, crop_width, crop_height):
+        if crop_width == crop_height:
+            return self.resize_square_crop(crop_width)
+
         img_width, img_height = self.proc_img.size
-        is_crop_width_long = crop_width > crop_height
-        if is_crop_width_long:
-            resize_ratio = crop_width / img_width
-        else:
+        aspect_ratio_img = img_height / img_width
+        aspect_ratio_crop = crop_height / crop_width
+        is_vertical_crop = aspect_ratio_crop > aspect_ratio_img
+        if is_vertical_crop:
             resize_ratio = crop_height / img_height
-
-        self.proc_img.thumbnail((img_width * resize_ratio, img_height * resize_ratio),
-                                PilImage.ANTIALIAS)
-        img_width, img_height = self.proc_img.size
-
-        if is_crop_width_long:
-            left = 0
-            right = img_width
-            top = (img_height - crop_height) / 2
-            bottom = top + crop_height
         else:
+            resize_ratio = crop_width / img_width
+
+        copied_img = self.proc_img.copy()
+        copied_img.thumbnail((img_width * resize_ratio, img_height * resize_ratio),
+                                PilImage.ANTIALIAS)
+        copied_width, copied_height = copied_img.size
+
+        if is_vertical_crop:
             top = 0
-            bottom = img_height
-            left = (img_width - crop_width) / 2
+            bottom = crop_height
+            left = (copied_width - crop_width) / 2
             right = left + crop_width
+        else:
+            left = 0
+            right = crop_width
+            top = (copied_height - crop_height) / 2
+            bottom = top + crop_height
 
         box = (left, top, right, bottom)
-        self.proc_img = self.proc_img.crop(box)
+        return copied_img.crop(box)
 
 
     def resize_square_crop(self, size):
@@ -121,8 +129,10 @@ class Image():
             top = (height - square_size) / 2
             bottom = top + square_size
             box = (left, top, right, bottom)
-        self.proc_img = self.proc_img.crop(box)
-        self.proc_img.thumbnail((size, size), PilImage.ANTIALIAS)
+        copied_img = self.proc_img.copy()
+        copied_img = copied_img.crop(box)
+        copied_img.thumbnail((size, size), PilImage.ANTIALIAS)
+        return copied_img
 
 
     def set_exifs(self):
