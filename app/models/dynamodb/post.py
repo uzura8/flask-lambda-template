@@ -1,8 +1,8 @@
 import secrets
 import mistletoe
-from boto3.dynamodb.conditions import Key
 from app.common.date import utc_iso, iso_offset2utc
 from app.common.string import new_uuid, nl2br, url2link, strip_html_tags
+from app.common.dict import keys_from_dicts
 from app.models.dynamodb.base import Base, ModelInvalidParamsException
 from app.models.dynamodb.category import Category
 from app.models.dynamodb.post_tag import PostTag
@@ -104,8 +104,8 @@ class Post(Base):
             for i, cid in enumerate(cate_slugs):
                 val_name = 'cid' + str(i)
                 filter_exp_cids.append('#{v} = :{v}'.format(v=val_name))
-                exp_attr_names['#{v}'.format(v=val_name)] = 'categorySlug'
-                exp_attr_vals[':{v}'.format(v=val_name)] = cid
+                exp_attr_names[f'#{val_name}'] = 'categorySlug'
+                exp_attr_vals[f':{val_name}'] = cid
 
         filter_exps_str = ' AND '.join(filter_exps) if filter_exps else ''
         filter_exp_cids_str = '(%s)' % ' OR '.join(filter_exp_cids) if filter_exp_cids else ''
@@ -129,11 +129,15 @@ class Post(Base):
         items = result.get('Items', [])[:limit]
 
         if with_cate:
-            for idx, item in enumerate(items):
-                cate = Category.get_one_by_slug(service_id, item['categorySlug'],
-                                                            False, False, True)
-                items[idx]['category'] = cate
-
+            cate_slugs = keys_from_dicts(items, 'categorySlug')
+            if cate_slugs:
+                cates = {}
+                for cate_slug in cate_slugs:
+                    cates[cate_slug] = Category.get_one_by_slug(service_id, cate_slug,
+                                                                False, False, True)
+                for idx, item in enumerate(items):
+                    cate = cates[item['categorySlug']]
+                    items[idx]['category'] = cate
         return items
 
 
