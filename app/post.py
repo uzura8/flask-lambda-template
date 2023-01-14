@@ -14,7 +14,7 @@ def posts(service_id):
         raise InvalidUsage('ServiceId does not exist', 404)
 
     params = {}
-    for key in ['count', 'order', 'sinceTime', 'untilTime', 'category', 'tag']:
+    for key in ['count', 'order', 'category', 'tag', 'pagerKey']:
         params[key] = request.args.get(key)
     schema = validation_schema_posts_post()
     vals = validate_req_params(schema, params)
@@ -42,9 +42,9 @@ def posts(service_id):
             tag_id = tag['tagId']
 
     if tag_id:
-        body = Post.query_all_by_tag_id(tag_id, vals)
+        body = Post.query_all_by_tag_id(tag_id, vals, True, service_id)
     else:
-        body = Post.query_all('statusPublishAtGsi', service_id, vals, True)
+        body = Post.query_pager_published(service_id, vals, True)
 
     return jsonify(body), 200
 
@@ -167,22 +167,22 @@ def validation_schema_posts_post():
             'allowed': ['asc', 'desc'],
             'default': 'desc',
         },
-        'sinceTime': {
-            'type': 'string',
-            'coerce': (NormalizerUtils.trim),
-            'required': False,
-            'nullable': True,
-            'empty': True,
-            'regex': r'\d{4}\-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([\+\-]\d{2}:\d{2}|Z)$',
-        },
-        'untilTime': {
-            'type': 'string',
-            'coerce': (NormalizerUtils.trim),
-            'required': False,
-            'nullable': True,
-            'empty': True,
-            'regex': r'\d{4}\-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([\+\-]\d{2}:\d{2}|Z)$',
-        },
+        #'sinceTime': {
+        #    'type': 'string',
+        #    'coerce': (NormalizerUtils.trim),
+        #    'required': False,
+        #    'nullable': True,
+        #    'empty': True,
+        #    'regex': r'\d{4}\-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([\+\-]\d{2}:\d{2}|Z)$',
+        #},
+        #'untilTime': {
+        #    'type': 'string',
+        #    'coerce': (NormalizerUtils.trim),
+        #    'required': False,
+        #    'nullable': True,
+        #    'empty': True,
+        #    'regex': r'\d{4}\-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([\+\-]\d{2}:\d{2}|Z)$',
+        #},
         'token': {
             'type': 'string',
             'coerce': (NormalizerUtils.trim),
@@ -190,5 +190,35 @@ def validation_schema_posts_post():
             'nullable': True,
             'empty': True,
             'regex': r'^[0-9a-fA-F]+$',
+        },
+        'pagerKey' : {
+            'type': 'dict',
+            'coerce': (NormalizerUtils.json2dict),
+            'required': False,
+            'nullable': True,
+            'empty': True,
+            'schema': {
+                'serviceId': {
+                    'type': 'string',
+                    #'required': True,
+                    #'empty': False,
+                },
+                'postId': {
+                    'type': 'string',
+                    #'required': True,
+                    #'empty': False,
+                },
+                'tagId': {
+                    'type': 'string',
+                    #'required': True,
+                    #'empty': False,
+                },
+                'statusPublishAt': {
+                    'type': 'string',
+                    'required': True,
+                    'empty': False,
+                    'regex': r'publish#\d{4}\-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([\+\-]\d{2}:\d{2}|Z)$',
+                },
+            }
         },
     }

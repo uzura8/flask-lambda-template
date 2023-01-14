@@ -9,6 +9,7 @@ class PostTag(Base):
     public_attrs = [
         'postId',
         'tagId',
+        'publishAt',
         'statusPublishAt',
     ]
     response_attrs = public_attrs + []
@@ -38,46 +39,53 @@ class PostTag(Base):
 
 
     @classmethod
-    def query_all_by_tag_id(self, tag_id, params, is_public=True):
+    def query_pager_published_by_tag_id(self, tag_id, params, is_public=True):
         table = self.get_table()
-        until_time = params.get('untilTime', '')
-        since_time = params.get('sinceTime', '')
+        start_key = params.get('ExclusiveStartKey')
+        #until_time = params.get('untilTime', '')
+        #since_time = params.get('sinceTime', '')
         is_desc = params.get('order', 'asc') == 'desc'
         limit = params.get('count', 20)
+        start_key = params.get('pagerKey')
 
         status = 'publish'
-        sort_key = 'publishAt'
+        #sort_key = 'publishAt'
         exp_attr_names = {}
         exp_attr_vals = {}
         key_conds = ['#ti = :ti']
         option = {
             'IndexName': 'postsByTagGsi',
-            'ProjectionExpression': self.prj_exps_str(is_public),
+            'ProjectionExpression': self.prj_exps_str(),
             'ScanIndexForward': not is_desc,
             'Limit': limit,
         }
         exp_attr_names['#ti'] = 'tagId'
         exp_attr_vals[':ti'] = tag_id
 
-        current = utc_iso(False, True)
-        if not until_time or until_time > current:
-            until_time = current
+        #current = utc_iso(False, True)
+        #if not until_time or until_time > current:
+        #    until_time = current
 
         key_conds.append('begins_with(#sp, :sp)')
         exp_attr_names['#sp'] = 'statusPublishAt'
         exp_attr_vals[':sp'] = status
 
-        filter_exps = []
-        if since_time:
-            cond = '#st > :st'
-            exp_attr_names['#st'] = sort_key
-            exp_attr_vals[':st'] = since_time
-            filter_exps.append(cond)
+        if start_key:
+            option['ExclusiveStartKey'] = start_key
 
-        if until_time:
+        filter_exps = []
+        #if since_time:
+        #    cond = '#st > :st'
+        #    exp_attr_names['#st'] = sort_key
+        #    exp_attr_vals[':st'] = since_time
+        #    filter_exps.append(cond)
+
+        #if until_time:
+        if not start_key:
+            current = utc_iso(False, True)
             cond = '#ut < :ut'
-            exp_attr_names['#ut'] = sort_key
-            exp_attr_vals[':ut'] = until_time
+            exp_attr_names['#ut'] = 'publishAt'
+            exp_attr_vals[':ut'] = current
             filter_exps.append(cond)
 
         filter_exps_str = ' AND '.join(filter_exps) if filter_exps else ''
@@ -87,11 +95,18 @@ class PostTag(Base):
 
         if filter_exp:
             option['FilterExpression'] = filter_exp
-            option['Limit'] += 50
+            #option['Limit'] += 50
 
         option['KeyConditionExpression'] = ' AND '.join(key_conds)
         option['ExpressionAttributeNames'] = exp_attr_names
         option['ExpressionAttributeValues'] = exp_attr_vals
-        result = table.query(**option)
+        res = table.query(**option)
+        #items = res.get('Items', [])[:limit]
+        items = res.get('Items', [])
 
-        return result.get('Items', [])[:limit]
+        #return result.get('Items', [])[:limit]
+        ret = {
+            'items': items,
+            'pagerKey': res.get('LastEvaluatedKey')
+        }
+        return ret

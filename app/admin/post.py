@@ -66,7 +66,7 @@ def post_list(service_id):
             vals['ExclusiveStartKey'] = vals_last_key[key_name]
 
         hkey = {'name':'serviceId', 'value': service_id}
-        post = Post.query_pager(hkey, vals, True)
+        post = Post.query_pager_admin(hkey, vals, True)
 
     return jsonify(post), 200
 

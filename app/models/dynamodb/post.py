@@ -3,6 +3,7 @@ import mistletoe
 from app.common.date import utc_iso, iso_offset2utc
 from app.common.string import new_uuid, nl2br, url2link, strip_html_tags
 from app.common.dict import keys_from_dicts
+from app.common.list import find_dicts
 from app.models.dynamodb.base import Base, ModelInvalidParamsException
 from app.models.dynamodb.category import Category
 from app.models.dynamodb.post_tag import PostTag
@@ -142,7 +143,99 @@ class Post(Base):
 
 
     @classmethod
-    def query_pager(self, hkey, params=None, with_cate=False):
+    def query_pager_published(self, service_id, params, with_cate=False):
+        table = self.get_table()
+        #status = params.get('status')
+        #until_time = params.get('untilTime', '')
+        #since_time = params.get('sinceTime', '')
+        is_desc = params.get('order', 'asc') == 'desc'
+        limit = params.get('count', 20)
+        start_key = params.get('pagerKey')
+        cate_slugs = params.get('categories', [])
+
+        exp_attr_names = {}
+        exp_attr_vals = {}
+        key_conds = ['#si = :si']
+        option = {
+            'IndexName': 'statusPublishAtGsi',
+            'ProjectionExpression': self.prj_exps_str(),
+            'ScanIndexForward': not is_desc,
+            'Limit': limit,
+        }
+        exp_attr_names['#si'] = 'serviceId'
+        exp_attr_vals[':si'] = service_id
+
+        status = 'publish'
+        key_conds.append('begins_with(#sp, :sp)')
+        exp_attr_names['#sp'] = 'statusPublishAt'
+        exp_attr_vals[':sp'] = status
+
+        if start_key:
+            option['ExclusiveStartKey'] = start_key
+
+        #current = utc_iso(False, True)
+        #if not until_time or until_time > current:
+        #    until_time = current
+
+        filter_exps = []
+        #if since_time:
+        #    cond = '#st > :st'
+        #    exp_attr_names['#st'] = sort_key
+        #    exp_attr_vals[':st'] = since_time
+        #    if is_admin:
+        #        key_conds.append(cond)
+        #    else:
+        #        filter_exps.append(cond)
+
+        if not start_key:
+            current = utc_iso(False, True)
+            cond = '#ut < :ut'
+            exp_attr_names['#ut'] = 'publishAt'
+            exp_attr_vals[':ut'] = current
+            filter_exps.append(cond)
+
+        filter_exp_cids = []
+        if cate_slugs:
+            for i, cid in enumerate(cate_slugs):
+                val_name = 'cid' + str(i)
+                filter_exp_cids.append('#{v} = :{v}'.format(v=val_name))
+                exp_attr_names[f'#{val_name}'] = 'categorySlug'
+                exp_attr_vals[f':{val_name}'] = cid
+
+        filter_exps_str = ' AND '.join(filter_exps) if filter_exps else ''
+        filter_exp_cids_str = '(%s)' % ' OR '.join(filter_exp_cids) if filter_exp_cids else ''
+
+        filter_exp = ''
+        if filter_exps_str:
+            filter_exp += filter_exps_str
+        if filter_exp_cids_str:
+            if filter_exp:
+                filter_exp += ' AND '
+            filter_exp += filter_exp_cids_str
+
+        if filter_exp:
+            option['FilterExpression'] = filter_exp
+            #option['Limit'] += 50
+
+        option['KeyConditionExpression'] = ' AND '.join(key_conds)
+        option['ExpressionAttributeNames'] = exp_attr_names
+        option['ExpressionAttributeValues'] = exp_attr_vals
+        res = table.query(**option)
+        #items = res.get('Items', [])[:limit]
+        items = res.get('Items', [])
+
+        if with_cate:
+            items = self.set_category_to_list(items, service_id)
+
+        ret = {
+            'items': items,
+            'pagerKey': res.get('LastEvaluatedKey')
+        }
+        return ret
+
+
+    @classmethod
+    def query_pager_admin(self, hkey, params=None, with_cate=False):
         index = params.get('index')
         is_desc = params.get('order', 'asc') == 'desc'
         limit = params.get('count', 20)
@@ -175,10 +268,7 @@ class Post(Base):
         items = res['Items']
 
         if with_cate:
-            for idx, item in enumerate(items):
-                cate = Category.get_one_by_slug(hkey['value'], item['categorySlug'],
-                                                            False, False, True)
-                items[idx]['category'] = cate
+            items = self.set_category_to_list(items, hkey['value'])
 
         return {
             'items': items,
@@ -215,16 +305,29 @@ class Post(Base):
 
 
     @classmethod
-    def query_all_by_tag_id(self, tag_id, params):
-        items = PostTag.query_all_by_tag_id(tag_id, params)
-        if not items:
-            return []
+    def query_all_by_tag_id(self, tag_id, params, with_cate=False, service_id=''):
+        res = PostTag.query_pager_published_by_tag_id(tag_id, params)
+        items = res['items']
+        new_items = []
+        if items:
+            keys = [ {'postId':d['postId']} for d in items ]
+            posts = Post.batch_get_items(keys)
 
-        keys = [ {'postId':d['postId']} for d in items ]
-        posts = Post.batch_get_items(keys)
-        is_desc = params.get('order', 'asc') == 'desc'
-        sort_key = 'publishAt'
-        return sorted(posts, key=lambda x: x[sort_key], reverse=is_desc)
+            if with_cate:
+                posts = self.set_category_to_list(posts, service_id)
+
+            for item in items:
+                new = find_dicts(posts, 'postId', item['postId'])
+                new['ori'] = item
+                new_items.append(new)
+            #is_desc = params.get('order', 'asc') == 'desc'
+            #sort_key = 'publishAt'
+        #return sorted(posts, key=lambda x: x[sort_key], reverse=is_desc)
+        ret = {
+            'items': new_items,
+            'pagerKey': res['pagerKey'],
+        }
+        return  ret
 
 
     @classmethod
@@ -514,3 +617,20 @@ class Post(Base):
             body_html = body_raw
             body_text = strip_html_tags(body_raw)
         return body_html, body_text
+
+
+    @staticmethod
+    def set_category_to_list(posts, service_id):
+        cate_slugs = keys_from_dicts(posts, 'categorySlug')
+        if not cate_slugs:
+            return posts
+
+        cates = {}
+        for cate_slug in cate_slugs:
+            cates[cate_slug] = Category.get_one_by_slug(service_id, cate_slug,
+                                                        False, False, True)
+        for idx, post in enumerate(posts):
+            cate = cates[post['categorySlug']]
+            posts[idx]['category'] = cate
+
+        return posts

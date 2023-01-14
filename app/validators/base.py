@@ -1,4 +1,5 @@
 import re
+import json
 from cerberus import Validator
 from app.common.string import validate_url, validate_email, validate_uuid
 
@@ -64,3 +65,4 @@ class NormalizerUtils():
     trim = lambda v: v.strip() if type(v) is str else v
     rtrim = lambda v: v.rstrip() if type(v) is str else v
     split = lambda v, dlt=',': v.split(dlt) if v else []
+    json2dict = lambda v: json.loads(v) if type(v) is str else None
