@@ -213,4 +213,4 @@ class Category(Base):
         if categories and not res:
             return [ self.to_response(c) if for_response else c for c in categories ]
 
-        return res
+        return list(res.values())
