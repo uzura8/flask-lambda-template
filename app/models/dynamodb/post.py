@@ -381,6 +381,12 @@ class Post(Base):
         elif is_publish:
             publish_at = time
 
+        created_at = ''
+        if vals.get('createdAt'):
+            created_at = vals.get('createdAt')
+        else:
+            created_at = time
+
         is_hidden = vals.get('isHiddenInList', False)
         sort_key_prefix = 'hidden' if is_hidden else status
         status_publish_at = '#'.join([sort_key_prefix, publish_at])
@@ -388,7 +394,7 @@ class Post(Base):
         required_attrs = ['slug', 'title']
         for attr in required_attrs:
             if attr not in vals or len(vals[attr].strip()) == 0:
-                raise ModelInvalidParamsException("Argument '%s' requires values" % attr)
+                raise ModelInvalidParamsException(f"Argument '{attr}' requires values")
 
         slug = vals['slug']
         cate_slug = vals['category']
@@ -406,14 +412,11 @@ class Post(Base):
             file_ids = [ file['fileId'] for file in vals['files'] ]
             File.bulk_update_status(file_ids, 'published')
 
-
-
         table = self.get_table()
         item = {
             'postId': new_uuid(),
-            'createdAt': time,
+            'createdAt': created_at,
             'createdBy': vals.get('createdBy'),
-            #'updatedAt': time,
             'serviceId': service_id,
             'slug': slug,
             'publishAt': publish_at,
@@ -432,6 +435,10 @@ class Post(Base):
             'postStatus': status,
             'statusPublishAt': status_publish_at,
         }
+
+        if vals.get('updatedAt'):
+            item['updatedAt'] = vals.get('updatedAt')
+
         table.put_item(Item=item)
         return item
 
