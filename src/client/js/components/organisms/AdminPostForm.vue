@@ -606,19 +606,6 @@ export default{
       }
     },
 
-    async getNewSlug() {
-      try {
-        this.$store.dispatch('setLoading', true)
-        const res = await Admin.getPostNewSlug(this.serviceId, this.adminUserToken)
-        this.$store.dispatch('setLoading', false)
-        return res
-      } catch (err) {
-        console.log(err);//!!!!!!
-        this.$store.dispatch('setLoading', false)
-        this.handleApiError(err)
-      }
-    },
-
     cancel() {
       this.resetInputs()
       this.$router.push(`/admin/posts/${this.serviceId}`)

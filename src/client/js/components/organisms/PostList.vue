@@ -25,7 +25,7 @@
   </div>
 
   <nav v-if="hasNext" class="u-mt2r">
-    <a class="u-clickable" @click="fetchPosts({ untilTime:lastItemPublishedAt })">{{ $t('common.more') }}</a>
+    <a class="u-clickable" @click="fetchPosts()">{{ $t('common.more') }}</a>
   </nav>
 </div>
 </template>
@@ -60,7 +60,7 @@ export default{
   data(){
     return {
       posts: [],
-      hasNext: false,
+      pagerKey: null,
       listCount: 10,
     }
   },
@@ -74,20 +74,19 @@ export default{
       return this.$route.params.tagLabel
     },
 
-    lastItemPublishedAt () {
-      const lastIndex = this.posts.length - 1
-      return this.posts.length > 0 ? encodeURI(this.posts[lastIndex].publishAt) : null
+    hasNext() {
+      return this.pagerKey != null
     },
   },
 
   watch: {
     categorySlug() {
-      this.posts = []
+      this.resetPosts()
       this.fetchPosts()
     },
 
     tagLabel() {
-      this.posts = []
+      this.resetPosts()
       this.fetchPosts()
     },
   },
@@ -97,28 +96,31 @@ export default{
   },
 
   methods: {
-    async fetchPosts(params = {}, isLatest = false) {
-      const params_copied = { ...params }
-      params_copied.count = this.listCount + 1
+    resetPosts() {
+      this.pagerKey= null
+      this.posts = []
+    },
+
+    async fetchPosts(isLatest = false) {
+      let params = {}
+      if (this.pagerKey != null) {
+        params.pagerKey = JSON.stringify(this.pagerKey)
+      }
+      params.count = this.listCount
 
       if (this.categorySlug) {
-        params_copied.category = this.categorySlug
+        params.category = this.categorySlug
       } else if (this.tagLabel) {
-        params_copied.tag = this.tagLabel
+        params.tag = this.tagLabel
       }
 
       this.$store.dispatch('setLoading', true)
       try {
-        let items = await Post.get(this.serviceId, null, params_copied)
+        const res = await Post.get(this.serviceId, null, params)
+        this.pagerKey = res.pagerKey
+        let items = res.items
         if (isLatest) {
           items.reverse()
-        } else {
-          if (items.length > this.listCount) {
-            items.pop()
-            this.hasNext = true
-          } else {
-            this.hasNext = false
-          }
         }
         items.map(item => {
           if (isLatest) {
