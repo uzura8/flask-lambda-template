@@ -54,9 +54,9 @@ def url_list(service_id):
         for key in ['count', 'order']:
             params[key] = request.args.get(key)
         vals = validate_req_params(validation_schema_url_list_get(), params)
-        key_name =  'lastKeyCreatedAt'
+        key_name =  'pagerKey'
         vals['index'] = 'createdAtGsi'
-        last_key = request.args.get('lastKey')
+        last_key = request.args.get('pagerKey')
         if last_key:
             params = {key_name:json.loads(last_key)}
             vals_last_key = validate_req_params(validation_schema_url_list_get(), params)
@@ -238,7 +238,7 @@ def validation_schema_url_list_get():
             'allowed': ['asc', 'desc'],
             'default': 'desc',
         },
-        'lastKeyCreatedAt' : {
+        'pagerKey' : {
             'type': 'dict',
             'schema': {
                 'serviceId': {

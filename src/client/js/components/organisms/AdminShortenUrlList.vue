@@ -143,13 +143,13 @@ export default{
       try {
         let params = {}
         if (this.currentPagerKey) {
-          params.lastKey = JSON.stringify(this.currentPagerKey)
+          params.pagerKey = JSON.stringify(this.currentPagerKey)
         }
         const res = await Admin.getShortenUrls(this.serviceId, null, params, this.adminUserToken)
         this.shortenUrls = res.items
         this.$store.dispatch('setAdminShortenUrlsPagerLastIndex', this.index)
-        if (res.lastKey) {
-          const item = {index: this.index + 1, key: res.lastKey}
+        if (res.pagerKey) {
+          const item = {index: this.index + 1, key: res.pagerKey}
           this.$store.dispatch('pushItemToAdminShortenUrlsPagerKeys', item)
         }
         this.$store.dispatch('setLoading', false)
