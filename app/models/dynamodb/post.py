@@ -29,6 +29,7 @@ class Post(Base):
         'images',
         'files',
         'links',
+        'statusPublishAt',
     ]
     response_attrs = public_attrs + [
         'tags',
@@ -144,7 +145,6 @@ class Post(Base):
 
     @classmethod
     def query_pager_published(self, service_id, params, with_cate=False):
-        table = self.get_table()
         #status = params.get('status')
         #until_time = params.get('untilTime', '')
         #since_time = params.get('sinceTime', '')
@@ -160,7 +160,7 @@ class Post(Base):
             'IndexName': 'statusPublishAtGsi',
             'ProjectionExpression': self.prj_exps_str(),
             'ScanIndexForward': not is_desc,
-            'Limit': limit,
+            #'Limit': limit,
         }
         exp_attr_names['#si'] = 'serviceId'
         exp_attr_vals[':si'] = service_id
@@ -170,8 +170,8 @@ class Post(Base):
         exp_attr_names['#sp'] = 'statusPublishAt'
         exp_attr_vals[':sp'] = status
 
-        if start_key:
-            option['ExclusiveStartKey'] = start_key
+        #if start_key:
+        #    option['ExclusiveStartKey'] = start_key
 
         #current = utc_iso(False, True)
         #if not until_time or until_time > current:
@@ -187,12 +187,12 @@ class Post(Base):
         #    else:
         #        filter_exps.append(cond)
 
-        if not start_key:
-            current = utc_iso(False, True)
-            cond = '#ut < :ut'
-            exp_attr_names['#ut'] = 'publishAt'
-            exp_attr_vals[':ut'] = current
-            filter_exps.append(cond)
+        #if not start_key:
+        current = utc_iso(False, True)
+        cond = '#ut < :ut'
+        exp_attr_names['#ut'] = 'publishAt'
+        exp_attr_vals[':ut'] = current
+        filter_exps.append(cond)
 
         filter_exp_cids = []
         if cate_slugs:
@@ -220,18 +220,88 @@ class Post(Base):
         option['KeyConditionExpression'] = ' AND '.join(key_conds)
         option['ExpressionAttributeNames'] = exp_attr_names
         option['ExpressionAttributeValues'] = exp_attr_vals
-        res = table.query(**option)
-        #items = res.get('Items', [])[:limit]
-        items = res.get('Items', [])
 
+        items, pager_key = self.query_loop_for_limit(option, limit, start_key,
+                                                     len(cate_slugs) > 0)
         if with_cate:
             items = self.set_category_to_list(items, service_id)
 
-        ret = {
+        return {
             'items': items,
-            'pagerKey': res.get('LastEvaluatedKey')
+            'pagerKey': pager_key
         }
-        return ret
+
+
+    @classmethod
+    def query_loop_for_limit(self, option, target_count, pager_key, use_cate_filter):
+        items_all = []
+        loop_count = 0
+        loop_count_max = 10
+        need_count = target_count
+
+        while loop_count < loop_count_max:
+            adjust_count = self.get_ajust_count(need_count, use_cate_filter)
+            option['Limit'] = need_count + adjust_count
+            if pager_key:
+                option['ExclusiveStartKey'] = pager_key
+
+            items, pager_key = self.exe_query(option)
+
+            is_break = False
+            if len(items) < need_count and pager_key:
+                need_count = need_count - len(items)
+            else:
+                is_break = True
+
+            items_all.extend(items)
+
+            if is_break:
+                break
+
+            loop_count += 1
+
+        if len(items_all) > target_count:
+            items_all = items_all[:target_count]
+            pager_key = self.get_pager_key_from_list(items_all)
+
+        return items_all, pager_key
+
+
+    @classmethod
+    def exe_query(self, option):
+        table = self.get_table()
+        res = table.query(**option)
+        return res.get('Items', []), res.get('LastEvaluatedKey')
+
+
+    @staticmethod
+    def get_ajust_count(reqired_count, use_cate_filter):
+        if use_cate_filter:
+            if reqired_count < 10:
+                adjust_count = 50
+            elif reqired_count < 50:
+                adjust_count = 100
+            else:
+                adjust_count = 300
+        else:
+            if reqired_count < 10:
+                adjust_count = 20
+            elif reqired_count < 50:
+                adjust_count = 50
+            else:
+                adjust_count = 100
+
+        return adjust_count
+
+
+    @staticmethod
+    def get_pager_key_from_list(items):
+        item = items[-1]
+        return {
+            'serviceId': item['serviceId'],
+            'postId': item['postId'],
+            'statusPublishAt': item['statusPublishAt'],
+        }
 
 
     @classmethod
