@@ -39,9 +39,7 @@ class PostTag(Base):
 
 
     @classmethod
-    def query_pager_published_by_tag_id(self, tag_id, params, is_public=True):
-        table = self.get_table()
-        start_key = params.get('ExclusiveStartKey')
+    def query_pager_published_by_tag_id(self, tag_id, params):
         #until_time = params.get('untilTime', '')
         #since_time = params.get('sinceTime', '')
         is_desc = params.get('order', 'asc') == 'desc'
@@ -49,7 +47,6 @@ class PostTag(Base):
         start_key = params.get('pagerKey')
 
         status = 'publish'
-        #sort_key = 'publishAt'
         exp_attr_names = {}
         exp_attr_vals = {}
         key_conds = ['#ti = :ti']
@@ -57,7 +54,6 @@ class PostTag(Base):
             'IndexName': 'postsByTagGsi',
             'ProjectionExpression': self.prj_exps_str(),
             'ScanIndexForward': not is_desc,
-            'Limit': limit,
         }
         exp_attr_names['#ti'] = 'tagId'
         exp_attr_vals[':ti'] = tag_id
@@ -70,9 +66,6 @@ class PostTag(Base):
         exp_attr_names['#sp'] = 'statusPublishAt'
         exp_attr_vals[':sp'] = status
 
-        if start_key:
-            option['ExclusiveStartKey'] = start_key
-
         filter_exps = []
         #if since_time:
         #    cond = '#st > :st'
@@ -80,13 +73,11 @@ class PostTag(Base):
         #    exp_attr_vals[':st'] = since_time
         #    filter_exps.append(cond)
 
-        #if until_time:
-        if not start_key:
-            current = utc_iso(False, True)
-            cond = '#ut < :ut'
-            exp_attr_names['#ut'] = 'publishAt'
-            exp_attr_vals[':ut'] = current
-            filter_exps.append(cond)
+        current = utc_iso(False, True)
+        cond = '#ut < :ut'
+        exp_attr_names['#ut'] = 'publishAt'
+        exp_attr_vals[':ut'] = current
+        filter_exps.append(cond)
 
         filter_exps_str = ' AND '.join(filter_exps) if filter_exps else ''
         filter_exp = ''
@@ -95,18 +86,15 @@ class PostTag(Base):
 
         if filter_exp:
             option['FilterExpression'] = filter_exp
-            #option['Limit'] += 50
 
         option['KeyConditionExpression'] = ' AND '.join(key_conds)
         option['ExpressionAttributeNames'] = exp_attr_names
         option['ExpressionAttributeValues'] = exp_attr_vals
-        res = table.query(**option)
-        #items = res.get('Items', [])[:limit]
-        items = res.get('Items', [])
 
-        #return result.get('Items', [])[:limit]
-        ret = {
+        pager_keys = {'pkey':'postId', 'index_pkey':'tagId', 'index_skey':'statusPublishAt'}
+        items, pager_key = self.query_loop_for_limit(option, limit, start_key, pager_keys)
+
+        return {
             'items': items,
-            'pagerKey': res.get('LastEvaluatedKey')
+            'pagerKey': pager_key
         }
-        return ret

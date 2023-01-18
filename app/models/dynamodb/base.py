@@ -2,6 +2,7 @@ import os
 import boto3
 from app.common.date import utc_iso
 from app.common.string import new_uuid
+from pprint import pprint #!!!!!!!!!!!!!!!!
 
 
 class Base():
@@ -319,6 +320,79 @@ class Base():
         with table.batch_writer() as batch:
             for key in delete_keys:
                 batch.delete_item(Key = key)
+
+
+    @classmethod
+    def query_loop_for_limit(self, option, target_count, pager_key, pager_keys, use_cate_filter=False):
+        items_all = []
+        loop_count = 0
+        loop_count_max = 10
+        need_count = target_count
+
+        while loop_count < loop_count_max:
+            adjust_count = self.get_ajust_count(need_count, use_cate_filter)
+            option['Limit'] = need_count + adjust_count
+            if pager_key:
+                option['ExclusiveStartKey'] = pager_key
+
+            items, pager_key = self.exe_query(option)
+
+            is_break = False
+            if len(items) < need_count and pager_key:
+                need_count = need_count - len(items)
+            else:
+                is_break = True
+
+            items_all.extend(items)
+
+            if is_break:
+                break
+
+            loop_count += 1
+
+        if len(items_all) > target_count:
+            items_all = items_all[:target_count]
+            pager_key = self.get_pager_key_from_list(items_all, pager_keys['pkey'],
+                                         pager_keys['index_pkey'], pager_keys['index_skey'])
+
+        return items_all, pager_key
+
+
+    @classmethod
+    def exe_query(self, option):
+        table = self.get_table()
+        res = table.query(**option)
+        return res.get('Items', []), res.get('LastEvaluatedKey')
+
+
+    @staticmethod
+    def get_ajust_count(reqired_count, use_cate_filter=False):
+        if use_cate_filter:
+            if reqired_count < 10:
+                adjust_count = 50
+            elif reqired_count < 50:
+                adjust_count = 100
+            else:
+                adjust_count = 300
+        else:
+            if reqired_count < 10:
+                adjust_count = 20
+            elif reqired_count < 50:
+                adjust_count = 50
+            else:
+                adjust_count = 100
+
+        return adjust_count
+
+
+    @staticmethod
+    def get_pager_key_from_list(items, pkey, index_pkey, index_skey):
+        item = items[-1]
+        return {
+            pkey: item[pkey],
+            index_pkey: item[index_pkey],
+            index_skey: item[index_skey],
+        }
 
 
 class ModelInvalidParamsException(Exception):
