@@ -24,6 +24,7 @@
 
     </td>
     <td class="is-size-7"><inline-time :datetime="post.publishAt"></inline-time></td>
+    <td class="is-size-7"><inline-time :datetime="post.createdAt"></inline-time></td>
     <td class="is-size-7"><inline-time :datetime="post.updatedAt"></inline-time></td>
   </tr>
 </template>

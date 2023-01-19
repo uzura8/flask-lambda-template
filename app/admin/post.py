@@ -54,16 +54,21 @@ def post_list(service_id):
 
     else:
         params = {}
-        for key in ['count', 'order']:
+        for key in ['count', 'sort', 'order']:
             params[key] = request.args.get(key)
         vals = validate_req_params(validation_schema_posts_get(), params)
-        key_name =  'lastKeyCreatedAt'
-        vals['index'] = 'createdAtGsi'
-        last_key = request.args.get('lastKey')
-        if last_key:
-            params = {key_name:json.loads(last_key)}
-            vals_last_key = validate_req_params(validation_schema_posts_get(), params)
-            vals['ExclusiveStartKey'] = vals_last_key[key_name]
+
+        if vals['sort'] == 'publishAt':
+            vals['index'] = 'publishAtGsi'
+        else:
+            vals['index'] = 'createdAtGsi'
+
+        key_name =  'pagerKey'
+        pager_key = request.args.get('pagerKey')
+        if pager_key:
+            params = {key_name:json.loads(pager_key)}
+            vals_pager_key = validate_req_params(validation_schema_posts_get(), params)
+            vals['ExclusiveStartKey'] = vals_pager_key[key_name]
 
         hkey = {'name':'serviceId', 'value': service_id}
         post = Post.query_pager_admin(hkey, vals, True)
@@ -490,6 +495,12 @@ def validation_schema_posts_get():
             'max': 50,
             'default': 20,
         },
+        'sort': {
+            'type': 'string',
+            'required': False,
+            'allowed': ['createdAt', 'publishAt'],
+            'default': 'createdAt',
+        },
         'order': {
             'type': 'string',
             'required': False,
@@ -512,7 +523,7 @@ def validation_schema_posts_get():
             'empty': True,
             'regex': r'\d{4}\-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([\+\-]\d{2}:\d{2}|Z)$',
         },
-        'lastKeyCreatedAt' : {
+        'pagerKey' : {
             'type': 'dict',
             'schema': {
                 'serviceId': {
@@ -527,9 +538,15 @@ def validation_schema_posts_get():
                 },
                 'createdAt': {
                     'type': 'string',
-                    'required': True,
-                    'empty': False,
+                    'required': False,
+                    'empty': True,
                     'regex': r'\d{4}\-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([\+\-]\d{2}:\d{2}|Z)$',
+                },
+                'publishAt': {
+                    'type': 'string',
+                    'required': False,
+                    'empty': True,
+                    'regex': r'((\d{4}\-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([\+\-]\d{2}:\d{2}|Z))|None)$',
                 },
             }
         },

@@ -11,7 +11,7 @@
   >{{ $t('msg.hiddenInList') }}</b-message>
 
   <div class="block">
-    <router-link :to="postsPageUri">
+    <router-link :to="postsPageUriObj">
       <i class="fas fa-chevron-left"></i>
       <span>{{ $t('common.posts') }}</span>
     </router-link>
@@ -247,10 +247,10 @@ export default{
       return this.getPostPublishStatus(this.post.postStatus, this.post.publishAt) === 'reserved'
     },
 
-    postsPageUri() {
-      const uri = `/admin/posts/${this.serviceId}`
-      if (!this.$store.state.adminPostsPager.lastIndex) return uri
-      return `${uri}?index=${this.$store.state.adminPostsPager.lastIndex}`
+    postsPageUriObj() {
+      const path = `/admin/posts/${this.serviceId}`
+      const query = this.$store.getters.adminPostsPagerQueryCurrent()
+      return { path:path, query:query }
     },
 
     previewUrl() {

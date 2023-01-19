@@ -59,5 +59,5 @@ class ShortenUrl(Base):
 
         return {
             'items': items,
-            'lastKey': res['LastEvaluatedKey'] if 'LastEvaluatedKey' in res else None,
+            'pagerKey': res['LastEvaluatedKey'] if 'LastEvaluatedKey' in res else None,
         }

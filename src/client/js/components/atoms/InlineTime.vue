@@ -1,7 +1,7 @@
 <template>
 <span>
   <time
-    v-if="datetime"
+    v-if="isEmptyDatetime === false"
     itemprop="time"
     :datetime="datetime | dateFormat(format)"
     :class="timeClass"
@@ -27,6 +27,14 @@ export default{
     timeClass: {
       type: String,
       default: '',
+    },
+  },
+
+  computed: {
+    isEmptyDatetime() {
+      if (this.checkEmpty(this.datetime)) return true
+      if (this.datetime === 'None') return true
+      return false
     },
   },
 }

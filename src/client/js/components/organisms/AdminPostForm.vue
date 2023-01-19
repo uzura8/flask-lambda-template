@@ -432,7 +432,7 @@ export default{
       this.body = this.post.body != null ? String(this.post.body) : ''
       this.editorMode = this.getModeByFormat(this.post.bodyFormat)
       this.tags = this.checkEmpty(this.post.tags) === false ? this.post.tags : []
-      this.publishAt = this.post.publishAt ? moment(this.post.publishAt).toDate() : null
+      this.publishAt = this.post.publishAt && this.post.publishAt !== 'None' ? moment(this.post.publishAt).toDate() : null
       this.isHiddenInList = this.post.isHiddenInList
     },
 

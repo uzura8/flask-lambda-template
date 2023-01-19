@@ -265,7 +265,7 @@ class Post(Base):
 
         return {
             'items': items,
-            'lastKey': res['LastEvaluatedKey'] if 'LastEvaluatedKey' in res else None,
+            'pagerKey': res['LastEvaluatedKey'] if 'LastEvaluatedKey' in res else None,
         }
 
 
@@ -373,6 +373,8 @@ class Post(Base):
             publish_at = iso_offset2utc(vals['publishAt'], True)
         elif is_publish:
             publish_at = time
+        else:
+            publish_at = 'None'
 
         created_at = ''
         if vals.get('createdAt'):
@@ -479,7 +481,7 @@ class Post(Base):
             if publish_at_upd != saved['publishAt']:
                 publish_at_upd = iso_offset2utc(vals['publishAt'], True)
         else:
-            if is_published and not saved['publishAt']:
+            if is_published and (not saved['publishAt'] or saved['publishAt'] == 'None'):
                 publish_at_upd = time
 
         is_hidden_upd = vals.get('isHiddenInList')

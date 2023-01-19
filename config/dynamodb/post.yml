@@ -17,6 +17,9 @@ Properties:
     -
       AttributeName: createdAt
       AttributeType: S
+    -
+      AttributeName: publishAt
+      AttributeType: S
   KeySchema:
     -
       AttributeName: postId
@@ -60,6 +63,20 @@ Properties:
         KeyType: HASH
       -
         AttributeName: createdAt
+        KeyType: RANGE
+      Projection:
+        ProjectionType: ALL
+      #ProvisionedThroughput:
+      #  ReadCapacityUnits: 5
+      #  WriteCapacityUnits: 3
+    -
+      IndexName: publishAtGsi
+      KeySchema:
+      -
+        AttributeName: serviceId
+        KeyType: HASH
+      -
+        AttributeName: publishAt
         KeyType: RANGE
       Projection:
         ProjectionType: ALL

@@ -25,6 +25,12 @@ export default {
     state.adminPostsPager.lastIndex = payload
   },
 
+  [types.SET_ADMIN_POSTS_PAGER_PARAMS] (state, payload) {
+    state.adminPostsPager.lastIndex = payload.index
+    state.adminPostsPager.sort = payload.sort
+    state.adminPostsPager.order = payload.order
+  },
+
   [types.PUSH_ITEM_TO_ADMIN_SHORTEN_URLS_PAGER_KEYS] (state, payload) {
     const index = payload.index
     if (state.adminShortenUrlsPager.keys.find(item => item.index === index)) return

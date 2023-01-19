@@ -56,11 +56,11 @@ def url_list(service_id):
         vals = validate_req_params(validation_schema_url_list_get(), params)
         key_name =  'pagerKey'
         vals['index'] = 'createdAtGsi'
-        last_key = request.args.get('pagerKey')
-        if last_key:
-            params = {key_name:json.loads(last_key)}
-            vals_last_key = validate_req_params(validation_schema_url_list_get(), params)
-            vals['ExclusiveStartKey'] = vals_last_key[key_name]
+        pager_key = request.args.get('pagerKey')
+        if pager_key:
+            params = {key_name:json.loads(pager_key)}
+            vals_pager_key = validate_req_params(validation_schema_url_list_get(), params)
+            vals['ExclusiveStartKey'] = vals_pager_key[key_name]
 
         hkey = {'name':'serviceId', 'value': service_id}
         res = ShortenUrl.query_pager(hkey, vals)

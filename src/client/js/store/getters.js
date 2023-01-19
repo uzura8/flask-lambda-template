@@ -58,6 +58,17 @@ export default {
     return acceptServiceIds.includes(serviceId)
   },
 
+  adminPostsPagerQueryCurrent: state => () => {
+    let params = {
+      sort: state.adminPostsPager.sort,
+      order: state.adminPostsPager.order,
+    }
+    if (state.adminPostsPager.lastIndex != null) {
+      params.index = state.adminPostsPager.lastIndex
+    }
+    return params
+  },
+
   adminPostsPagerIndexCount: state => () => {
     return state.adminPostsPager.keys.length
   },

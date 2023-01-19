@@ -21,6 +21,8 @@ const state = {
   adminPostsPager: {
     keys: [],
     lastIndex: 0,
+    sort: 'createdAt',
+    order: 'desc',
   },
   adminShortenUrlsPager: {
     keys: [],
