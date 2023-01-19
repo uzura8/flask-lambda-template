@@ -2,9 +2,14 @@
 <div v-if="post">
 
   <b-message
-    v-if="isPublished === false"
+    v-if="post.postStatus !== 'publish'"
+    type="is-danger"
+  >{{ $t('msg.thisIsUnpublished', {name: $t('common.post')}) }}</b-message>
+
+  <b-message
+    v-else-if="isPublished === false"
     type="is-warning"
-  >{{ $t('msg.thisIsNotPublished', {name: $t('common.post')}) }}</b-message>
+  >{{ $t('msg.thisIsNotPublishedYet', {name: $t('common.post')}) }}</b-message>
 
   <b-message
     v-if="post.isHiddenInList === true"
@@ -20,7 +25,7 @@
   <h1 class="title">
     <span
       v-if="isPublishItem === false"
-      class="tag is-dark"
+      class="tag is-danger"
     >{{ $t('common.unpublished') }}</span>
 
     {{ post.title }}

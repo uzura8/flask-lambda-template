@@ -176,7 +176,7 @@ export default {
 
     checkPostPublished(postStatus, publishAt = '') {
       if (postStatus === 'unpublish') return false
-      if (!publishAt) return true
+      if (!publishAt || publishAt === 'None') return true
 
       const current = moment.utc().add(3, 'seconds').format()
       return publishAt < current
