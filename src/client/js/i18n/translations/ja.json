@@ -81,6 +81,7 @@
     "webSite": "Webサイト",
     "locationTo": "遷移先",
     "via": "経由",
+    "hidden": "非表示",
     "paramsFor": "{target}用パラメータ",
     "more": "もっと見る"
   },
@@ -231,6 +232,7 @@
     "generatedUrl": "生成されたURL",
     "acceptServices": "使用可能なサービス",
     "accessAnalysis": "アクセス解析",
+    "hiddenInListLabel": "一覧非表示",
     "availableFunctions": {
       "post": "投稿",
       "urlShortener": "短縮URL"

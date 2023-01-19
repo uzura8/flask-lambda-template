@@ -4,6 +4,8 @@
       <span v-if="publishStatus == 'published'" class="tag is-success">{{ $t('common.published') }}</span>
       <span v-else-if="publishStatus == 'reserved'" class="tag is-warning">{{ $t('common.reserved') }}</span>
       <span v-else class="tag is-danger">{{ $t('common.unpublished') }}</span>
+
+      <span v-if="post.isHiddenInList" class="tag is-dark">{{ $t('common.hidden') }}</span>
     </td>
     <td>
       <router-link :to="`/admin/posts/${serviceId}/${post.postId}`">{{ post.title }}</router-link>
@@ -69,9 +71,9 @@ export default{
           return 'has-background-danger-light'
         case 'reserved':
           return 'has-background-warning-light'
-        default :
-          return ''
       }
+      if (this.post.isHiddenInList === true) return 'has-background-light'
+      return ''
     }
   },
 

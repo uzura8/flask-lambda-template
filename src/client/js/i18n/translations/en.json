@@ -80,6 +80,7 @@
     "webSite": "Web Site",
     "locationTo": "Location to",
     "via": "Via",
+    "hidden": "hidden",
     "paramsFor": "Params for {target}",
     "more": "More"
   },
@@ -230,6 +231,7 @@
     "generatedUrl": "Generated URL",
     "acceptServices": "Available services",
     "accessAnalysis": "Access Analysis",
+    "hiddenInListLabel": "Not in list",
     "availableFunctions": {
       "post": "Post",
       "urlShortener": "URL Shortener"
