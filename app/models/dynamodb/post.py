@@ -383,7 +383,8 @@ class Post(Base):
             created_at = time
 
         is_hidden = vals.get('isHiddenInList', False)
-        sort_key_prefix = 'hidden' if is_hidden else status
+        # Set 'hidden' in statusPublishAt only on pusblished
+        sort_key_prefix = 'hidden' if is_hidden and is_publish else status
         status_publish_at = '#'.join([sort_key_prefix, publish_at])
 
         required_attrs = ['slug', 'title']
@@ -514,15 +515,23 @@ class Post(Base):
             exp_items.append('isHiddenInList=:hil')
             exp_vals[':hil'] = is_hidden_upd
 
+        is_upd_status_publish_at = False
         if status_upd or publish_at_upd or is_hidden_upd is not None:
             status = status_upd if status_upd else saved['postStatus']
             is_hidden = is_hidden_upd if is_hidden_upd is not None else saved['isHiddenInList']
-            sort_key_prefix = 'hidden' if is_hidden else status
+            if status == 'unpublish':
+                sort_key_prefix = 'unpublish'
+            elif is_hidden:
+                sort_key_prefix = 'hidden'
+            else:
+                sort_key_prefix = 'publish'
 
             publish_at = publish_at_upd if publish_at_upd else saved['publishAt']
-
-            exp_items.append('statusPublishAt=:spa')
-            exp_vals[':spa'] = '#'.join([sort_key_prefix, publish_at])
+            upd_status_publish_at = '#'.join([sort_key_prefix, publish_at])
+            if upd_status_publish_at != saved['statusPublishAt']:
+                exp_items.append('statusPublishAt=:spa')
+                exp_vals[':spa'] = upd_status_publish_at
+                is_upd_status_publish_at = True
 
         saved_images = saved['images']
         upd_images = vals.get('images', [])
@@ -602,7 +611,7 @@ class Post(Base):
         if add_file_fids:
             File.bulk_update_status(add_file_fids, 'published')
 
-        return saved
+        return {'item':saved, 'is_updated_index':is_upd_status_publish_at}
 
 
     @staticmethod

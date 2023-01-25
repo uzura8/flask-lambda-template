@@ -107,7 +107,9 @@ def post_detail(service_id, identifer):
         vals['updatedBy'] = current_cognito_jwt.get('cognito:username', '')
 
         try:
-            saved = Post.update(post_id, vals)
+            res = Post.update(post_id, vals)
+            saved = res['item']
+            is_upd_status_publish_at = res['is_updated_index']
 
         except ModelInvalidParamsException as e:
             raise InvalidUsage(e.message, 400)
@@ -116,13 +118,8 @@ def post_detail(service_id, identifer):
             print(traceback.format_exc())
             raise InvalidUsage('Server Error', 500)
 
-        is_upd_status_publish_at = False
         if not saved:
             saved = post
-        else:
-            if saved['publishAt'] != post['publishAt']\
-                    or saved['postStatus'] != post['postStatus']:
-                is_upd_status_publish_at = True
 
         tags = []
         if vals.get('tags', []):
@@ -188,7 +185,9 @@ def post_status(service_id, identifer):
         raise InvalidUsage('Status is same value', 400)
 
     try:
-        saved = Post.update(post_id, vals)
+        res = Post.update(post_id, vals)
+        saved = res['item']
+        #is_upd_status_publish_at = res['is_updated_index']
 
     except ModelInvalidParamsException as e:
         raise InvalidUsage(e.message, 400)
@@ -239,19 +238,28 @@ def update_post_tags_status_publish_at(post_id, status_publish_at, publish_at):
 
 
 def update_post_tags(post, req_tags, is_update_status_publish_at=False):
+    # If set is_update_status_publish_at, only for update PostTag records
     service_id = post['serviceId']
+    upd_tag_ids = [] # For PostTag table to update
+    del_tag_ids = [] # For PostTag table to delete
+    add_tag_ids = [] # For PostTag table to add
+
     new_tag_labels = []
-    upd_tag_ids = []
     for req_tag in req_tags:
+        # If saved already, requested as tagId
         if req_tag.get('tagId'):
             upd_tag_ids.append(req_tag['tagId'])
+
+        # If not saved, requested as tagLabel
         elif req_tag.get('label'):
             new_tag_labels.append(req_tag['label'])
 
+    # If exists new requested tags, create new records in Tag table at first
     if new_tag_labels:
         exist_tags = Tag.get_all_by_service_id(service_id)
         exist_tag_labels = [ d.get('label') for d in exist_tags ]
         for ntl in new_tag_labels:
+            # If already saved, not create record of Tag table
             if ntl in exist_tag_labels:
                 tag_id = [ d['tagId'] for d in exist_tags if d['label'] == ntl ][0]
                 upd_tag_ids.append(tag_id)
@@ -263,8 +271,6 @@ def update_post_tags(post, req_tags, is_update_status_publish_at=False):
                 new_tag = Tag.create(tag_vals, 'tagId')
                 upd_tag_ids.append(new_tag['tagId'])
 
-    del_tag_ids = []
-    add_tag_ids = []
     saved_post_tags = PostTag.get_all_by_pkey({'key':'postId', 'val':post['postId']})
     if saved_post_tags:
         saved_tag_ids = [ d['tagId'] for d in saved_post_tags ]
@@ -281,8 +287,9 @@ def update_post_tags(post, req_tags, is_update_status_publish_at=False):
         PostTag.batch_delete(del_tags)
 
     if not upd_tag_ids:
-        return {'del_ids':del_tag_ids, 'current_ids':upd_tag_ids}
+        return {'del_ids':del_tag_ids, 'current_ids':[]}
 
+    # Following is only for update PostTag records
     if is_update_status_publish_at:
         save_tag_ids = upd_tag_ids
         pkeys = ['postId', 'tagId']
