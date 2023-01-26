@@ -70,14 +70,26 @@ def post_group(service_id, slug):
     if not group:
         raise InvalidUsage('Not Found', 404)
 
+    vals = validate_req_params(validation_schema_group_get(), request.args)
+    order = vals.get('order')
+    count = vals.get('count')
+
     posts = []
-    if group.get('postIds'):
-        keys = [ {'postId':pid} for pid in group['postIds'] ]
+    post_ids = group.get('postIds', [])
+    if post_ids:
+        if order == 'desc':
+            post_ids.reverse()
+        if count:
+            post_ids = post_ids[:count]
+
+        keys = [ {'postId':pid} for pid in post_ids ]
         batch_res = Post.batch_get_items(keys)
-        for pid in group['postIds']:
+        for pid in post_ids:
             p = next((p for p in batch_res if p.get('postId') == pid), None)
             posts.append(Post.to_response(p))
+
     group['posts'] = posts
+    group['postIds'] = post_ids
 
     return jsonify(PostGroup.to_response(group)), 200
 
@@ -220,5 +232,24 @@ def validation_schema_posts_post():
                     'regex': r'publish#\d{4}\-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([\+\-]\d{2}:\d{2}|Z)$',
                 },
             }
+        },
+    }
+
+
+def validation_schema_group_get():
+    return {
+        'count': {
+            'type': 'integer',
+            'coerce': int,
+            'required': False,
+            'min': 1,
+            'max': 50,
+            'default': 5,
+        },
+        'order': {
+            'type': 'string',
+            'required': False,
+            'allowed': ['asc', 'desc'],
+            'default': 'asc',
         },
     }
