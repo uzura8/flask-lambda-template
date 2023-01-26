@@ -145,7 +145,7 @@
       </div>
     </draggable>
   </div>
-  <div v-else class="mt-5">
+  <div v-else-if="isLoading === false" class="mt-5">
     <p>{{ $t('msg["Data is empty"]') }}</p>
   </div>
 </div>
@@ -189,11 +189,6 @@ export default{
   },
 
   watch: {
-    async postIds(vals, before) {
-      if (this.checkEmpty(before) === false) {
-        await this.updatePostGroup()
-      }
-    },
   },
 
   async created() {
@@ -207,18 +202,20 @@ export default{
       this.groupItems = this.postGroup.posts
     },
 
-    addGroupItem(post) {
+    async addGroupItem(post) {
       if (this.postIds.includes(post.postId)) {
         this.showGlobalMessage(this.$t('msg.AlreadySet'))
         return
       }
       this.groupItems.push(post)
+      await this.updatePostGroup()
       this.isPostModalActive = false
     },
 
-    deletePostGroupItem(postId) {
+    async deletePostGroupItem(postId) {
       const index = this.groupItems.findIndex(item => item.postId === postId)
       this.groupItems.splice(index, 1)
+      await this.updatePostGroup()
     },
 
     async updatePostGroup() {

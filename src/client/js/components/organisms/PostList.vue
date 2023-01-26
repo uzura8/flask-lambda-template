@@ -20,7 +20,7 @@
     </li>
   </ul>
 
-  <div v-else>
+  <div v-else-if="isLoading === false">
     <p>{{ $t('msg["Data is empty"]') }}</p>
   </div>
 
