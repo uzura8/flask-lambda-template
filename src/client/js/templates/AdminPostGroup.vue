@@ -106,6 +106,7 @@
       :options="{handle:'.handle'}"
       @start="drag=true"
       @end="drag=false"
+      @update="updatePostGroup"
     >
       <div
         v-for="post in groupItems"
