@@ -1,5 +1,6 @@
 import json
 import os
+import traceback
 from datetime import datetime
 import boto3
 from flask import jsonify, request
@@ -8,6 +9,7 @@ from app.validators import NormalizerUtils
 from app.common.request import validate_req_params
 from app.common.error import InvalidUsage
 from app.admin import bp, site_before_request, admin_role_admin_required
+from app.models.dynamodb import AdminUserConfig, ModelInvalidParamsException
 
 COGNITO_REGION = os.environ.get('COGNITO_REGION', '')
 COGNITO_USERPOOL_ID = os.environ.get('COGNITO_USERPOOL_ID', '')
@@ -40,56 +42,72 @@ def user_list():
 def user_detail(username):
     if request.method == 'POST':
         schema = validation_schema_users_post()
-        attrs = []
         vals = validate_req_params(schema, request.json)
-        if vals.get('serviceIds'):
-            attrs.append({'Name':'custom:acceptServiceIds', 'Value':','.join(vals['serviceIds'])})
 
-        if vals.get('role'):
-            attrs.append({'Name':'custom:role', 'Value':vals['role']})
-
+        attrs = []
+        cogres = None
         try:
-            res = cognito.admin_update_user_attributes(
-                UserPoolId = COGNITO_USERPOOL_ID,
-                Username=username,
-                UserAttributes=attrs
-            )
+            if vals.get('role'):
+                attrs.append({'Name':'custom:role', 'Value':vals['role']})
+
+            if attrs:
+                cogres = cognito.admin_update_user_attributes(
+                    UserPoolId = COGNITO_USERPOOL_ID,
+                    Username=username,
+                    UserAttributes=attrs
+                )
         except cognito.exceptions.UserNotFoundException:
             raise InvalidUsage('User does not exist', 404)
 
-        if res['ResponseMetadata']['HTTPStatusCode'] != 200:
+        except Exception as e:
+            print(traceback.format_exc())
+            raise InvalidUsage('Server Error', 500)
+
+        if cogres and cogres['ResponseMetadata']['HTTPStatusCode'] != 200:
             raise InvalidUsage('Failed update user', 500)
+
+        try:
+            if vals.get('serviceIds'):
+                attrs.append({'Name':'custom:acceptServiceIds', 'Value':','.join(vals['serviceIds'])})
+                auser_config = AdminUserConfig.save(username, 'acceptServiceIds', vals.get('serviceIds'))
+
+        except ModelInvalidParamsException as e:
+            raise InvalidUsage(e.message, 400)
+
+        except Exception as e:
+            print(traceback.format_exc())
+            raise InvalidUsage('Server Error', 500)
 
         return jsonify({'message': 'Update success'}), 200
 
     try:
-        res = cognito.admin_get_user(
+        coguser = cognito.admin_get_user(
             UserPoolId = COGNITO_USERPOOL_ID,
             Username=username
         )
+        accept_service_ids = AdminUserConfig.get_val(username, 'acceptServiceIds')
     except cognito.exceptions.UserNotFoundException:
         raise InvalidUsage('User does not exist', 404)
 
-    user = user_to_dict_for_response(res)
+    user = user_to_dict_for_response(coguser, accept_service_ids)
     return json.dumps(user, default=support_datetime_default), 200
 
 
-def user_to_dict_for_response(coguser):
+def user_to_dict_for_response(coguser, accept_service_ids=None):
     cog_attrs = coguser['Attributes'] if 'Attributes' in coguser else coguser['UserAttributes']
     attrs = { i['Name']:i['Value'] for i in cog_attrs }
-    sids_str = attrs.get('custom:acceptServiceIds', '')
-    sids = sids_str.split(',') if sids_str else []
     res = {
         'username': coguser.get('Username', ''),
         'email': attrs.get('email', ''),
         'emailVerified': attrs.get('email_verified') == 'true',
         'role': attrs.get('custom:role', 'normal'),
-        'acceptServiceIds': sids,
         'enabled': coguser.get('Enabled', False),
         'status': coguser.get('UserStatus', ''),
         'createdAt': coguser.get('UserCreateDate'),
         'updatedAt': coguser.get('UserLastModifiedDate'),
     }
+    if accept_service_ids is not None:
+        res['acceptServiceIds'] = accept_service_ids
     return res
 
 

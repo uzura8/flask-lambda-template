@@ -236,6 +236,7 @@ resources:
     SiteConfigDynamoDBTable: ${file(./config/dynamodb/site-config.yml)}
     ServiceDynamoDBTable: ${file(./config/dynamodb/service.yml)}
     ServiceConfigDynamoDBTable: ${file(./config/dynamodb/service-config.yml)}
+    AdminUserConfigDynamoDBTable: ${file(./config/dynamodb/admin-user-config.yml)}
     CategoryDynamoDBTable: ${file(./config/dynamodb/category.yml)}
     PostDynamoDBTable: ${file(./config/dynamodb/post.yml)}
     PostGroupDynamoDBTable: ${file(./config/dynamodb/post-group.yml)}

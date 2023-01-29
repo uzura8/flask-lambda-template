@@ -1,6 +1,6 @@
 from flask import jsonify
 from flask_cognito import cognito_auth_required, current_cognito_jwt
-from app.models.dynamodb import Service
+from app.models.dynamodb import Service, AdminUserConfig
 from app.admin import bp, site_before_request, admin_role_editor_required
 
 
@@ -14,7 +14,8 @@ def before_request():
 @cognito_auth_required
 @admin_role_editor_required
 def account_service_list():
-    accept_sids = current_cognito_jwt.get('custom:acceptServiceIds').split(',')
+    username = current_cognito_jwt.get('cognito:username', '')
+    accept_sids = AdminUserConfig.get_val(username, 'acceptServiceIds')
     if not accept_sids:
         return jsonify([]), 200
 
