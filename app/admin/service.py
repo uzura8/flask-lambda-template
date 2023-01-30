@@ -5,7 +5,7 @@ from app.common.error import InvalidUsage
 from app.common.request import validate_req_params
 from app.validators import NormalizerUtils
 from app.admin import bp, site_before_request, admin_role_admin_required,\
-        check_acl_service_id, admin_role_editor_required
+        check_acl_service_id, admin_role_editor_required, check_admin_role
 
 
 @bp.before_request
@@ -50,14 +50,18 @@ def service_configs():
 
 @bp.route('/services/<string:service_id>', methods=['POST', 'GET'])
 @cognito_auth_required
-@admin_role_admin_required
+@admin_role_editor_required
 def service_detail(service_id):
+    service = check_acl_service_id(service_id)
+
     key = {'p': {'key':'serviceId', 'val':service_id}}
     service = Service.get_one(key)
     if not service:
         raise InvalidUsage('ServiceId does not exist', 404)
 
     if request.method == 'POST':
+        check_admin_role('admin')
+
         alloweds = ['label', 'functions', 'configs']
         vals = validate_req_params(validation_schema_services(), request.json, alloweds)
         configs = None

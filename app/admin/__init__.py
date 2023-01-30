@@ -18,8 +18,7 @@ def site_before_request(f):
 def admin_role_admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if current_cognito_jwt.get('custom:role') != 'admin':
-            raise InvalidUsage('Forbidden', 403)
+        check_admin_role('admin')
 
         return f(*args, **kwargs)
     return decorated_function
@@ -28,16 +27,24 @@ def admin_role_admin_required(f):
 def admin_role_editor_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        role = current_cognito_jwt.get('custom:role')
-        if role not in ['admin', 'editor', 'viewer']:
-            raise InvalidUsage('Forbidden', 403)
-
+        role = check_admin_role(['admin', 'editor', 'viewer'])
         if role == 'viewer':
             if request.method in ['POST', 'PUT', 'DELETE']:
                 raise InvalidUsage('Forbidden', 403)
 
         return f(*args, **kwargs)
     return decorated_function
+
+
+def check_admin_role(accept_roles='admin'):
+    if not isinstance(accept_roles, list):
+        accept_roles = [accept_roles]
+
+    role = current_cognito_jwt.get('custom:role')
+    if role not in accept_roles:
+        raise InvalidUsage('Forbidden', 403)
+
+    return role
 
 
 def check_acl_service_id(service_id, with_configs=False):
