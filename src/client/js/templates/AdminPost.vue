@@ -269,7 +269,8 @@ export default{
       if (this.isPublished) return previewUrl
 
       if (this.checkEmpty(this.post.previewToken)) return ''
-      return `${previewUrl}?token=${this.post.previewToken}`
+      const delimitter = previewUrl.indexOf('?') === -1 ? '?' : '&'
+      return `${previewUrl}${delimitter}token=${this.post.previewToken}`
     },
   },
 
