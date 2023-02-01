@@ -15,7 +15,7 @@
     :label="$t('common.category')"
     :type="checkEmpty(errors.category) ? '' : 'is-danger'"
     :message="checkEmpty(errors.category) ? '' : errors.category[0]"
-    class="mt-5"
+    class="mt-6"
   >
     <b-select
       v-model="category"
@@ -41,7 +41,7 @@
     :label="$t('form.title')"
     :type="checkEmpty(errors.title) ? '' : 'is-danger'"
     :message="checkEmpty(errors.title) ? '' : errors.title[0]"
-    class="mt-5"
+    class="mt-6"
   >
     <b-input
       v-model="title"
@@ -52,7 +52,7 @@
   <b-field
     :label="$t('form.body')"
     :message="checkEmpty(errors.editorModeOption) ? '' : errors.editorModeOption[0]"
-    class="mt-5"
+    class="mt-6"
   >
     <b-select v-model="editorMode">
       <option
@@ -91,7 +91,7 @@
     :label="$t('common.images')"
     :type="checkEmpty(errors.images) ? '' : 'is-danger'"
     :message="checkEmpty(errors.images) ? '' : $t('msg.ErrorsExist')"
-    class="mt-5"
+    class="mt-6"
   >
     <file-uploader
       v-if="uploaderOptions"
@@ -107,7 +107,7 @@
     :label="$t('form.files')"
     :type="checkEmpty(errors.files) ? '' : 'is-danger'"
     :message="checkEmpty(errors.files) ? '' : $t('msg.ErrorsExist')"
-    class="mt-5"
+    class="mt-6"
   >
     <file-uploader
       v-if="uploaderOptions"
@@ -122,7 +122,7 @@
     :label="$t('common.link')"
     :type="checkEmpty(errors.links) ? '' : 'is-danger'"
     :message="checkEmpty(errors.links) ? '' : $t('msg.ErrorsExist')"
-    class="mt-5"
+    class="mt-6"
   >
     <ul v-if="links.length > 0">
       <li
@@ -155,7 +155,7 @@
     :label="$t('common.tag')"
     :type="checkEmpty(errors.tags) ? '' : 'is-danger'"
     :message="checkEmpty(errors.tags) ? $t('form.ExpAboutNewTagsSeparater') : errors.tags[0]"
-    class="mt-5"
+    class="mt-6"
   >
     <b-taginput
       v-model="tags"
@@ -175,7 +175,7 @@
     :label="$t('common.publishAt')"
     :type="checkEmpty(errors.publishAt) ? '' : 'is-danger'"
     :message="checkEmpty(errors.publishAt) ? '' : errors.publishAt[0]"
-    class="mt-5"
+    class="mt-6"
   >
     <b-datetimepicker
       v-model="publishAt"
@@ -212,7 +212,7 @@
     :label="$t('common.dispSetting')"
     :type="checkEmpty(errors.isHiddenInList) ? '' : 'is-danger'"
     :message="checkEmpty(errors.isHiddenInList) ? '' : errors.isHiddenInList[0]"
-    class="mt-5"
+    class="mt-6"
   >
     <b-checkbox v-model="isHiddenInList">
       {{ $t('form.hideInList') }}
@@ -221,10 +221,10 @@
 
   <div
     v-if="globalError"
-    class="block has-text-danger mt-5"
+    class="block has-text-danger mt-6"
   >{{ globalError }}</div>
 
-  <div class="field mt-5">
+  <div class="field mt-6">
     <div
       v-if="!isPublished"
       class="control"
