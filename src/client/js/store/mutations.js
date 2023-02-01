@@ -10,6 +10,16 @@ export default {
     state.adminUser = payload
   },
 
+  [types.SET_CATEGORY_ITEMS] (state, payload) {
+    state.categoryItems = []
+    payload.map((item) => {
+      state.categoryItems.push({
+        slug: item.slug,
+        label: item.label,
+      })
+    })
+  },
+
   [types.PUSH_ITEM_TO_ADMIN_POSTS_PAGER_KEYS] (state, payload) {
     const index = payload.index
     if (state.adminPostsPager.keys.find(item => item.index === index)) return

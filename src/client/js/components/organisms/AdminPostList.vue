@@ -123,7 +123,7 @@
 </div>
 </template>
 <script>
-import { Admin } from '@/api'
+import { Admin, Category } from '@/api'
 import AdminPostsTableRow from '@/components/organisms/AdminPostsTableRow'
 
 export default{
@@ -204,6 +204,7 @@ export default{
   },
 
   async created() {
+    await this.setCategories()
     await this.fetchPosts()
   },
 
@@ -216,6 +217,21 @@ export default{
       this.$router.push({ query:{ sort:sortKey, order:order } })
     },
 
+    async setCategories() {
+      if (this.checkEmpty(this.$store.state.categoryItems) === false) return
+
+      this.$store.dispatch('setLoading', true)
+      try {
+        const res = await Category.get(this.serviceId, null, { isList: 1 })
+        this.$store.dispatch('setCategoryItems', res)
+        this.$store.dispatch('setLoading', false)
+      } catch (err) {
+        console.log(err)
+        this.handleApiError(err, 'Failed to get data from server')
+        this.$store.dispatch('setLoading', false)
+      }
+    },
+
     async fetchPosts() {
       this.validateQueries()
       this.$store.dispatch('setLoading', true)
@@ -223,6 +239,7 @@ export default{
         let params = {
           sort: this.sort,
           order: this.order,
+          withCategory: 0,
         }
         let params_clone = {...params}
         if (this.currentPagerKey) {

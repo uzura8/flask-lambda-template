@@ -13,7 +13,9 @@ def handle_list(service_id):
     if not Service.check_exists(service_id):
         raise InvalidUsage('ServiceId does not exist', 404)
 
-    body = Category.get_all_by_service_id(service_id)
+    vals = validate_req_params(validation_schema_list_get(), request.args)
+    is_nested = not vals.get('isList')
+    body = Category.get_all_by_service_id(service_id, True, is_nested)
     return jsonify(body), 200
 
 
@@ -27,7 +29,7 @@ def handle_detail(service_id, slug):
         for key in ['withParents', 'withChildren']:
             params[key] = request.args.get(key)
 
-    vals = validate_req_params(validation_schema(), params)
+    vals = validate_req_params(validation_schema_detail_get(), params)
     item = Category.get_one_by_slug(service_id, vals['slug'],
                                 vals['withParents'], vals['withChildren'], True)
     if not item:
@@ -40,7 +42,7 @@ def handle_detail(service_id, slug):
     return jsonify(item), 200
 
 
-def validation_schema():
+def validation_schema_detail_get():
     return {
         'slug': {
             'type': 'string',
@@ -71,6 +73,18 @@ def validation_schema():
             'default': False,
         },
         'withChildren': {
+            'type': 'boolean',
+            'coerce': (str, NormalizerUtils.to_bool),
+            'required': False,
+            'empty': True,
+            'default': False,
+        },
+    }
+
+
+def validation_schema_list_get():
+    return {
+        'isList': {
             'type': 'boolean',
             'coerce': (str, NormalizerUtils.to_bool),
             'required': False,

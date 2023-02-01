@@ -22,7 +22,7 @@ class Category(Base):
 
 
     @classmethod
-    def get_all_by_service_id(self, service_id, is_public=True):
+    def get_all_by_service_id(self, service_id, is_public=True, is_nested=True):
         table = self.get_table()
         option = {
             'IndexName': 'gsi-list-by-service',
@@ -35,6 +35,10 @@ class Category(Base):
         items = result.get('Items')
         if not items:
             return []
+
+        if not is_nested:
+            return items
+
         return self.convert_to_nested(items)
 
 

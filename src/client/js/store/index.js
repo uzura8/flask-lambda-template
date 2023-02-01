@@ -17,6 +17,7 @@ const state = {
     user: null,
     token: null,
   },
+  categoryItems: [],
   adminUser: null,
   adminPostsPager: {
     keys: [],

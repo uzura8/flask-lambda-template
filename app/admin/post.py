@@ -70,8 +70,12 @@ def post_list(service_id):
             vals_pager_key = validate_req_params(validation_schema_posts_get(), params)
             vals['ExclusiveStartKey'] = vals_pager_key[key_name]
 
+        params = { 'withCategory':request.args.get('withCategory') }
+        vals_with_cate = validate_req_params(validation_schema_posts_get(), params)
+        with_cate = vals_with_cate['withCategory']
+
         hkey = {'name':'serviceId', 'value': service_id}
-        post = Post.query_pager_admin(hkey, vals, True)
+        post = Post.query_pager_admin(hkey, vals, with_cate)
 
     return jsonify(post), 200
 
@@ -529,6 +533,13 @@ def validation_schema_posts_get():
             'nullable': True,
             'empty': True,
             'regex': r'\d{4}\-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([\+\-]\d{2}:\d{2}|Z)$',
+        },
+        'withCategory': {
+            'type': 'boolean',
+            'coerce': (str, NormalizerUtils.to_bool),
+            'required': False,
+            'empty': True,
+            'default': True,
         },
         'pagerKey' : {
             'type': 'dict',

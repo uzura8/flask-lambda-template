@@ -189,5 +189,12 @@ export default {
       const current = moment.utc().add(3, 'seconds').format()
       return publishAt < current ? 'published' : 'reserved'
     },
+
+    getCategoryLabel(slug) {
+      const cates = this.$store.state.categoryItems
+      if (this.checkEmpty(cates)) return ''
+      const cate = cates.find(item => item.slug === slug)
+      return cate != null ? cate.label : ''
+    },
   },
 }
