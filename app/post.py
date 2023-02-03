@@ -14,9 +14,9 @@ def posts(service_id):
         raise InvalidUsage('ServiceId does not exist', 404)
 
     params = {}
-    for key in ['count', 'order', 'category', 'tag', 'pagerKey']:
+    for key in ['count', 'order', 'category', 'tag', 'withCategory', 'pagerKey']:
         params[key] = request.args.get(key)
-    schema = validation_schema_posts_post()
+    schema = validation_schema_posts_get()
     vals = validate_req_params(schema, params)
     #vals['status'] = 'publish'
 
@@ -44,7 +44,7 @@ def posts(service_id):
     if tag_id:
         body = Post.query_all_by_tag_id(tag_id, vals, True, service_id)
     else:
-        body = Post.query_pager_published(service_id, vals, True)
+        body = Post.query_pager_published(service_id, vals, vals['withCategory'])
 
     return jsonify(body), 200
 
@@ -99,8 +99,8 @@ def post(service_id, slug):
     if not Service.check_exists(service_id):
         raise InvalidUsage('ServiceId does not exist', 404)
 
-    params = {'token': request.args.get('token')}
-    vals = validate_req_params(validation_schema_posts_post(), params)
+    params = {'token':request.args.get('token'), 'slug':slug}
+    vals = validate_req_params(validation_schema_post_get(), params)
 
     item = Post.get_one_by_slug(service_id, slug, True)
     if not item:
@@ -119,29 +119,45 @@ def post(service_id, slug):
     return jsonify(Post.to_response(item)), 200
 
 
-def validation_schema_posts_post():
+validation_schema_slug = {
+    'type': 'string',
+    'coerce': (str, NormalizerUtils.trim),
+    'required': True,
+    'empty': False,
+    'maxlength': 128,
+    'regex': r'^[0-9a-z\-]+$',
+}
+
+
+def validation_schema_post_get():
     return {
-        'slug': {
-            'type': 'string',
-            'coerce': (str, NormalizerUtils.trim),
-            'required': True,
-            'empty': False,
-            'maxlength': 128,
-            'regex': r'^[0-9a-z\-]+$',
-        },
-        'title': {
+        'slug': validation_schema_slug,
+        'token': {
             'type': 'string',
             'coerce': (NormalizerUtils.trim),
-            'required': True,
-            'empty': False,
-        },
-        'body': {
-            'type': 'string',
-            'coerce': (NormalizerUtils.rtrim),
             'required': False,
             'nullable': True,
             'empty': True,
-            'default': '',
+            'regex': r'^[0-9a-fA-F]+$',
+        },
+    }
+
+
+def validation_schema_posts_get():
+    return {
+        'count': {
+            'type': 'integer',
+            'coerce': int,
+            'required': False,
+            'min': 1,
+            'max': 50,
+            'default': 5,
+        },
+        'order': {
+            'type': 'string',
+            'required': False,
+            'allowed': ['asc', 'desc'],
+            'default': 'desc',
         },
         'category': {
             'type': 'string',
@@ -158,26 +174,12 @@ def validation_schema_posts_post():
             'empty': True,
             'maxlength': 100,
         },
-        'publishAt': {
-            'type': 'string',
-            'coerce': (NormalizerUtils.trim),
+        'withCategory': {
+            'type': 'boolean',
+            'coerce': (str, NormalizerUtils.to_bool),
             'required': False,
             'empty': True,
-            'regex': r'\d{4}\-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([\+\-]\d{2}:\d{2}|Z)$',
-        },
-        'count': {
-            'type': 'integer',
-            'coerce': int,
-            'required': False,
-            'min': 1,
-            'max': 50,
-            'default': 5,
-        },
-        'order': {
-            'type': 'string',
-            'required': False,
-            'allowed': ['asc', 'desc'],
-            'default': 'desc',
+            'default': True,
         },
         #'sinceTime': {
         #    'type': 'string',
@@ -195,14 +197,6 @@ def validation_schema_posts_post():
         #    'empty': True,
         #    'regex': r'\d{4}\-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([\+\-]\d{2}:\d{2}|Z)$',
         #},
-        'token': {
-            'type': 'string',
-            'coerce': (NormalizerUtils.trim),
-            'required': False,
-            'nullable': True,
-            'empty': True,
-            'regex': r'^[0-9a-fA-F]+$',
-        },
         'pagerKey' : {
             'type': 'dict',
             'coerce': (NormalizerUtils.json2dict),
