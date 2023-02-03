@@ -72,7 +72,7 @@ custom:
       functionErrors:
         period: 60
   associateWaf:
-    name: web-api-acl # If need to use WAF, create WebACL named "web-api-acl". If not create, ignore this.
+    #name: web-api-acl # If need to use WAF, create WebACL named "web-api-acl". If not create, ignore this.
     version: V2 #(optional) Regional | V2
 
 provider:
