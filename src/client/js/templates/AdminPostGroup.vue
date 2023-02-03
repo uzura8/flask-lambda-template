@@ -198,9 +198,17 @@ export default{
 
   methods: {
     async setPostGroup() {
-      const params = { 'withPostDetail':1 }
-      this.postGroup = await Admin.getPostGroups(this.serviceId, this.slug, params, this.adminUserToken)
-      this.groupItems = this.postGroup.posts
+      try {
+        this.$store.dispatch('setLoading', true)
+        const params = { 'withPostDetail':1 }
+        this.postGroup = await Admin.getPostGroups(this.serviceId, this.slug, params, this.adminUserToken)
+        this.groupItems = this.postGroup.posts
+        this.$store.dispatch('setLoading', false)
+      } catch (err) {
+        console.log(err);//!!!!!!
+        this.$store.dispatch('setLoading', false)
+        this.handleApiError(err, this.$t('msg["Failed to get data from server"]'))
+      }
     },
 
     async addGroupItem(post) {
