@@ -10,7 +10,7 @@
     <td>
       <router-link :to="`/admin/posts/${serviceId}/${post.postId}`">{{ post.title }}</router-link>
     </td>
-    <td v-text="getCategoryLabel(post.categorySlug)"></td>
+    <td class="is-size-7" v-text="getCategoryLabel(post.categorySlug)"></td>
     <td>
       <router-link
         v-if="hasEditorRole"

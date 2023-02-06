@@ -6,7 +6,7 @@
         <tr>
           <th class="is-size-7">{{ $t('common.status') }}</th>
           <th class="is-size-6">{{ $t('form.title') }}</th>
-          <th class="is-size-6">{{ $t('common.category') }}</th>
+          <th class="is-size-7">{{ $t('common.category') }}</th>
           <th class="is-size-7">{{ $t('common.edit') }}</th>
           <th
             @click="updateSortOrder('publishAt')"
@@ -39,7 +39,7 @@
         <tr>
           <th class="is-size-7">{{ $t('common.status') }}</th>
           <th class="is-size-6">{{ $t('form.title') }}</th>
-          <th class="is-size-6">{{ $t('common.category') }}</th>
+          <th class="is-size-7">{{ $t('common.category') }}</th>
           <th class="is-size-7">{{ $t('common.edit') }}</th>
           <th
             @click="updateSortOrder('publishAt')"
