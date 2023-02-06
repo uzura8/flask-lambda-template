@@ -2,7 +2,7 @@ import json
 import traceback
 from flask import jsonify, request
 from flask_cognito import cognito_auth_required, current_cognito_jwt
-from app.models.dynamodb import Post, Tag, PostTag, File, ModelInvalidParamsException
+from app.models.dynamodb import Post, Tag, PostTag, File, PostGroup, ModelInvalidParamsException
 from app.common.site import media_accept_mimetypes
 from app.common.error import InvalidUsage
 from app.common.request import validate_req_params
@@ -153,6 +153,8 @@ def post_detail(service_id, identifer):
         if post.get('files'):
             del_file_fids = [ i['fileId'] for i in post['files'] ]
             File.bulk_update_status(del_file_fids, 'removed')
+
+        PostGroup.delete_post_id_for_all_items(service_id, post['postId'])
 
         Post.delete({'postId':post_id})
         return jsonify(), 200

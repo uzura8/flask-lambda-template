@@ -24,3 +24,25 @@ class PostGroup(Base):
     reserved_values = {
         'slug': ['slug', 'create']
     }
+
+
+    @classmethod
+    def delete_post_id_for_all_items(self, service_id, post_id):
+        pkeys = {'key':'serviceId', 'val':service_id}
+        groups = PostGroup.get_all_by_pkey(pkeys, None, 'PostGroupsByServiceIdGsi')
+        if not groups:
+            return []
+
+        upd_pkeys = []
+        for group in groups:
+            if post_id not in group['postIds']:
+                continue
+
+            group['postIds'].remove(post_id)
+            query_key = '#'.join([service_id, group['slug']])
+            query_keys = {'p': {'key':'serviceIdSlug', 'val':query_key}}
+            vals = {'postIds':group['postIds']}
+            PostGroup.update(query_keys, vals)
+            upd_pkeys.append(query_key)
+
+        return upd_pkeys
