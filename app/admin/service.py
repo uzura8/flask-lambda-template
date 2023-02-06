@@ -77,6 +77,7 @@ def service_detail(service_id):
     service['configs'] = ServiceConfig.get_all_by_service(service_id, True, True, True)
     return jsonify(service), 200
 
+mimetype_regex = r'^[0-9a-z_\-\.]+/[0-9a-z_\-\.]+$'
 
 def validation_schema_services():
     return {
@@ -144,7 +145,7 @@ def validation_schema_services():
                         'type': 'string',
                         'required': False,
                         'empty': True,
-                        'regex': r'^[0-9a-z_\-]+/[0-9a-z_\-]+$',
+                        'regex': mimetype_regex,
                     }
                 },
                 'mediaUploadImageSizes': {
@@ -182,7 +183,7 @@ def validation_schema_services():
                         'type': 'string',
                         'required': False,
                         'empty': True,
-                        'regex': r'^[0-9a-z_\-]+/[0-9a-z_\-]+$',
+                        'regex': mimetype_regex,
                     }
                 },
                 'mediaUploadSizeLimitMBFile': {

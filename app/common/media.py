@@ -5,6 +5,15 @@ media_types = [
     {'mimetype':'image/png', 'extensions':['png']},
     {'mimetype':'image/gif', 'extensions':['gif']},
     {'mimetype':'application/pdf', 'extensions':['pdf']},
+    {'mimetype':'application/msword', 'extensions':['doc']},
+    {'mimetype':'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'extensions':['docx']},
+    {'mimetype':'application/vnd.ms-powerpoint', 'extensions':['ppt']},
+    {'mimetype':'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'extensions':['pptx']},
+    {'mimetype':'application/vnd.ms-excel', 'extensions':['xls']},
+    {'mimetype':'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'extensions':['xlsx']},
+    {'mimetype':'application/zip', 'extensions':['zip']},
+    {'mimetype':'text/plain', 'extensions':['txt']},
+    {'mimetype':'text/csv', 'extensions':['csv']},
 ]
 
 
