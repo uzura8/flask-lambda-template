@@ -45,6 +45,7 @@
   </ul>
 
   <b-upload
+    v-model="files"
     class="file-label"
     multiple
     :accept="getUploadConfig('mimeTypes', []).join(',')"
