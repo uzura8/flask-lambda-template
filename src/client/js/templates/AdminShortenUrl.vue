@@ -102,7 +102,7 @@
     <div
       class="mt-3 has-text-warning-dark"
       v-else-if="isLoading === false"
-    >{{ $t('msg.generateImageRequiresTimes') }}</div>
+    >{{ $t('msg.generateItemRequiresTimes', { target: $t('common.images') }) }}</div>
   </div>
 
 </div>

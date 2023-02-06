@@ -53,6 +53,8 @@
     "comments": "Comments",
     "image": "Image",
     "images": "Images",
+    "thumbnail": "Thumbnail image",
+    "thumbnails": "Thumbnail images",
     "file": "File",
     "files": "Files",
     "originalSize": "Original Size",
@@ -164,7 +166,7 @@
     "cofirmToDelete": "Are you sure you want to delete?",
     "inputRequiredBoth": "Both inputs required",
     "hiddenInList": "This item is hidden in list",
-    "generateImageRequiresTimes": "Generating images requires times in case",
+    "generateItemRequiresTimes": "Generating {target} requires times in case",
     "signInGreeting": "Hi, {name} !"
   },
   "error": {

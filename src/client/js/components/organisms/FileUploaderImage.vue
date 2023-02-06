@@ -65,6 +65,12 @@
         <span v-else>{{ $t('common.insertOf', {name: $t('common.image')}) }}</span>
       </button>
     </div>
+    <div
+      v-if="file.isUploaded"
+      class="mt-2 has-text-warning-dark"
+    >
+      {{ $t('msg.generateItemRequiresTimes', { target: $t('common.thumbnails') }) }}
+    </div>
   </div>
 
   <button

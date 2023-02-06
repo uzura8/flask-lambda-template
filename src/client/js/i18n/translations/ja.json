@@ -54,6 +54,8 @@
     "comments": "コメント一覧",
     "image": "画像",
     "images": "画像",
+    "thumbnail": "サムネイル",
+    "thumbnails": "サムネイル",
     "file": "ファイル",
     "files": "ファイル",
     "originalSize": "オリジナルサイズ",
@@ -165,7 +167,7 @@
     "cofirmToDelete": "本当に削除しますか？",
     "inputRequiredBoth": "両方入力してください",
     "hiddenInList": "一覧には表示されません",
-    "generateImageRequiresTimes": "画像の生成に時間がかかる場合があります",
+    "generateItemRequiresTimes": "{target}の生成に時間がかかる場合があります",
     "signInGreeting": "こんにちは、{name} さん！"
   },
   "error": {
