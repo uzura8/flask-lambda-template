@@ -534,18 +534,18 @@ class Post(Base):
                 is_upd_status_publish_at = True
 
         saved_images = saved['images']
-        upd_images = vals.get('images', [])
+        upd_images = vals.get('images')
         del_img_fids = []
         add_img_fids = []
-        if upd_images != saved_images:
+        if upd_images is not None and upd_images != saved_images:
             del_img_fids = [ s['fileId'] for s in saved_images if s not in upd_images ]
             add_img_fids = [ s['fileId'] for s in upd_images if s not in saved_images ]
 
         saved_files = saved['files']
-        upd_files = vals.get('files', [])
+        upd_files = vals.get('files')
         del_file_fids = []
         add_file_fids = []
-        if upd_files != saved_files:
+        if upd_files is not None and upd_files != saved_files:
             del_file_fids = [ s['fileId'] for s in saved_files if s not in upd_files ]
             add_file_fids = [ s['fileId'] for s in upd_files if s not in saved_files ]
 
