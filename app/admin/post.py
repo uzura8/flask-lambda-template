@@ -199,6 +199,7 @@ def post_status(service_id, identifer):
         raise InvalidUsage(e.message, 400)
 
     except Exception as e:
+        print(traceback.format_exc())
         raise InvalidUsage('Server Error', 500)
 
     saved['service'] = service
