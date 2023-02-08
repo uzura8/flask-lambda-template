@@ -1,8 +1,8 @@
 {
   "common": {
     "top": "Top",
-    "next": "Next",
-    "prev": "Previous",
+    "toNext": "Next",
+    "toPrev": "Previous",
     "toFirst": "To First",
     "status": "Status",
     "createdAt": "Created",
