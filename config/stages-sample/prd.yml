@@ -8,19 +8,19 @@ logsRestApiFullExecutionData: true # Optional configuration which specifies whet
 debugLogEnabled: false
 
 appMemorySize: 256
-appTimeout: 12 # s
+appTimeout: 20 # s
 
 mediaS3BucketName: "media.example.com"
 mediaImageMakerMemorySize: 256 # MB
 mediaImageMakerTimeout: 600 # s
-mediaImageMakerFileSizeLimit: 10 # MB
+mediaImageMakerFileSizeLimit: 20 # MB
 
 urlShortenQrcodeMakerMemorySize: 128 # MB
 urlShortenQrcodeMakerTimeout: 300 # s
 urlShortenBaseUrl: 'https://rd.example.com/'
 
 commentDefaultPublishStatus: "unpublish"
-commentImportTimeout: 300 # s
+commentImportTimeout: 600 # s
 commentImportMemorySize: 256 # MB
 commentImportS3BucketName: "your-content-resources"
 commentImportS3BucketPath: "your-project/prd/comments"

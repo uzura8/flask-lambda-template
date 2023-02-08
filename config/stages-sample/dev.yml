@@ -8,23 +8,23 @@ logsRestApiFullExecutionData: true # Optional configuration which specifies whet
 debugLogEnabled: true
 
 appMemorySize: 128 # MB
-appTimeout: 12 # s
+appTimeout: 20 # s
 
 mediaS3BucketName: "media-dev.example.com"
 mediaImageMakerMemorySize: 256 # MB
 mediaImageMakerTimeout: 600 # s
-mediaImageMakerFileSizeLimit: 5 # MB
+mediaImageMakerFileSizeLimit: 20 # MB
 
 urlShortenQrcodeMakerMemorySize: 128 # MB
 urlShortenQrcodeMakerTimeout: 300 # s
 urlShortenBaseUrl: 'https://rd-dev.example.com/'
 
 commentDefaultPublishStatus: "unpublish"
-commentImportTimeout: 300 # s
+commentImportTimeout: 600 # s
 commentImportMemorySize: 256 # MB
 commentImportS3BucketName: "your-content-resources"
 commentImportS3BucketPath: "your-project/dev/comments"
-commentImportS3BucketSizeLimit: 3 # MB
+commentImportS3BucketSizeLimit: 10 # MB
 commentImportCsvRowsCountLimit: 1000 # Stop execution to import comments from csv, if run over this value
 commentImporterNoticeEmails: '{"hoge": {"to":"admin@example.com", "from":"admin@example.com", "from_name":"System Administrator"}}'
 
