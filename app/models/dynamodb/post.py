@@ -561,7 +561,7 @@ class Post(Base):
             upd_attrs.append(attr)
 
         if not exp_items:
-            return
+            return {'item':None, 'is_updated_index':False}
 
         if 'body' in upd_attrs or 'bodyFormat' in upd_attrs:
             body_html, body_text = self.conv_body_to_each_format(vals['body'], vals['bodyFormat'])

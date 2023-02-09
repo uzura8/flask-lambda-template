@@ -35,7 +35,7 @@ class PostGroup(Base):
 
         upd_pkeys = []
         for group in groups:
-            if post_id not in group['postIds']:
+            if post_id not in group.get('postIds', []):
                 continue
 
             group['postIds'].remove(post_id)
