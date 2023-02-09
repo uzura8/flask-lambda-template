@@ -44,12 +44,20 @@ def post_list(service_id):
 
         tags = []
         if vals.get('tags', []):
-            res = update_post_tags(post, vals['tags'])
-            if res.get('current_ids'):
-                keys = []
-                for tag_id in res['current_ids']:
-                    keys.append({'tagId':tag_id})
-                tags = Tag.batch_get_items(keys)
+            try:
+                res = update_post_tags(post, vals['tags'])
+                if res.get('current_ids'):
+                    keys = []
+                    for tag_id in res['current_ids']:
+                        keys.append({'tagId':tag_id})
+                    tags = Tag.batch_get_items(keys)
+
+            except ModelInvalidParamsException as e:
+                raise InvalidUsage(e.message, 400)
+
+            except Exception as e:
+                print(traceback.format_exc())
+                raise InvalidUsage('Server Error', 500)
         post['tags'] = tags
 
     else:
@@ -127,37 +135,86 @@ def post_detail(service_id, identifer):
 
         tags = []
         if vals.get('tags', []):
-            res = update_post_tags(saved, vals['tags'], is_upd_status_publish_at)
-            if res.get('current_ids'):
-                keys = []
-                for tag_id in res['current_ids']:
-                    keys.append({'tagId':tag_id})
-                tags = Tag.batch_get_items(keys)
+            try:
+                res = update_post_tags(saved, vals['tags'], is_upd_status_publish_at)
+                if res.get('current_ids'):
+                    keys = []
+                    for tag_id in res['current_ids']:
+                        keys.append({'tagId':tag_id})
+                    tags = Tag.batch_get_items(keys)
+
+            except ModelInvalidParamsException as e:
+                raise InvalidUsage(e.message, 400)
+
+            except Exception as e:
+                print(traceback.format_exc())
+                raise InvalidUsage('Server Error', 500)
+
         else:
-            post_tags = PostTag.get_all_by_post_id(post['postId'], False, False)
-            if post_tags:
-                del_tags = [ {'tagId':pt['tagId'],'postId':pt['postId']} for pt in post_tags ]
-                PostTag.batch_delete(del_tags)
+            try:
+                post_tags = PostTag.get_all_by_post_id(post['postId'], False, False)
+                if post_tags:
+                    del_tags = [ {'tagId':pt['tagId'],'postId':pt['postId']} for pt in post_tags ]
+                    PostTag.batch_delete(del_tags)
+
+            except ModelInvalidParamsException as e:
+                raise InvalidUsage(e.message, 400)
+
+            except Exception as e:
+                print(traceback.format_exc())
+                raise InvalidUsage('Server Error', 500)
 
         saved['tags'] = tags
 
     elif request.method == 'DELETE':
         if post.get('tags'):
-            del_tags = [ {'tagId':tag['tagId'],'postId':post['postId']} for tag in post['tags'] ]
-            PostTag.batch_delete(del_tags)
+            try:
+                del_tags = [ {'tagId':tag['tagId'],'postId':post['postId']} for tag in post['tags'] ]
+                PostTag.batch_delete(del_tags)
+
+            except ModelInvalidParamsException as e:
+                raise InvalidUsage(e.message, 400)
+
+            except Exception as e:
+                print(traceback.format_exc())
+                raise InvalidUsage('Server Error', 500)
 
         if post.get('images'):
-            del_img_fids = [ i['fileId'] for i in post['images'] ]
-            File.bulk_update_status(del_img_fids, 'removed')
+            try:
+                del_img_fids = [ i['fileId'] for i in post['images'] ]
+                File.bulk_update_status(del_img_fids, 'removed')
+
+            except ModelInvalidParamsException as e:
+                raise InvalidUsage(e.message, 400)
+
+            except Exception as e:
+                print(traceback.format_exc())
+                raise InvalidUsage('Server Error', 500)
+
 
         if post.get('files'):
-            del_file_fids = [ i['fileId'] for i in post['files'] ]
-            File.bulk_update_status(del_file_fids, 'removed')
+            try:
+                del_file_fids = [ i['fileId'] for i in post['files'] ]
+                File.bulk_update_status(del_file_fids, 'removed')
 
-        PostGroup.delete_post_id_for_all_items(service_id, post['postId'])
+            except ModelInvalidParamsException as e:
+                raise InvalidUsage(e.message, 400)
 
-        Post.delete({'postId':post_id})
-        return jsonify(), 200
+            except Exception as e:
+                print(traceback.format_exc())
+                raise InvalidUsage('Server Error', 500)
+
+        try:
+            PostGroup.delete_post_id_for_all_items(service_id, post['postId'])
+            Post.delete({'postId':post_id})
+            return jsonify(), 200
+
+        except ModelInvalidParamsException as e:
+            raise InvalidUsage(e.message, 400)
+
+        except Exception as e:
+            print(traceback.format_exc())
+            raise InvalidUsage('Server Error', 500)
 
     if request.method == 'HEAD':
         return jsonify(), 200
