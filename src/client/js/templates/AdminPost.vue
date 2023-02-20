@@ -31,75 +31,77 @@
     {{ post.title }}
   </h1>
 
-  <div class="is-pulled-right">
-    <eb-dropdown
-      position="is-bottom-left"
-    >
-      <span
-        slot="label"
-        class="icon"
+  <div class="is-clearfix">
+    <div class="is-pulled-right">
+      <eb-dropdown
+        position="is-bottom-left"
       >
-        <i class="fas fa-edit"></i>
-      </span>
-      <div class="dropdown-content">
-        <a
-          v-if="previewUrl"
-          :href="previewUrl"
-          target="_blank"
-          class="dropdown-item"
+        <span
+          slot="label"
+          class="icon"
         >
-          <span class="icon">
-            <i class="fas fa-eye"></i>
-          </span>
-          <span>{{ $t('common.preview') }}</span>
-        </a>
+          <i class="fas fa-edit"></i>
+        </span>
+        <div class="dropdown-content">
+          <a
+            v-if="previewUrl"
+            :href="previewUrl"
+            target="_blank"
+            class="dropdown-item"
+          >
+            <span class="icon">
+              <i class="fas fa-eye"></i>
+            </span>
+            <span>{{ $t('common.preview') }}</span>
+          </a>
 
-        <router-link
-          v-if="hasEditorRole"
-          :to="`/admin/posts/${serviceId}/${post.postId}/edit`"
-          class="dropdown-item"
-        >
-          <span class="icon">
-            <i class="fas fa-pen"></i>
-          </span>
-          <span>{{ $t('common.edit') }}</span>
-        </router-link>
+          <router-link
+            v-if="hasEditorRole"
+            :to="`/admin/posts/${serviceId}/${post.postId}/edit`"
+            class="dropdown-item"
+          >
+            <span class="icon">
+              <i class="fas fa-pen"></i>
+            </span>
+            <span>{{ $t('common.edit') }}</span>
+          </router-link>
 
-        <a
-          v-if="hasEditorRole && isPublishItem"
-          @click="updateStatus(false)"
-          class="dropdown-item is-clickable"
-        >
-          <span class="icon">
-            <i class="fas fa-lock"></i>
-          </span>
-          <span>{{ $t('common.unpublish') }}</span>
-        </a>
+          <a
+            v-if="hasEditorRole && isPublishItem"
+            @click="updateStatus(false)"
+            class="dropdown-item is-clickable"
+          >
+            <span class="icon">
+              <i class="fas fa-lock"></i>
+            </span>
+            <span>{{ $t('common.unpublish') }}</span>
+          </a>
 
-        <a
-          v-else-if="hasEditorRole && !isPublishItem"
-          @click="confirmPublish()"
-          class="dropdown-item is-clickable"
-        >
-          <span class="icon">
-            <i class="fas fa-globe"></i>
-          </span>
-          <span>{{ $t('common.publish') }}</span>
-        </a>
+          <a
+            v-else-if="hasEditorRole && !isPublishItem"
+            @click="confirmPublish()"
+            class="dropdown-item is-clickable"
+          >
+            <span class="icon">
+              <i class="fas fa-globe"></i>
+            </span>
+            <span>{{ $t('common.publish') }}</span>
+          </a>
 
-        <a
-          v-if="hasEditorRole"
-          @click="confirmDelete()"
-          class="dropdown-item is-clickable"
-        >
-          <span class="icon">
-            <i class="fas fa-trash"></i>
-          </span>
-          <span>{{ $t('common.delete') }}</span>
-        </a>
+          <a
+            v-if="hasEditorRole"
+            @click="confirmDelete()"
+            class="dropdown-item is-clickable"
+          >
+            <span class="icon">
+              <i class="fas fa-trash"></i>
+            </span>
+            <span>{{ $t('common.delete') }}</span>
+          </a>
 
-      </div>
-    </eb-dropdown>
+        </div>
+      </eb-dropdown>
+    </div>
   </div>
 
   <post-body
