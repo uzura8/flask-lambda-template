@@ -338,6 +338,10 @@ export default{
           mode: 'text',
           format: 'text',
         },
+        {
+          mode: 'rawHtml',
+          format: 'html',
+        },
       ],
     }
   },
@@ -730,13 +734,15 @@ export default{
       if (this.editorMode === 'markdown') {
         const altText = payload.caption ? payload.caption : this.$t('common.image')
         imgTag = `![${altText}](${imgUrl})`
+      } else if (this.editorMode === 'text') {
+        imgTag = imgUrl
       } else {
         let attrs = ['img', `src="${imgUrl}"`]
         if (payload.caption) attrs.push(`alt="${payload.caption}"`)
         imgTag = '<' + attrs.join(' ') + '>'
       }
 
-      if (this.editorMode === 'text') {
+      if (['text', 'rawHtml'].includes(this.editorMode)) {
         const inputEl = this.$refs.inputBody.$el.getElementsByTagName('textarea')[0]
         const inputPos = inputEl.selectionStart
         const preVal = this.body.substr(0, inputPos)

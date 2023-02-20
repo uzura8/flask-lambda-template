@@ -229,6 +229,7 @@
     "richText": "リッチテキスト",
     "markdown": "Markdown",
     "text": "テキスト",
+    "rawHtml": "生HTML",
     "postGroup": "投稿グループ",
     "shortenUrl": "短縮URL",
     "generateUrl": "生成されるURL",
