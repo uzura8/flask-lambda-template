@@ -1,18 +1,23 @@
 [DB]
 dbname = 
-dbuser = 
-host = 
+#dbname = for_new_db_name
+dbuser = root
+host   = localhost
 password = 
-port = 
+port   = 3306
 
 [CONVERT]
-user_id_common = 'your-user-id'
-limit = 10
+user_id_common = your-user-id
+limit = 100
 
 [SERVICE]
 service_id = hoge
 service_label = ほげ
-base_url = example.com
-media_s3_bucket_name = media.example.com
-media_base_url_before = before-media.example.com
+media_domain_before = media-old.example.com
+media_domain_abolished = media-abolished.example.com
 allowed_image_sizes = raw|200x200|600x600|400x400xc
+media_s3_bucket_name = media-dev.example.com
+#media_s3_bucket_name = media.example.com
+site_domain_before = www.example.com
+site_base_url_after = https://stg.example.com
+#site_base_url_after = https://www.example.com

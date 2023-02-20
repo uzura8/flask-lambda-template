@@ -29,7 +29,11 @@ class DbConverterBase():
     service_label = ''
     service_base_url = ''
     media_s3_bucket_name = ''
+    media_domain_before = ''
     media_base_url_before = ''
+    media_domain_abolished = ''
+    site_domain_before = ''
+    site_base_url_after = ''
     allowed_image_sizes = ''
     user_id = ''
     category_exc_table = []
@@ -39,6 +43,7 @@ class DbConverterBase():
     post_group_exc_table = []
     file_exc_table = []
     file_not_exists = []
+    file_related_others = []
     logs_dir = ''
     offset_max = 0 # On Development, Set this value
 
@@ -57,6 +62,26 @@ class DbConverterBase():
         self.cursor.close()
         self.connect.close()
         output_log('END: Convert')
+
+
+    def set_conf(self):
+        self.config = configparser.ConfigParser()
+        config_path = self.converter_base_path.joinpath('config.ini')
+        self.config.read(config_path, encoding='utf-8')
+        conf = self.config['CONVERT']
+        self.limit = int(conf['limit'])
+        self.user_id = conf['user_id_common']
+
+        conf = self.config['SERVICE']
+        self.service_id = conf['service_id']
+        self.service_label = conf['service_label']
+        self.media_domain_before = conf['media_domain_before']
+        self.media_base_url_before = f'https://{self.media_domain_before}/gunma'
+        self.media_domain_abolished = conf['media_domain_abolished']
+        self.media_s3_bucket_name = conf['media_s3_bucket_name']
+        self.allowed_image_sizes = conf['allowed_image_sizes']
+        self.site_domain_before = conf['site_domain_before']
+        self.site_base_url_after = conf['site_base_url_after']
 
 
     def from_records(self, table, order_by='id'):
@@ -107,6 +132,7 @@ class DbConverterBase():
         self.save_exc_table('post_group', self.post_group_exc_table)
         self.save_exc_table('file', self.file_exc_table)
         self.save_exc_table('file_not_exists', self.file_not_exists)
+        self.save_exc_table('file_related_others', self.file_related_others)
 
 
     def save_exc_table(self, table_name, data):
@@ -116,25 +142,12 @@ class DbConverterBase():
         json_file.close()
 
 
-    def set_conf(self):
-        self.config = configparser.ConfigParser()
-        config_path = self.converter_base_path.joinpath('config.ini')
-        self.config.read(config_path, encoding='utf-8')
-        conf = self.config['CONVERT']
-        self.limit = int(conf['limit'])
-        self.user_id = conf['user_id_common']
-
-        conf = self.config['SERVICE']
-        self.service_id = conf['service_id']
-        self.service_label = conf['service_label']
-        self.service_base_url = conf['base_url']
-        self.media_s3_bucket_name = conf['media_s3_bucket_name']
-        self.media_base_url_before = conf['media_base_url_before']
-        self.allowed_image_sizes = conf['allowed_image_sizes']
+    def reset_file_exc_table(self):
+        self.file_exc_table = []
 
 
     def get_file_by_url(self, url, save_path=None):
-        res = requests.get(url).content
+        res = requests.get(url, timeout=(5.0, 10.0)).content
 
         if save_path:
             abs_path = self.converter_base_path.joinpath(save_path)
