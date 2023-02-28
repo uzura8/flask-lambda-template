@@ -75,5 +75,8 @@ cypress/videos
 /develop/comment_importer_event.json
 /develop/media_image_maker_event.json
 /develop/db_converter/config.ini
+/develop/db_converter/config-dev.ini
 /develop/db_converter/services/*
 /develop/db_converter/var/*
+/develop/performance/post.js
+/develop/performance/post_detail.js
