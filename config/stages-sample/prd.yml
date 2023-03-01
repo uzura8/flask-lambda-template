@@ -7,6 +7,8 @@ logsRestApiLevel: ERROR # Optional configuration which specifies the log level t
 logsRestApiFullExecutionData: true # Optional configuration which specifies whether or not to log full requests/responses for execution logging. Defaults to true.
 debugLogEnabled: false
 
+dynamoDbBackupTargetTagValue: 'aws-backup' # 'aws-backup':backup target / other value: not target
+
 appMemorySize: 256
 appTimeout: 20 # s
 

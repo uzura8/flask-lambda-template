@@ -13,3 +13,7 @@ Properties:
   #ProvisionedThroughput:
   #  ReadCapacityUnits: 1
   #  WriteCapacityUnits: 5
+  Tags:
+    - Key: backup
+      Value: ${self:custom.dynamoDbBackupTargetTagValue}
+

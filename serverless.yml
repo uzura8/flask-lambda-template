@@ -16,6 +16,7 @@ custom:
   defaultStage: dev
   prjPrefix: ${self:service}-${self:provider.stage}
   stageConfigFileName: ./config/stages/${self:provider.stage}.yml
+  dynamoDbBackupTargetTagValue: ${file(${self:custom.stageConfigFileName}):dynamoDbBackupTargetTagValue}
   mediaS3BucketName: ${file(${self:custom.stageConfigFileName}):mediaS3BucketName}
   commentImportS3BucketName: ${file(${self:custom.stageConfigFileName}):commentImportS3BucketName}
   commentImportS3BucketPath: ${file(${self:custom.stageConfigFileName}):commentImportS3BucketPath}
@@ -81,6 +82,9 @@ provider:
   stage: ${opt:stage, self:custom.defaultStage}
   region: ${file(./config/stages/common.yml):defaultRegion}
   endpointType: REGIONAL
+  stackTags:
+    deployedBy: serverless-gp-cms
+    projectName: ${self:custom.prjPrefix}
   iam:
     role:
       statements: ${file(./config/iam-role-statements.yml)}

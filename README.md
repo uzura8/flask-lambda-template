@@ -172,6 +172,37 @@ aws cognito-idp admin-set-user-password \
 ]
 ```
 
+## DynamoDB Backup Settings
+
+If you want to backup DynamoDB items, set bellows
+
+* Access to "AWS Backup" on AWS Console and set region
+* Press "Create backup plan"
+* Input as follows for "Plan"
+    + Start options
+        - Select "Build a new plan"
+        - Backup plan name: your-project-dynamodb-backup
+    + Backup rule configuration
+        - Backup vault: Default
+        - Backup rule name: your-project-dynamodb-backup-rule
+        - Backup frequency: Daily
+        - Backup window: Customize backup window
+        - Backup window settings: as you like
+    + Press "Create backup plan"
+* Input as follows for "Assign resources"
+    + General
+        - Resource assignment name: your-project-dynamodb-backup-assignment
+        - IAM role: Default role
+    + Resource selection
+        - 1. Define resource selection: Include specific resource types
+        - 2. Select specific resource types: DynamoDB
+            - Table names: All tables
+        - 4. Refine selection using tags
+            - Key: backup
+            - Condition for value: Eauqls
+            - Value: aws-backup
+    + Press "Assign resources"
+
 ## Deploy Server Side Resources
 
 ### Setup configs

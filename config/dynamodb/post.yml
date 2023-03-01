@@ -28,6 +28,9 @@ Properties:
   #  ReadCapacityUnits: 5
   #  WriteCapacityUnits: 3
   BillingMode: PAY_PER_REQUEST
+  Tags:
+    - Key: backup
+      Value: ${self:custom.dynamoDbBackupTargetTagValue}
 
   GlobalSecondaryIndexes:
     -

@@ -22,6 +22,9 @@ Properties:
       AttributeName: commentId
       KeyType: HASH
   BillingMode: PAY_PER_REQUEST
+  Tags:
+    - Key: backup
+      Value: ${self:custom.dynamoDbBackupTargetTagValue}
 
   GlobalSecondaryIndexes:
     -

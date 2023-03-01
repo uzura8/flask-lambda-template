@@ -19,6 +19,9 @@ Properties:
   #ProvisionedThroughput:
   #  ReadCapacityUnits: 5
   #  WriteCapacityUnits: 3
+  Tags:
+    - Key: backup
+      Value: ${self:custom.dynamoDbBackupTargetTagValue}
 
   GlobalSecondaryIndexes:
     -
