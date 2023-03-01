@@ -80,3 +80,4 @@ cypress/videos
 /develop/db_converter/var/*
 /develop/performance/post.js
 /develop/performance/post_detail.js
+/develop/bin/copy_dynamodb_table_items.py
