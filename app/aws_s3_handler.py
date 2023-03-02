@@ -33,6 +33,11 @@ class AwsS3Handler:
         return str_data
 
 
+    def get_list_by_dir(self, dir_path):
+        res = self.client.list_objects(Bucket=self.bucket, Prefix=dir_path)
+        return res.get('Contents', [])
+
+
     def upload(self, blob, path, mimetype=None):
         res = self.client.put_object(
             Body = blob,
@@ -50,4 +55,14 @@ class AwsS3Handler:
             Bucket = self.bucket,
             Key = path
         )
+        return res
+
+
+    def delete_by_dir(self, dir_path):
+        objs = self.get_list_by_dir(dir_path)
+        if len(objs) == 0:
+            return None
+
+        delete_keys = {'Objects': [{'Key': obj['Key']} for obj in objs]}
+        res = self.client.delete_objects(Bucket=self.bucket, Delete=delete_keys)
         return res

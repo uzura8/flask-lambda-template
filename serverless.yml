@@ -105,6 +105,7 @@ provider:
     DEBUG_LOG_ENABLED: ${file(${self:custom.stageConfigFileName}):debugLogEnabled}
     MEDIA_S3_BUCKET_NAME: ${self:custom.mediaS3BucketName}
     MEDIA_IMAGE_MAKER_FILE_SIZE_LIMIT: ${file(${self:custom.stageConfigFileName}):mediaImageMakerFileSizeLimit}
+    MEDIA_UNUSED_FILES_CLEANER_RESERVED_FILE_EXPIRATION_HOURS: ${file(${self:custom.stageConfigFileName}):mediaUnusedFilesCleanerReservedFileExpirationHours}
     URL_SHORTEN_BASE_URL: ${file(${self:custom.stageConfigFileName}):urlShortenBaseUrl}
     COMMENT_IMPORTER_COLUMN_CONVERSION_TABLE: ${file(./config/stages/common.yml):commentImporterColumnConversionTable}
     COMMENT_IMPORTER_CONTENT_LIST: ${file(./config/stages/common.yml):commentImporterContentList}
@@ -174,6 +175,14 @@ functions:
           #  #- suffix: .jpg
           existing: true # If use existing bucket, set true
           forceDeploy: true
+
+  mediaUnusedFilesCleaner:
+    handler: app/media_unused_files_cleaner_handler.handler
+    name: ${self:service}-${self:provider.stage}-mediaUnusedFilesCleaner
+    memorySize: ${file(${self:custom.stageConfigFileName}):mediaUnusedFilesCleanerMemorySize}
+    timeout: ${file(${self:custom.stageConfigFileName}):mediaUnusedFilesCleanerTimeout}
+    events:
+      - schedule: ${file(${self:custom.stageConfigFileName}):mediaUnusedFilesCleanerEventSchedule}
 
   #mediaImageModifier:
   #  handler: app/media_image_modifier_handler.handler

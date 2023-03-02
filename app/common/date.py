@@ -1,5 +1,5 @@
 import re
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 
 def utc_iso(with_ms=False, conv_tz_spec=False, dt=None):
@@ -67,3 +67,16 @@ def is_future(target_data_str, date_format='%Y-%m-%dT%H:%M:%S%z', base_date_str=
         base_dt = datetime.now(timezone.utc)
 
     return target_dt > base_dt
+
+
+def get_calced_date_str(base_date_str, date_format, **timedelta_args):
+    if not date_format:
+        date_format = '%Y-%m-%dT%H:%M:%S%z'
+
+    if base_date_str:
+        base_dt = datetime.strptime(base_date_str, date_format)
+    else:
+        base_dt = datetime.now(timezone.utc)
+
+    calced_dt = base_dt + timedelta(**timedelta_args)
+    return utc_iso(False, True, calced_dt)
