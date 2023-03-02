@@ -156,3 +156,49 @@ class File(Base):
             updateds.append(updated)
 
         return updateds
+
+
+    @classmethod
+    def get_all_pager_by_status(self, status, params=None, pager_key=None, is_return_raw_data=False):
+        table = self.get_table()
+        until_time = params.get('untilTime', '')
+        since_time = params.get('sinceTime', '')
+        is_desc = params.get('order', 'asc') == 'desc'
+        limit = params.get('count', 20)
+        option = {
+            'IndexName': 'fileStatusCreatedAtGsi',
+            'ScanIndexForward': not is_desc,
+            'Limit': limit,
+        }
+
+        key_conds = []
+        exp_attr_names = {}
+        exp_attr_vals = {}
+
+        key_conds.append('#fs = :fs')
+        exp_attr_names['#fs'] = 'fileStatus'
+        exp_attr_vals[':fs'] = status
+
+        sort_key = 'createdAt'
+        if since_time:
+            key_conds.append('#st > :st')
+            exp_attr_names['#st'] = sort_key
+            exp_attr_vals[':st'] = since_time
+
+        if until_time:
+            key_conds.append('#ut < :ut')
+            exp_attr_names['#ut'] = sort_key
+            exp_attr_vals[':ut'] = until_time
+
+        if pager_key:
+            option['ExclusiveStartKey'] = pager_key
+
+        option['KeyConditionExpression'] = ' AND '.join(key_conds)
+        option['ExpressionAttributeNames'] = exp_attr_names
+        option['ExpressionAttributeValues'] = exp_attr_vals
+
+        res = table.query(**option)
+        if is_return_raw_data:
+            return res
+
+        return res.get('Items', [])

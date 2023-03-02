@@ -8,7 +8,7 @@ from app.common.log import output_log
 class MediaUnusedFilesCleaner:
     s3handler = None
     debug_log_enabled = False
-    limit = None
+    limit = 100
     targets = []
     scan_params = {}
     pager_key = None
@@ -18,7 +18,6 @@ class MediaUnusedFilesCleaner:
     def __init__(self, bucket_name, expir_hours_for_reserved, limit=None, options=None):
         add_hour = expir_hours_for_reserved * -1
         self.expired_at_for_reseved = get_calced_date_str(None, None, hours=add_hour)
-        #self.expired_at_for_reseved = get_calced_date_str(None, None, minutes=-5)
         if limit:
             self.limit = limit
         self.s3handler = AwsS3Handler(bucket_name)
@@ -40,23 +39,25 @@ class MediaUnusedFilesCleaner:
     def delete_files_by_status(self, status):
         pager_key = None
         is_scaned_all = False
-        scan_option = self.get_scan_option(status, self.limit)
         while not is_scaned_all:
-            items, pager_key = self.get_target_files(scan_option, pager_key)
+            items, pager_key = self.get_target_files_by_status(status, pager_key)
             self.delete_files(items)
 
             if pager_key is None:
                 is_scaned_all = True
 
 
-    def get_scan_option(self, status, limit):
-        if status == 'removed':
-            return self.get_scan_option_for_removed(limit)
-
+    def get_target_files_by_status(self, status, pager_key=None):
+        params = {
+            'count': self.limit,
+            'order': 'desc',
+        }
         if status == 'reserved':
-            return self.get_scan_option_for_reserved(self.expired_at_for_reseved, limit)
+            params['untilTime'] = self.expired_at_for_reseved
 
-        raise Exception('status is invalid')
+        res = File.get_all_pager_by_status(status, params, pager_key, True)
+        output_log(['get_target_files_by_status:1', status, params, pager_key, res.get('Count')])
+        return res.get('Items', []), res.get('LastEvaluatedKey')
 
 
     def delete_files(self, items):
@@ -83,48 +84,6 @@ class MediaUnusedFilesCleaner:
             file_path = media_bucket_file_path(sid, ftype, fid, item['mimeType'])
             self.s3handler.delete(file_path)
             output_log(['delete_s3_objects_by_type:2', file_path])
-
-
-    @staticmethod
-    def get_target_files(scan_option, pager_key=None):
-        if pager_key:
-            scan_option['ExclusiveStartKey'] = pager_key
-
-        res = File.scan(scan_option, True)
-        output_log(['get_target_files', scan_option, res.get('LastEvaluatedKey'), res['Count']])
-        return res['Items'], res.get('LastEvaluatedKey')
-
-
-    @staticmethod
-    def get_scan_option_for_removed(limit=None):
-        opt = {
-            'FilterExpression': '#fs = :fs',
-            'ExpressionAttributeNames': {'#fs':'fileStatus'},
-            'ExpressionAttributeValues': {':fs':'removed'},
-        }
-        if limit:
-            opt['Limit'] = limit
-
-        return opt
-
-
-    @staticmethod
-    def get_scan_option_for_reserved(expired_at_for_reseved, limit=None):
-        opt = {
-            'FilterExpression': '#fs = :fs AND #ca < :ca',
-            'ExpressionAttributeNames': {
-                '#fs': 'fileStatus',
-                '#ca': 'createdAt',
-            },
-            'ExpressionAttributeValues': {
-                ':fs': 'reserved',
-                ':ca': expired_at_for_reseved,
-            },
-        }
-        if limit:
-            opt['Limit'] = limit
-
-        return opt
 
 
     @staticmethod

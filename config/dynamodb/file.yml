@@ -6,13 +6,10 @@ Properties:
       AttributeName: fileId
       AttributeType: S
     -
-      AttributeName: serviceId
+      AttributeName: fileStatus
       AttributeType: S
     -
-      AttributeName: statusCreatedAt
-      AttributeType: S
-    -
-      AttributeName: fileTypeStatusCreatedAt
+      AttributeName: createdAt
       AttributeType: S
   KeySchema:
     -
@@ -28,24 +25,18 @@ Properties:
 
   GlobalSecondaryIndexes:
     -
-      IndexName: statusCreatedAtGsi
+      IndexName: fileStatusCreatedAtGsi
       KeySchema:
       -
-        AttributeName: serviceId
+        AttributeName: fileStatus
         KeyType: HASH
       -
-        AttributeName: statusCreatedAt
+        AttributeName: createdAt
         KeyType: RANGE
       Projection:
-        ProjectionType: ALL
-    -
-      IndexName: fileTypeStatusCreatedAtGsi
-      KeySchema:
-      -
-        AttributeName: serviceId
-        KeyType: HASH
-      -
-        AttributeName: fileTypeStatusCreatedAt
-        KeyType: RANGE
-      Projection:
-        ProjectionType: ALL
+        NonKeyAttributes:
+          - fileId
+          - fileType
+          - serviceId
+          - mimeType
+        ProjectionType: INCLUDE
