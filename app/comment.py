@@ -15,9 +15,8 @@ def comment_counts(service_id):
     if not Service.check_exists(service_id):
         raise InvalidUsage('ServiceId does not exist', 404)
 
-    keys = {'p': {'key':'serviceId', 'val':service_id}}
-    prj_attrs = ['publishStatus', 'commentCount', 'serviceId', 'contentId', 'updatedAt']
-    items = CommentCount.get_all(keys, False, None, 0, prj_attrs)
+    pkeys = {'key':'serviceId', 'val':service_id}
+    items = CommentCount.get_all_by_pkey(pkeys, None, None, False)
     body = conv_res_obj_for_all_count(items)
     return jsonify(body), 200
 
@@ -70,7 +69,7 @@ def conv_res_obj_for_all_count(items):
         res_body['items'] = items
         count = 0
         for item in items:
-            count += item['commentCount']
+            count += item.get('commentCount', 0)
         res_body['totalCount'] = count
 
     return res_body

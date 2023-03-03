@@ -55,8 +55,7 @@ def post_groups(service_id):
         raise InvalidUsage('ServiceId does not exist', 404)
 
     pkeys = {'key':'serviceId', 'val':service_id}
-    group = PostGroup.get_all_by_pkey(pkeys, None, 'PostGroupsByServiceIdGsi')
-    body = [ PostGroup.to_response(item) for item in group ]
+    body = PostGroup.get_all_by_pkey(pkeys, None, 'PostGroupsByServiceIdGsi', False)
     return jsonify(body), 200
 
 

@@ -48,8 +48,7 @@ def post_group_list(service_id):
             params[key] = request.args.get(key)
         vals = validate_req_params(validation_schema_group_list_get(), params)
         pkeys = {'key':'serviceId', 'val':service_id}
-        res = PostGroup.get_all_by_pkey(pkeys, vals, 'PostGroupsByServiceIdGsi')
-        group = [ PostGroup.to_response(item) for item in res ]
+        group = PostGroup.get_all_by_pkey(pkeys, vals, 'PostGroupsByServiceIdGsi', False)
 
     return jsonify(group), 200
 

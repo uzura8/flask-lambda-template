@@ -116,7 +116,7 @@ class Base():
 
 
     @classmethod
-    def get_all_by_pkey(self, pkeys, params=None, index_name=None):
+    def get_all_by_pkey(self, pkeys, params=None, index_name=None, is_all_attr=True):
         table = self.get_table()
 
         if params and params.get('order') and not params.get('is_desc'):
@@ -140,7 +140,11 @@ class Base():
         option['ExpressionAttributeNames'] = exp_attr_names
         option['ExpressionAttributeValues'] = exp_attr_vals
         res = table.query(**option)
-        return res.get('Items')
+        items = res.get('Items')
+        if is_all_attr:
+            return items
+
+        return [ self.to_response(item) for item in items ]
 
 
     @classmethod
