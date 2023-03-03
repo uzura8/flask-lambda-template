@@ -144,87 +144,18 @@ class Post(Base):
 
 
     @classmethod
-    def query_pager_published(self, service_id, params, with_cate=False):
-        #until_time = params.get('untilTime', '')
-        #since_time = params.get('sinceTime', '')
-        is_desc = params.get('order', 'asc') == 'desc'
-        limit = params.get('count', 20)
-        start_key = params.get('pagerKey')
-        cate_slugs = params.get('categories', [])
-
-        exp_attr_names = {}
-        exp_attr_vals = {}
-        key_conds = ['#si = :si']
-        option = {
-            'IndexName': 'statusPublishAtGsi',
-            'ProjectionExpression': self.prj_exps_str(),
-            'ScanIndexForward': not is_desc,
-        }
-        exp_attr_names['#si'] = 'serviceId'
-        exp_attr_vals[':si'] = service_id
-
-        status = 'publish'
-        key_conds.append('begins_with(#sp, :sp)')
-        exp_attr_names['#sp'] = 'statusPublishAt'
-        exp_attr_vals[':sp'] = status
-
-        #current = utc_iso(False, True)
-        #if not until_time or until_time > current:
-        #    until_time = current
-
-        filter_exps = []
-        #if since_time:
-        #    cond = '#st > :st'
-        #    exp_attr_names['#st'] = sort_key
-        #    exp_attr_vals[':st'] = since_time
-        #    if is_admin:
-        #        key_conds.append(cond)
-        #    else:
-        #        filter_exps.append(cond)
-
-        #if not start_key:
-        current = utc_iso(False, True)
-        cond = '#ut < :ut'
-        exp_attr_names['#ut'] = 'publishAt'
-        exp_attr_vals[':ut'] = current
-        filter_exps.append(cond)
+    def get_filter_sub_exps_for_pager(self, exp_attr_names, exp_attr_vals, cate_slugs):
+        if not cate_slugs:
+            return '', exp_attr_names, exp_attr_vals
 
         filter_exp_cids = []
-        if cate_slugs:
-            for i, cid in enumerate(cate_slugs):
-                val_name = 'cid' + str(i)
-                filter_exp_cids.append('#{v} = :{v}'.format(v=val_name))
-                exp_attr_names[f'#{val_name}'] = 'categorySlug'
-                exp_attr_vals[f':{val_name}'] = cid
-
-        filter_exps_str = ' AND '.join(filter_exps) if filter_exps else ''
+        for i, cid in enumerate(cate_slugs):
+            val_name = 'cid' + str(i)
+            filter_exp_cids.append('#{v} = :{v}'.format(v=val_name))
+            exp_attr_names[f'#{val_name}'] = 'categorySlug'
+            exp_attr_vals[f':{val_name}'] = cid
         filter_exp_cids_str = '(%s)' % ' OR '.join(filter_exp_cids) if filter_exp_cids else ''
-
-        filter_exp = ''
-        if filter_exps_str:
-            filter_exp += filter_exps_str
-        if filter_exp_cids_str:
-            if filter_exp:
-                filter_exp += ' AND '
-            filter_exp += filter_exp_cids_str
-
-        if filter_exp:
-            option['FilterExpression'] = filter_exp
-
-        option['KeyConditionExpression'] = ' AND '.join(key_conds)
-        option['ExpressionAttributeNames'] = exp_attr_names
-        option['ExpressionAttributeValues'] = exp_attr_vals
-
-        pager_keys = {'pkey':'postId', 'index_pkey':'serviceId', 'index_skey':'statusPublishAt'}
-        items, pager_key = self.query_loop_for_limit(option, limit, start_key,
-                                                     pager_keys, len(cate_slugs) > 0)
-        if with_cate:
-            items = self.set_category_to_list(items, service_id)
-
-        return {
-            'items': items,
-            'pagerKey': pager_key
-        }
+        return filter_exp_cids_str, exp_attr_names, exp_attr_vals
 
 
     @classmethod
@@ -299,7 +230,9 @@ class Post(Base):
 
     @classmethod
     def query_all_by_tag_id(self, tag_id, params, with_cate=False, service_id=''):
-        res = PostTag.query_pager_published_by_tag_id(tag_id, params)
+        pkeys = {'key':'tagId', 'val':tag_id}
+        pager_keys = {'pkey':'postId', 'index_pkey':'tagId', 'index_skey':'statusPublishAt'}
+        res = PostTag.query_pager_published(pkeys, params, pager_keys, 'postsByTagGsi')
         items = res['items']
         new_items = []
         if items:

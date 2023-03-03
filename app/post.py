@@ -43,8 +43,15 @@ def posts(service_id):
 
     if tag_id:
         body = Post.query_all_by_tag_id(tag_id, vals, True, service_id)
+
     else:
-        body = Post.query_pager_published(service_id, vals, vals['withCategory'])
+        pkeys = {'key':'serviceId', 'val':service_id}
+        pager_keys = {'pkey':'postId', 'index_pkey':'serviceId', 'index_skey':'statusPublishAt'}
+        cate_slugs = vals.get('categories', [])
+        body = Post.query_pager_published(pkeys, vals, pager_keys, 'statusPublishAtGsi', cate_slugs)
+
+        if vals.get('withCategory', True):
+            body['items'] = Post.set_category_to_list(body['items'], service_id)
 
     return jsonify(body), 200
 
