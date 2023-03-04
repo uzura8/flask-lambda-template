@@ -48,7 +48,8 @@ def posts(service_id):
         pkeys = {'key':'serviceId', 'val':service_id}
         pager_keys = {'pkey':'postId', 'index_pkey':'serviceId', 'index_skey':'statusPublishAt'}
         cate_slugs = vals.get('categories', [])
-        body = Post.query_pager_published(pkeys, vals, pager_keys, 'statusPublishAtGsi', cate_slugs)
+        filter_conds = {'cate_slugs': cate_slugs}
+        body = Post.query_pager_published(pkeys, vals, pager_keys, 'statusPublishAtGsi', filter_conds)
 
         if vals.get('withCategory', True):
             body['items'] = Post.set_category_to_list(body['items'], service_id)

@@ -49,12 +49,14 @@ def comments(service_id, content_id):
             raise InvalidUsage('Server Error', 500)
     else:
         params = {}
-        for key in ['count', 'order', 'sinceTime', 'untilTime']:
+        for key in ['count', 'order', 'pagerKey']:
             params[key] = request.args.get(key)
         params['contentId'] = content_id
         schema = validation_schema_comments()
         vals = validate_req_params(schema, params)
-        res_body = Comment.query_all_publish(service_id, content_id, vals)
+        pkeys = {'key':'serviceIdContentId', 'val':'#'.join([service_id, content_id])}
+        pager_keys = {'pkey':'commentId', 'index_pkey':'serviceIdContentId', 'index_skey':'statusCreatedAt'}
+        res_body = Comment.query_pager_published(pkeys, vals, pager_keys, 'commentStatusCreatedAtGsi')
 
     return jsonify(res_body), 200
 
@@ -107,20 +109,29 @@ def validation_schema_comments():
             'allowed': ['asc', 'desc'],
             'default': 'desc',
         },
-        'sinceTime': {
-            'type': 'string',
-            'coerce': (NormalizerUtils.trim),
+        'pagerKey' : {
+            'type': 'dict',
+            'coerce': (NormalizerUtils.json2dict),
             'required': False,
             'nullable': True,
             'empty': True,
-            'regex': r'\d{4}\-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([\+\-]\d{2}:\d{2}|Z)$',
-        },
-        'untilTime': {
-            'type': 'string',
-            'coerce': (NormalizerUtils.trim),
-            'required': False,
-            'nullable': True,
-            'empty': True,
-            'regex': r'\d{4}\-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([\+\-]\d{2}:\d{2}|Z)$',
+            'schema': {
+                'commentId': {
+                    'type': 'string',
+                    #'required': True,
+                    #'empty': False,
+                },
+                'serviceIdContentId': {
+                    'type': 'string',
+                    #'required': True,
+                    #'empty': False,
+                },
+                'statusCreatedAt': {
+                    'type': 'string',
+                    'required': True,
+                    'empty': False,
+                    'regex': r'publish#\d{4}\-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([\+\-]\d{2}:\d{2}|Z)$',
+                },
+            }
         },
     }

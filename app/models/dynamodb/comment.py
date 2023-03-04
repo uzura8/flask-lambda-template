@@ -14,10 +14,14 @@ class Comment(Base):
         'createdAt',
         'body',
         'profiles',
+        'serviceId',
+        'serviceIdContentId',
+        'statusCreatedAt',
     ]
     response_attrs = public_attrs + []
     private_attrs = [
         'ip',
+        'ua',
     ]
     all_attrs = public_attrs + private_attrs
 

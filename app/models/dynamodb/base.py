@@ -2,7 +2,6 @@ import os
 import boto3
 from app.common.date import utc_iso
 from app.common.string import new_uuid
-from pprint import pprint #!!!!!!!!!!!!!!!!
 
 
 class Base():
@@ -327,9 +326,7 @@ class Base():
 
 
     @classmethod
-    def query_pager_published(self, pkeys, params, pager_keys_def, index_name=None, filter_sub_cond=None):
-        #until_time = params.get('untilTime', '')
-        #since_time = params.get('sinceTime', '')
+    def query_pager_published(self, pkeys, params, pager_keys_def, index_name=None, filter_conds=None):
         is_desc = params.get('order', 'asc') == 'desc'
         limit = params.get('count', 20)
         start_key = params.get('pagerKey')
@@ -351,57 +348,33 @@ class Base():
         exp_attr_vals[':pk'] = pkeys['val']
 
         status = 'publish'
-        key_conds.append('begins_with(#sp, :sp)')
-        exp_attr_names['#sp'] = pager_keys_def['index_skey']
-        exp_attr_vals[':sp'] = status
+        key_conds.append('begins_with(#sk, :sk)')
+        exp_attr_names['#sk'] = pager_keys_def['index_skey']
+        exp_attr_vals[':sk'] = status
 
-        #current = utc_iso(False, True)
-        #if not until_time or until_time > current:
-        #    until_time = current
+        filter_exps_str = ''
+        if filter_conds:
+            exp_attr_names, exp_attr_vals, filter_exps_str =\
+                self.get_filter_exps_for_pager(exp_attr_names, exp_attr_vals, filter_conds)
 
-        filter_exps = []
-        #if since_time:
-        #    cond = '#st > :st'
-        #    exp_attr_names['#st'] = sort_key
-        #    exp_attr_vals[':st'] = since_time
-        #    if is_admin:
-        #        key_conds.append(cond)
-        #    else:
-        #        filter_exps.append(cond)
-
-        #if not start_key:
-        current = utc_iso(False, True)
-        cond = '#ut < :ut'
-        exp_attr_names['#ut'] = 'publishAt'
-        exp_attr_vals[':ut'] = current
-        filter_exps.append(cond)
-        filter_exps_str = ' AND '.join(filter_exps) if filter_exps else ''
-
-        filter_sub_exps_str = ''
-        if filter_sub_cond:
-            filter_sub_exps_str, exp_attr_names, exp_attr_vals =\
-                self.get_filter_sub_exps_for_pager(exp_attr_names, exp_attr_vals, filter_sub_cond)
-
-        filter_exps_all = []
         if filter_exps_str:
-            filter_exps_all.append(filter_exps_str)
-
-        if filter_sub_exps_str:
-            filter_exps_all.append(filter_sub_exps_str)
-
-        if filter_exps_all:
-            option['FilterExpression'] = ' AND '.join(filter_exps_all)
+            option['FilterExpression'] = filter_exps_str
 
         option['KeyConditionExpression'] = ' AND '.join(key_conds)
         option['ExpressionAttributeNames'] = exp_attr_names
         option['ExpressionAttributeValues'] = exp_attr_vals
 
         items, pager_key = self.query_loop_for_limit(option, limit, start_key,
-                                                 pager_keys_def, len(filter_sub_exps_str) > 0)
+                                                 pager_keys_def, len(filter_exps_str) > 0)
         return {
             'items': items,
             'pagerKey': pager_key
         }
+
+
+    @classmethod
+    def get_filter_exps_for_pager(self, exp_attr_names, exp_attr_vals, filter_conds):
+        return exp_attr_names, exp_attr_vals, ''
 
 
     @classmethod

@@ -37,16 +37,17 @@ Properties:
         AttributeName: statusCreatedAt
         KeyType: RANGE
       Projection:
-        NonKeyAttributes:
-          - commentId
-          - serviceId
-          - contentId
-          - body
-          - createdAt
-          - updatedAt
-          - publishStatus
-          - profiles
-        ProjectionType: INCLUDE
+        ProjectionType: ALL
+        #NonKeyAttributes:
+        #  - commentId
+        #  - serviceId
+        #  - contentId
+        #  - body
+        #  - createdAt
+        #  - updatedAt
+        #  - publishStatus
+        #  - profiles
+        #ProjectionType: INCLUDE
     -
       IndexName: commentCreatedAtGsi
       KeySchema:
@@ -57,13 +58,14 @@ Properties:
         AttributeName: createdAt
         KeyType: RANGE
       Projection:
-        NonKeyAttributes:
-          - commentId
-          - serviceId
-          - contentId
-          - body
-          - createdAt
-          - updatedAt
-          - publishStatus
-          - profiles
-        ProjectionType: INCLUDE
+        ProjectionType: ALL
+        #NonKeyAttributes:
+        #  - commentId
+        #  - serviceId
+        #  - contentId
+        #  - body
+        #  - createdAt
+        #  - updatedAt
+        #  - publishStatus
+        #  - profiles
+        #ProjectionType: INCLUDE

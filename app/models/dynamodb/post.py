@@ -144,18 +144,49 @@ class Post(Base):
 
 
     @classmethod
-    def get_filter_sub_exps_for_pager(self, exp_attr_names, exp_attr_vals, cate_slugs):
-        if not cate_slugs:
-            return '', exp_attr_names, exp_attr_vals
+    def get_filter_exps_for_pager(self, exp_attr_names, exp_attr_vals, filter_conds=None):
+        if filter_conds is None:
+            filter_conds = {}
+
+        cate_slugs = filter_conds['cate_slugs'] if 'cate_slugs' in filter_conds else None
+
+        #current = utc_iso(False, True)
+        #if not until_time or until_time > current:
+        #    until_time = current
+
+        filter_exps = []
+        filter_exps_time = []
+        #if since_time:
+        #    cond = '#st > :st'
+        #    exp_attr_names['#st'] = sort_key
+        #    exp_attr_vals[':st'] = since_time
+        #    if is_admin:
+        #        key_conds.append(cond)
+        #    else:
+        #        filter_exps_time.append(cond)
+
+        current = utc_iso(False, True)
+        cond = '#ut < :ut'
+        exp_attr_names['#ut'] = 'publishAt'
+        exp_attr_vals[':ut'] = current
+        filter_exps_time.append(cond)
+        filter_exps_time_str = ' AND '.join(filter_exps_time) if filter_exps_time else ''
+        if filter_exps_time_str:
+            filter_exps.append(filter_exps_time_str)
 
         filter_exp_cids = []
-        for i, cid in enumerate(cate_slugs):
-            val_name = 'cid' + str(i)
-            filter_exp_cids.append('#{v} = :{v}'.format(v=val_name))
-            exp_attr_names[f'#{val_name}'] = 'categorySlug'
-            exp_attr_vals[f':{val_name}'] = cid
+        if cate_slugs:
+            for i, cid in enumerate(cate_slugs):
+                val_name = 'cid' + str(i)
+                filter_exp_cids.append('#{v} = :{v}'.format(v=val_name))
+                exp_attr_names[f'#{val_name}'] = 'categorySlug'
+                exp_attr_vals[f':{val_name}'] = cid
         filter_exp_cids_str = '(%s)' % ' OR '.join(filter_exp_cids) if filter_exp_cids else ''
-        return filter_exp_cids_str, exp_attr_names, exp_attr_vals
+        if filter_exp_cids_str:
+            filter_exps.append(filter_exp_cids_str)
+
+        filter_exps_str = ' AND '.join(filter_exps)
+        return exp_attr_names, exp_attr_vals, filter_exps_str
 
 
     @classmethod
