@@ -17,6 +17,11 @@ mediaImageMakerMemorySize: 256 # MB
 mediaImageMakerTimeout: 600 # s
 mediaImageMakerFileSizeLimit: 20 # MB
 
+mediaUnusedFilesCleanerMemorySize: 256 # MB
+mediaUnusedFilesCleanerTimeout: 600 # s
+mediaUnusedFilesCleanerReservedFileExpirationHours: 24 # Hours
+mediaUnusedFilesCleanerEventSchedule: rate(1 day)
+
 urlShortenQrcodeMakerMemorySize: 128 # MB
 urlShortenQrcodeMakerTimeout: 300 # s
 urlShortenBaseUrl: 'https://rd.example.com/'
