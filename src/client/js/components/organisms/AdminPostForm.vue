@@ -1,7 +1,7 @@
 <template>
 <div>
   <b-field
-    :label="$t('form.Slug')"
+    :label="$t('form.slug')"
     :type="checkEmpty(errors.slug) ? '' : 'is-danger'"
     :message="checkEmpty(errors.slug) ? '' : errors.slug[0]"
   >

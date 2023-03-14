@@ -169,4 +169,13 @@ export default {
     const regexp = new RegExp(pattern, 'i')
     return regexp.test(str)
   },
+
+  checkJson(str) {
+    try {
+      JSON.parse(str)
+    } catch (e) {
+      return false
+    }
+    return true
+  },
 }

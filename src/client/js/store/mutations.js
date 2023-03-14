@@ -29,6 +29,11 @@ export default {
   [types.RESET_ADMIN_POSTS_PAGER] (state, isResetKeys) {
     if (isResetKeys) state.adminPostsPager.keys = []
     state.adminPostsPager.lastIndex = 0
+    state.adminPostsPager.filters = {
+      attribute: '',
+      compare: '',
+      value: '',
+    }
   },
 
   [types.SET_ADMIN_POSTS_PAGER_LAST_INDEX] (state, payload) {
@@ -39,6 +44,7 @@ export default {
     state.adminPostsPager.lastIndex = payload.index
     state.adminPostsPager.sort = payload.sort
     state.adminPostsPager.order = payload.order
+    state.adminPostsPager.filters = payload.filters
   },
 
   [types.PUSH_ITEM_TO_ADMIN_SHORTEN_URLS_PAGER_KEYS] (state, payload) {

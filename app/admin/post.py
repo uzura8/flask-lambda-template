@@ -62,28 +62,25 @@ def post_list(service_id):
 
     else:
         params = {}
-        for key in ['count', 'sort', 'order']:
+        for key in ['count', 'sort', 'order', 'withCategory', 'filters', 'pagerKey']:
             params[key] = request.args.get(key)
         vals = validate_req_params(validation_schema_posts_get(), params)
 
         if vals['sort'] == 'publishAt':
-            vals['index'] = 'publishAtGsi'
+            index = 'publishAtGsi'
+            index_skey = 'publishAt'
         else:
-            vals['index'] = 'createdAtGsi'
+            index = 'createdAtGsi'
+            index_skey = 'createdAt'
 
-        key_name =  'pagerKey'
-        pager_key = request.args.get('pagerKey')
-        if pager_key:
-            params = {key_name:json.loads(pager_key)}
-            vals_pager_key = validate_req_params(validation_schema_posts_get(), params)
-            vals['ExclusiveStartKey'] = vals_pager_key[key_name]
+        if vals.get('pagerKey'):
+            vals['ExclusiveStartKey'] = vals['pagerKey']
 
-        params = { 'withCategory':request.args.get('withCategory') }
-        vals_with_cate = validate_req_params(validation_schema_posts_get(), params)
-        with_cate = vals_with_cate['withCategory']
+        with_cate = vals.get('withCategory')
 
-        hkey = {'name':'serviceId', 'value': service_id}
-        post = Post.query_pager_admin(hkey, vals, with_cate)
+        pkeys = {'key':'serviceId', 'val':service_id}
+        pager_keys = {'pkey':'postId', 'index_pkey':'serviceId', 'index_skey':index_skey}
+        post = Post.query_pager_admin(pkeys, vals, pager_keys, index, vals['filters'])
 
     return jsonify(post), 200
 
@@ -601,8 +598,39 @@ def validation_schema_posts_get():
             'empty': True,
             'default': True,
         },
+        'filters' : {
+            'type': 'dict',
+            'required': False,
+            'empty': True,
+            'nullable': True,
+            'coerce': (NormalizerUtils.json2dict),
+            'schema': {
+                'attribute': {
+                    'type': 'string',
+                    'allowed': ['slug', 'title', 'body'],
+                    'required': True,
+                    'empty': False,
+                },
+                'compare': {
+                    'type': 'string',
+                    'allowed': ['eq', 'contains'],
+                    'required': True,
+                    'empty': False,
+                },
+                'value': {
+                    'type': 'string',
+                    'required': False,
+                    'empty': True,
+                    'default': '',
+                },
+            }
+        },
         'pagerKey' : {
             'type': 'dict',
+            'required': False,
+            'empty': True,
+            'nullable': True,
+            'coerce': (NormalizerUtils.json2dict),
             'schema': {
                 'serviceId': {
                     'type': 'string',

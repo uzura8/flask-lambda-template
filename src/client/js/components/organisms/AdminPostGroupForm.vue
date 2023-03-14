@@ -2,7 +2,7 @@
 <div>
   <b-field
     v-if="isEdit === false"
-    :label="$t('form.Slug')"
+    :label="$t('form.slug')"
     :type="checkEmpty(errors.slug) ? '' : 'is-danger'"
     :message="checkEmpty(errors.slug) ? '' : errors.slug[0]"
   >
@@ -13,7 +13,7 @@
   </b-field>
   <b-field
     v-else
-    :label="$t('form.Slug')"
+    :label="$t('form.slug')"
   >{{ this.slug }}</b-field>
 
   <b-field

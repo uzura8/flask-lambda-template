@@ -43,6 +43,8 @@
     "downloadFor": "Download {name}",
     "saveDraft": "Save Draft",
     "insertOf": "Insert {name}",
+    "run": "Run",
+    "reset": "Reset",
     "post": "post",
     "posts": "posts",
     "postsOf": "Posts of {label}",
@@ -84,6 +86,11 @@
     "via": "Via",
     "hidden": "hidden",
     "paramsFor": "Params for {target}",
+    "target": "Target",
+    "condition": "Condition",
+    "value": "Value",
+    "equalTo": "Equal To",
+    "contains": "Contains",
     "more": "More"
   },
   "msg": {
@@ -167,6 +174,8 @@
     "inputRequiredBoth": "Both inputs required",
     "hiddenInList": "This item is hidden in list",
     "generateItemRequiresTimes": "Generating {target} requires times in case",
+    "inputNoMoreThanTargetCharacters": "Please input no more than {num} characters",
+    "inputLessThanTargetCharacters": "Please input less than {num} characters",
     "signInGreeting": "Hi, {name} !"
   },
   "error": {
@@ -184,7 +193,7 @@
     "RetypeNewPassword": "Re-type new Password",
     "Masked for security": "Masked for security",
     "Used for display user name": "Used for display user name",
-    "Slug": "Slug",
+    "slug": "Slug",
     "Used for identifer on URL": "Used for identifer on URL",
     "siteUrl": "your site URL",
     "DisplayPostForm": "Display Post Form",
@@ -196,6 +205,7 @@
     "SelectFiles": "Select Files",
     "ExpAboutNewTagsSeparater": "Please input \",\" to separate on adding new tags",
     "hideInList": "Is hide in list",
+    "specifyingFilterConditions": "Specifying filter conditions",
     "isViaJumpPageLabel": "Redirect Setting",
     "viaJumpPage": "Via Jump Page",
     "notViaJumpPage": "Dosen't via jump page",

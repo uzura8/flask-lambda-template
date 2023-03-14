@@ -144,7 +144,27 @@ class Post(Base):
 
 
     @classmethod
-    def get_filter_exps_for_pager(self, exp_attr_names, exp_attr_vals, filter_conds=None):
+    def get_filter_exps_for_pager_admin(self, exp_attr_names, exp_attr_vals, filter_conds=None):
+        if filter_conds is None:
+            filter_conds = {}
+
+        filter_exps_str = ''
+        if filter_conds and all(filter_conds.values()):
+            if filter_conds['compare'] == 'contains':
+                filter_exps_str = 'contains(#fattr, :fval)'
+
+            elif filter_conds['compare'] == 'eq':
+                filter_exps_str = '#fattr = :fval'
+
+            if filter_exps_str:
+                exp_attr_names['#fattr'] = filter_conds['attribute']
+                exp_attr_vals[':fval'] = filter_conds['value']
+
+        return exp_attr_names, exp_attr_vals, filter_exps_str
+
+
+    @classmethod
+    def get_filter_exps_for_pager_published(self, exp_attr_names, exp_attr_vals, filter_conds=None):
         if filter_conds is None:
             filter_conds = {}
 
@@ -190,58 +210,45 @@ class Post(Base):
 
 
     @classmethod
-    def query_pager_admin(self, hkey, params=None, with_cate=False):
-        index = params.get('index')
+    def query_pager_admin(self, pkeys, params, pager_keys_def, index_name=None, filter_conds=None):
         is_desc = params.get('order', 'asc') == 'desc'
         limit = params.get('count', 20)
-        start_key = params.get('ExclusiveStartKey')
+        start_key = params.get('pagerKey')
 
-        table = self.get_table()
+        option = {
+            'IndexName': index_name,
+            #'ProjectionExpression': self.prj_exps_str(),
+            'ScanIndexForward': not is_desc,
+        }
+        if index_name:
+            option['IndexName'] = index_name
 
-        key_cond_exps = []
+        key_conds = []
         exp_attr_names = {}
         exp_attr_vals = {}
-        option = {
-            'ScanIndexForward': not is_desc,
-            'Limit': limit,
-        }
-        if index:
-            option['IndexName'] = index
 
-        key_cond_exps.append('#hk = :hv')
-        exp_attr_names['#hk'] = hkey['name']
-        exp_attr_vals[':hv'] = hkey['value']
+        key_conds.append('#pk = :pk')
+        exp_attr_names['#pk'] = pkeys['key']
+        exp_attr_vals[':pk'] = pkeys['val']
 
-        option['KeyConditionExpression'] = ' AND '.join(key_cond_exps)
+        filter_exps_str = ''
+        if filter_conds:
+            exp_attr_names, exp_attr_vals, filter_exps_str =\
+                self.get_filter_exps_for_pager_admin(exp_attr_names, exp_attr_vals, filter_conds)
+
+        if filter_exps_str:
+            option['FilterExpression'] = filter_exps_str
+
+        option['KeyConditionExpression'] = ' AND '.join(key_conds)
         option['ExpressionAttributeNames'] = exp_attr_names
         option['ExpressionAttributeValues'] = exp_attr_vals
 
-        if start_key:
-            option['ExclusiveStartKey'] = start_key
-
-        res = table.query(**option)
-        items = res['Items']
-
-        if with_cate:
-            items = self.set_category_to_list(items, hkey['value'])
-
+        items, pager_key = self.query_loop_for_limit(option, limit, start_key,
+                                                 pager_keys_def, len(filter_exps_str) > 0)
         return {
             'items': items,
-            'pagerKey': res['LastEvaluatedKey'] if 'LastEvaluatedKey' in res else None,
+            'pagerKey': pager_key
         }
-
-
-    #@classmethod
-    #def get_all_for_published(self, service_id):
-    #    table = self.get_table()
-    #    res = table.query(
-    #        IndexName='statusPublishAtGsi',
-    #        ProjectionExpression='title, categorySlug, isPublish, id, slug, serviceId, publishAt',
-    #        KeyConditionExpression=Key('serviceId').eq(service_id)\
-    #                & Key('statusPublishAt').begins_with('publish#'),
-    #        ScanIndexForward=False
-    #    )
-    #    return res['Items'] if 'Items' in res and res['Items'] else []
 
 
     @classmethod
