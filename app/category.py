@@ -42,6 +42,23 @@ def handle_detail(service_id, slug):
     return jsonify(item), 200
 
 
+@bp.route('/<string:service_id>/<string:slug>/children', methods=['GET'])
+def handle_detail_childlen(service_id, slug):
+    if not Service.check_exists(service_id):
+        raise InvalidUsage('ServiceId does not exist', 404)
+
+    parent = Category.get_one_by_slug(service_id, slug, False, False, True, False)
+    if not parent:
+        raise InvalidUsage('Not Found', 404)
+
+    parent_path = '#'.join([parent['parentPath'], str(parent['id'])])
+    items = Category.get_children_by_parent_path(service_id, parent_path, False, True, False)
+    if not items:
+        items = []
+
+    return jsonify(items), 200
+
+
 def validation_schema_detail_get():
     return {
         'slug': {
