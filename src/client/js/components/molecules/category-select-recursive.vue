@@ -4,8 +4,12 @@
     v-if="isHide === false"
     v-model="cateSlug"
     :placeholder="$t('msg.pleaseSelect')"
-    @input="updateValue"
+    @input="updateValue($event, parentCategorySlug)"
   >
+    <option
+      v-if="isLoading === false"
+      value=""
+    >{{ $t('msg.pleaseSelect') }}</option>
     <option
       v-for="cate in categories"
       :key="cate.slug"
@@ -17,7 +21,7 @@
     v-if="cateSlug"
     v-model="inputtedValue"
     :parent-category-slug="cateSlug"
-    @input="updateValue"
+    @input="updateValue($event, cateSlug)"
   ></category-select-recursive>
 </div>
 </template>
@@ -75,11 +79,14 @@ export default{
   },
 
   methods: {
-    updateValue(newValue) {
-      this.$emit('input', newValue)
+    updateValue(newValue, parentCate) {
+      let val = newValue ? newValue : parentCate
+      if (val === 'root') val = ''
+      this.$emit('input', val)
     },
 
     async setCategories(parentCateSlug) {
+      this.$store.dispatch('setLoading', true)
       try {
         this.categories.splice(0, this.categories.length);
         const items = await Category.getChildren(this.serviceId, parentCateSlug)
@@ -87,6 +94,7 @@ export default{
           this.categories.push(item)
         })
         if (this.checkEmpty(items)) this.isHide = true
+        this.$store.dispatch('setLoading', false)
       } catch (err) {
         console.log(err);//!!!!!!
         this.$store.dispatch('setLoading', false)

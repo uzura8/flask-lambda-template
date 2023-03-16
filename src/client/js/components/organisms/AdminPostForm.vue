@@ -17,27 +17,26 @@
     :message="checkEmpty(errors.category) ? '' : errors.category[0]"
     class="mt-6"
   >
-    <div v-if="isEdit === true && isChangedCategory === false">
-      <span>{{ savedCategoryLabel }}</span>
-      <span>
-        <a
-          @click="category = ''"
-          class="ml-4 u-clickable"
-        >{{ $t('common.edit') }}</a>
-      </span>
-    </div>
-    <div v-else>
+    <div v-if="isCategoryEditModeActive">
       <category-select-recursive
         v-model="category"
         parent-category-slug="root"
       ></category-select-recursive>
-      <div>
+      <div v-if="post.categorySlug">
         <a
-          v-if="isEdit === true"
-          @click="category = post.categorySlug"
+          @click="updateCategoryEditMode(false)"
           class="u-clickable"
         >{{ $t('common.undo') }}</a>
       </div>
+    </div>
+    <div v-else>
+      <span>{{ savedCategoryLabel }}</span>
+      <span>
+        <a
+          @click="updateCategoryEditMode(true)"
+          class="ml-4 u-clickable"
+        >{{ $t('common.edit') }}</a>
+      </span>
     </div>
   </b-field>
 
@@ -285,6 +284,7 @@
 import { getTinymce } from '@tinymce/tinymce-vue/lib/cjs/main/ts/TinyMCE'
 import moment from 'moment'
 import str from '@/util/str'
+import obj from '@/util/obj'
 import utilMedia from '@/util/media'
 import { Admin, Category, Tag } from '@/api'
 import config from '@/config/config'
@@ -334,6 +334,7 @@ export default{
       filteredTags: [],
       errors: [],
       uploaderOptions: null,
+      isCategoryEditModeActive: false,
       editorModes: [
         {
           mode: 'richText',
@@ -405,6 +406,9 @@ export default{
 
     savedCategoryLabel() {
       let items = []
+      if (obj.checkObjHasProp(this.post, 'category') === false) return ''
+      if (obj.checkObjHasProp(this.post.category, 'parents') === false) return this.post.category.label
+
       this.post.category.parents.map((cate) => {
         items.push(cate.label)
       })
@@ -441,6 +445,7 @@ export default{
         await this.setSlug()
       }
     }
+    if (!this.category) this.isCategoryEditModeActive = true
     await this.setTags()
     await this.setUploaderOptions()
   },
@@ -460,6 +465,16 @@ export default{
       this.tags = this.checkEmpty(this.post.tags) === false ? this.post.tags : []
       this.publishAt = this.post.publishAt && this.post.publishAt !== 'None' ? moment(this.post.publishAt).toDate() : null
       this.isHiddenInList = this.post.isHiddenInList
+    },
+
+    updateCategoryEditMode(isActive) {
+      if (isActive) {
+        this.category = ''
+        this.isCategoryEditModeActive = true
+      } else {
+        this.category = this.post.categorySlug
+        this.isCategoryEditModeActive = false
+      }
     },
 
     async setSlug() {

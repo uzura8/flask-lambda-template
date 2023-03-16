@@ -431,10 +431,13 @@ class Post(Base):
             slug_upd = None
 
         cate_slug_upd = vals.get('category')
-        if cate_slug_upd and cate_slug_upd != saved['categorySlug']:
-            cate_upd = Category.get_one_by_slug(service_id, cate_slug_upd)
-            if not cate_upd:
-                raise ModelInvalidParamsException('Category not exists', 400)
+        if cate_slug_upd is not None and cate_slug_upd != saved['categorySlug']:
+            if cate_slug_upd:
+                cate_upd = Category.get_one_by_slug(service_id, cate_slug_upd)
+                if not cate_upd:
+                    raise ModelInvalidParamsException('Category not exists', 400)
+            else:
+                cate_slug_upd = ''
         else:
             cate_slug_upd = None
 
@@ -470,7 +473,7 @@ class Post(Base):
             exp_items.append('serviceIdSlug=:sis')
             exp_vals[':sis'] = '#'.join([service_id, slug_upd])
 
-        if cate_slug_upd:
+        if cate_slug_upd is not None:
             exp_items.append('categorySlug=:cates')
             exp_vals[':cates'] = cate_slug_upd
 
