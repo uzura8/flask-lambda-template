@@ -92,6 +92,7 @@
     "value": "値",
     "equalTo": "次と等しい",
     "contains": "次を含む",
+    "undo": "元に戻す",
     "more": "もっと見る"
   },
   "msg": {
@@ -122,6 +123,7 @@
     "InvalidInput": "正しくありません",
     "Correct inputs with error": "エラーを修正してください",
     "Unregistered": "未登録です",
+    "pleaseSelect": "選択してください",
     "SelectItem": "{name} を選択してください",
     "Already in use": "すでに使用されています",
     "AlreadySet": "すでに設定されています",

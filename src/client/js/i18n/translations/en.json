@@ -91,6 +91,7 @@
     "value": "Value",
     "equalTo": "Equal To",
     "contains": "Contains",
+    "undo": "Undo",
     "more": "More"
   },
   "msg": {
@@ -121,6 +122,7 @@
     "InvalidInput": "Invalid",
     "Correct inputs with error": "Correct inputs with error",
     "Unregistered": "Unregistered",
+    "pleaseSelect": "Please Select",
     "SelectItem": "Select {name}",
     "Already in use": "Already in use",
     "AlreadySet": "Already set",

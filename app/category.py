@@ -51,7 +51,11 @@ def handle_detail_childlen(service_id, slug):
     if not parent:
         raise InvalidUsage('Not Found', 404)
 
-    parent_path = '#'.join([parent['parentPath'], str(parent['id'])])
+    if parent['parentPath'] == '0':
+        parent_path = str(parent['id'])
+    else:
+        parent_path = '#'.join([parent['parentPath'], str(parent['id'])])
+
     items = Category.get_children_by_parent_path(service_id, parent_path, False, True, False)
     if not items:
         items = []

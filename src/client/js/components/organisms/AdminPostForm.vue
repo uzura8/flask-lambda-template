@@ -1,5 +1,5 @@
 <template>
-<div>
+<div class="flex-item">
   <b-field
     :label="$t('form.slug')"
     :type="checkEmpty(errors.slug) ? '' : 'is-danger'"
@@ -17,24 +17,28 @@
     :message="checkEmpty(errors.category) ? '' : errors.category[0]"
     class="mt-6"
   >
-    <b-select
-      v-model="category"
-      @input="validate('category')"
-      :placeholder="$t('msg.SelectItem', { name:$t('common.category') })"
-    >
-      <optgroup
-        v-if="categories"
-        v-for="pcate in categories"
-        :key="pcate.slug"
-        :label="pcate.label"
-      >
-        <option
-          v-for="cate in pcate.children"
-          :key="cate.slug"
-          :value="cate.slug"
-        >{{ cate.label }}</option>
-      </optgroup>
-    </b-select>
+    <div v-if="isEdit === true && isChangedCategory === false">
+      <span>{{ savedCategoryLabel }}</span>
+      <span>
+        <a
+          @click="category = ''"
+          class="ml-4 u-clickable"
+        >{{ $t('common.edit') }}</a>
+      </span>
+    </div>
+    <div v-else>
+      <category-select-recursive
+        v-model="category"
+        parent-category-slug="root"
+      ></category-select-recursive>
+      <div>
+        <a
+          v-if="isEdit === true"
+          @click="category = post.categorySlug"
+          class="u-clickable"
+        >{{ $t('common.undo') }}</a>
+      </div>
+    </div>
   </b-field>
 
   <b-field
@@ -288,6 +292,8 @@ import RichTextEditor from '@/components/atoms/RichTextEditor'
 import MarkdownEditor from '@/components/atoms/MarkdownEditor'
 import FileUploader from '@/components/organisms/FileUploader'
 import LinkInputs from '@/components/molecules/LinkInputs'
+import CategorySelectRecursive from '@/components/molecules/category-select-recursive'
+import CategorySelectAll from '@/components/atoms/category-select-all'
 
 export default{
   name: 'AdminPostForm',
@@ -297,6 +303,8 @@ export default{
     LinkInputs,
     RichTextEditor,
     MarkdownEditor,
+    CategorySelectRecursive,
+    CategorySelectAll,
   },
 
   props: {
@@ -319,6 +327,7 @@ export default{
       tags: [],
       publishAt: null,
       isHiddenInList: false,
+      parentCategory: '',
       categories: [],
       fieldKeys: ['slug', 'category', 'title', 'images', 'files', 'links', 'editorMode', 'body', 'tags', 'publishAt', 'isHiddenInList'],
       savedTags: [],
@@ -349,6 +358,11 @@ export default{
   computed: {
     isEdit() {
       return this.post != null
+    },
+
+    isChangedCategory() {
+      if (this.isEdit === false) return false
+      return this.category !== this.post.categorySlug
     },
 
     isPublished() {
@@ -388,6 +402,15 @@ export default{
     bodyFormat() {
       return this.getFormatByMode(this.editorMode)
     },
+
+    savedCategoryLabel() {
+      let items = []
+      this.post.category.parents.map((cate) => {
+        items.push(cate.label)
+      })
+      items.push(this.post.category.label)
+      return items.join(' > ')
+    },
   },
 
   watch: {
@@ -418,7 +441,6 @@ export default{
         await this.setSlug()
       }
     }
-    await this.setCategories()
     await this.setTags()
     await this.setUploaderOptions()
   },
@@ -872,4 +894,6 @@ export default{
   },
 }
 </script>
-
+<style>
+.flex-item { flex:1; }
+</style>
