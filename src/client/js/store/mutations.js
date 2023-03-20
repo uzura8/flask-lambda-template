@@ -45,6 +45,7 @@ export default {
     state.adminPostsPager.sort = payload.sort
     state.adminPostsPager.order = payload.order
     state.adminPostsPager.filters = payload.filters
+    state.adminPostsPager.category = payload.category
   },
 
   [types.PUSH_ITEM_TO_ADMIN_SHORTEN_URLS_PAGER_KEYS] (state, payload) {

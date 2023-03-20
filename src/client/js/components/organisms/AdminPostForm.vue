@@ -17,27 +17,9 @@
     :message="checkEmpty(errors.category) ? '' : errors.category[0]"
     class="mt-6"
   >
-    <div v-if="isCategoryEditModeActive">
-      <category-select-recursive
-        v-model="category"
-        parent-category-slug="root"
-      ></category-select-recursive>
-      <div v-if="post.categorySlug">
-        <a
-          @click="updateCategoryEditMode(false)"
-          class="u-clickable"
-        >{{ $t('common.undo') }}</a>
-      </div>
-    </div>
-    <div v-else>
-      <span>{{ savedCategoryLabel }}</span>
-      <span>
-        <a
-          @click="updateCategoryEditMode(true)"
-          class="ml-4 u-clickable"
-        >{{ $t('common.edit') }}</a>
-      </span>
-    </div>
+    <category-select
+      v-model="category"
+    ></category-select>
   </b-field>
 
   <b-field
@@ -292,8 +274,7 @@ import RichTextEditor from '@/components/atoms/RichTextEditor'
 import MarkdownEditor from '@/components/atoms/MarkdownEditor'
 import FileUploader from '@/components/organisms/FileUploader'
 import LinkInputs from '@/components/molecules/LinkInputs'
-import CategorySelectRecursive from '@/components/molecules/category-select-recursive'
-import CategorySelectAll from '@/components/atoms/category-select-all'
+import CategorySelect from '@/components/molecules/category-select'
 
 export default{
   name: 'AdminPostForm',
@@ -303,8 +284,7 @@ export default{
     LinkInputs,
     RichTextEditor,
     MarkdownEditor,
-    CategorySelectRecursive,
-    CategorySelectAll,
+    CategorySelect,
   },
 
   props: {
@@ -327,14 +307,11 @@ export default{
       tags: [],
       publishAt: null,
       isHiddenInList: false,
-      parentCategory: '',
-      categories: [],
       fieldKeys: ['slug', 'category', 'title', 'images', 'files', 'links', 'editorMode', 'body', 'tags', 'publishAt', 'isHiddenInList'],
       savedTags: [],
       filteredTags: [],
       errors: [],
       uploaderOptions: null,
-      isCategoryEditModeActive: false,
       editorModes: [
         {
           mode: 'richText',
@@ -359,11 +336,6 @@ export default{
   computed: {
     isEdit() {
       return this.post != null
-    },
-
-    isChangedCategory() {
-      if (this.isEdit === false) return false
-      return this.category !== this.post.categorySlug
     },
 
     isPublished() {
@@ -403,18 +375,6 @@ export default{
     bodyFormat() {
       return this.getFormatByMode(this.editorMode)
     },
-
-    savedCategoryLabel() {
-      let items = []
-      if (obj.checkObjHasProp(this.post, 'category') === false) return ''
-      if (obj.checkObjHasProp(this.post.category, 'parents') === false) return this.post.category.label
-
-      this.post.category.parents.map((cate) => {
-        items.push(cate.label)
-      })
-      items.push(this.post.category.label)
-      return items.join(' > ')
-    },
   },
 
   watch: {
@@ -445,7 +405,6 @@ export default{
         await this.setSlug()
       }
     }
-    if (!this.category) this.isCategoryEditModeActive = true
     await this.setTags()
     await this.setUploaderOptions()
   },
@@ -465,16 +424,6 @@ export default{
       this.tags = this.checkEmpty(this.post.tags) === false ? this.post.tags : []
       this.publishAt = this.post.publishAt && this.post.publishAt !== 'None' ? moment(this.post.publishAt).toDate() : null
       this.isHiddenInList = this.post.isHiddenInList
-    },
-
-    updateCategoryEditMode(isActive) {
-      if (isActive) {
-        this.category = ''
-        this.isCategoryEditModeActive = true
-      } else {
-        this.category = this.post.categorySlug
-        this.isCategoryEditModeActive = false
-      }
     },
 
     async setSlug() {
@@ -497,19 +446,6 @@ export default{
           throw new Error('Create Slug Failed')
         }
         this.slug = slug
-      } catch (err) {
-        console.log(err);//!!!!!!
-        this.$store.dispatch('setLoading', false)
-        this.handleApiError(err, this.$t('msg["Failed to get data from server"]'))
-      }
-    },
-
-    async setCategories() {
-      try {
-        const res = await Category.get(this.serviceId)
-        if (res.length > 0) {
-          this.categories = res[0].children
-        }
       } catch (err) {
         console.log(err);//!!!!!!
         this.$store.dispatch('setLoading', false)
@@ -688,11 +624,6 @@ export default{
       this.initError('category')
       if (this.category === null) this.category = ''
       this.category = this.category.trim()
-      //if (this.checkEmpty(this.category)) {
-      //  this.errors.category.push(this.$t('msg["Input required"]'))
-      //} else if (str.checkSlug(this.category) === false) {
-      //  this.errors.category.push(this.$t('msg.InvalidInput'))
-      //}
       if (!this.checkEmpty(this.category) && str.checkSlug(this.category) === false) {
         this.errors.category.push(this.$t('msg.InvalidInput'))
       }

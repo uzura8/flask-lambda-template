@@ -1,9 +1,10 @@
-function checkObjHasProp(obj, prop) {
+function checkObjHasProp(obj, prop, checkEmpty=false) {
   if (typeof obj !== 'object') return false
   if (Array.isArray(obj) === true) return false
   if (obj.hasOwnProperty(prop) === false) return false
   if (obj[prop] == null) return false
-  return true
+  if (checkEmpty === false) return true
+  return isEmpty(obj[prop]) === false
 }
 
 function isEmpty(data) {

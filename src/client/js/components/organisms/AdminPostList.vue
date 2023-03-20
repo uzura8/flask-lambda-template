@@ -62,6 +62,20 @@
           class="has-text-danger"
         >{{ filterInputError }}</p>
 
+        <b-field grouped>
+          <b-field :label="$t('common.category')">
+            <category-select
+              v-model="filterCategory"
+              :is-enabled-undo="false"
+            ></category-select>
+          </b-field>
+        </b-field>
+
+        <p
+          v-if="filterCategoryInputError"
+          class="has-text-danger"
+        >{{ filterCategoryInputError }}</p>
+
         <b-field class="mt-4" grouped>
           <b-field>
             <button
@@ -90,28 +104,34 @@
           <th class="is-size-7">{{ $t('common.category') }}</th>
           <th class="is-size-7">{{ $t('common.edit') }}</th>
           <th
-            @click="updateSortOrder('publishAt')"
             class="is-size-7 u-clickable is-underlined"
           >
-            <span>{{ $t('common.publishAt') }}</span>
-            <span
-              v-if="publishAtSortIconClass"
-              class="icon"
+            <router-link
+              :to="getUrlObjBySortOrder('publishAt')"
             >
-              <i :class="publishAtSortIconClass"></i>
-            </span>
+              <span>{{ $t('common.publishAt') }}</span>
+              <span
+                v-if="publishAtSortIconClass"
+                class="icon"
+              >
+                <i :class="publishAtSortIconClass"></i>
+              </span>
+             </router-link>
           </th>
           <th
-            @click="updateSortOrder('createdAt')"
             class="is-size-7 u-clickable is-underlined"
           >
-            <span>{{ $t('common.createdAt') }}</span>
-            <span
-              v-if="createdAtSortIconClass"
-              class="icon"
+            <router-link
+              :to="getUrlObjBySortOrder('createdAt')"
             >
-              <i :class="createdAtSortIconClass"></i>
-            </span>
+              <span>{{ $t('common.createdAt') }}</span>
+              <span
+                v-if="createdAtSortIconClass"
+                class="icon"
+              >
+                <i :class="createdAtSortIconClass"></i>
+              </span>
+             </router-link>
           </th>
           <th class="is-size-7">{{ $t('common.lastUpdatedAt') }}</th>
         </tr>
@@ -123,28 +143,34 @@
           <th class="is-size-7">{{ $t('common.category') }}</th>
           <th class="is-size-7">{{ $t('common.edit') }}</th>
           <th
-            @click="updateSortOrder('publishAt')"
             class="is-size-7 u-clickable is-underlined"
           >
-            <span>{{ $t('common.publishAt') }}</span>
-            <span
-              v-if="publishAtSortIconClass"
-              class="icon"
+            <router-link
+              :to="getUrlObjBySortOrder('publishAt')"
             >
-              <i :class="publishAtSortIconClass"></i>
-            </span>
+              <span>{{ $t('common.publishAt') }}</span>
+              <span
+                v-if="publishAtSortIconClass"
+                class="icon"
+              >
+                <i :class="publishAtSortIconClass"></i>
+              </span>
+             </router-link>
           </th>
           <th
-            @click="updateSortOrder('createdAt')"
             class="is-size-7 u-clickable is-underlined"
           >
-            <span>{{ $t('common.createdAt') }}</span>
-            <span
-              v-if="createdAtSortIconClass"
-              class="icon"
+            <router-link
+              :to="getUrlObjBySortOrder('createdAt')"
             >
-              <i :class="createdAtSortIconClass"></i>
-            </span>
+              <span>{{ $t('common.createdAt') }}</span>
+              <span
+                v-if="createdAtSortIconClass"
+                class="icon"
+              >
+                <i :class="createdAtSortIconClass"></i>
+              </span>
+             </router-link>
           </th>
           <th class="is-size-7">{{ $t('common.lastUpdatedAt') }}</th>
         </tr>
@@ -160,7 +186,7 @@
 
     <nav class="pagination" role="navigation" aria-label="pagination">
       <router-link
-        :to="{ path:`/admin/posts/${serviceId}`, query:{sort:sort, order:order, filters:filtersJson, index:String(index - 1)}}"
+        :to="getUrlObjByPageIndex(index - 1)"
         class="pagination-previous"
         :class="{'is-disabled': !existsPrev}"
       >
@@ -171,7 +197,7 @@
       </router-link>
 
       <router-link
-        :to="{ path:`/admin/posts/${serviceId}`, query:{sort:sort, order:order, filters:filtersJson, index:String(index + 1)}}"
+        :to="getUrlObjByPageIndex(index + 1)"
         class="pagination-next"
         :class="{'is-disabled': !existsNext}"
       >
@@ -184,7 +210,7 @@
       <ul class="pagination-list">
         <li>
           <router-link
-            :to="{ path:`/admin/posts/${serviceId}`, query:{sort:sort, order:order, filters:filtersJson}}"
+            :to="getUrlObjByPageIndex()"
             class="pagination-link"
             :class="{'is-disabled': !existsPrev}"
           >
@@ -208,12 +234,14 @@ import utilStr from '@/util/str'
 import utilObj from '@/util/obj'
 import { Admin, Category } from '@/api'
 import AdminPostsTableRow from '@/components/organisms/AdminPostsTableRow'
+import CategorySelect from '@/components/molecules/category-select'
 
 export default{
   name: 'AdminPostList',
 
   components: {
     AdminPostsTableRow,
+    CategorySelect,
   },
 
   props: {
@@ -238,6 +266,8 @@ export default{
         {labelKey:'common.contains', value:'contains'},
       ],
       filterInputError: '',
+      filterCategory: '',
+      filterCategoryInputError: '',
       requestedParams: {},
     }
   },
@@ -259,6 +289,24 @@ export default{
       const reqOrder = this.$route.query.order
       if (!reqOrder) return defaultValue
       return this.$route.query.order
+    },
+
+    filterCategoryQuery() {
+      const defaultValue = ''
+      if (!this.$route.query.category) return defaultValue
+      return this.$route.query.category
+    },
+
+    filterCategoryInput() {
+      const defaultValue = ''
+      if (this.filterCategoryInputError) return defaultValue
+      return this.filterCategory
+    },
+
+    filterCategoryForReq() {
+      if (this.filterCategoryInput) return this.filterCategoryInput
+      if (this.filterCategoryQuery) return this.filterCategoryQuery
+      return ''
     },
 
     filtersQuery() {
@@ -313,6 +361,9 @@ export default{
         sort: this.sort,
         order: this.order,
       }
+      if (this.filterCategory) {
+        params.category = this.filterCategory
+      }
       if (this.filters) {
         params.filters = this.filters
       }
@@ -326,6 +377,9 @@ export default{
       let params = {
         sort: this.sort,
         order: this.order,
+      }
+      if (this.filterCategory) {
+        params.category = this.filterCategory
       }
       if (this.filters) {
         params.filters = JSON.stringify(this.filters)
@@ -359,7 +413,9 @@ export default{
     },
 
     hasFilterInputError() {
-      return this.filterInputError.length > 0
+      if (this.filterInputError.length > 0) return true
+      if (this.filterCategoryInputError.length > 0) return true
+      return false
     },
 
     filterAttributesAllowed() {
@@ -392,9 +448,13 @@ export default{
 
     await this.setCategories()
     if (this.filtersQuery) {
-      this.filterAttribute = this.filtersQuery['attribute']
-      this.filterCompare = this.filtersQuery['compare']
-      this.filterValue = this.filtersQuery['value']
+      this.filterAttribute = this.filtersQuery.attribute
+      this.filterCompare = this.filtersQuery.compare
+      this.filterValue = this.filtersQuery.value
+      this.isFilterActive = true
+    }
+    if (this.filterCategoryQuery) {
+      this.filterCategory = this.filterCategoryQuery
       this.isFilterActive = true
     }
     await this.fetchPosts()
@@ -420,6 +480,30 @@ export default{
       this.$router.push({ query: paramsCloned })
     },
 
+    getUrlObjBySortOrder(sortKey) {
+      let order = 'desc'
+      if (this.sort === sortKey) {
+        order = this.order === 'asc' ? 'desc' : 'asc'
+      }
+
+      let paramsCloned = { ...this.currentParamsForReq }
+      paramsCloned.sort = sortKey
+      paramsCloned.order = order
+      return {
+        path:`/admin/posts/${this.serviceId}`,
+        query: paramsCloned,
+      }
+    },
+
+    getUrlObjByPageIndex(index=0) {
+      let paramsCloned = { ...this.currentParamsForReq }
+      paramsCloned.index = String(index)
+      return {
+        path:`/admin/posts/${this.serviceId}`,
+        query: paramsCloned,
+      }
+    },
+
     async executeFilter() {
       this.validateFilterWithError()
       if (this.hasFilterInputError) return
@@ -431,10 +515,12 @@ export default{
     },
 
     async resetFilter() {
-      this.filterInputError = ''
       this.filterAttribute = 'slug'
       this.filterCompare = 'eq'
       this.filterValue = ''
+      this.filterInputError = ''
+      this.filterCategory = ''
+      this.filterCategoryInputError = ''
       const params = {
         sort: this.sort,
         order: this.order,
@@ -515,6 +601,8 @@ export default{
         this.filterInputError = this.$t('msg.InvalidInput')
       } else if (this.validateFilterValue() === false) {
         this.filterInputError = this.$t('msg.inputNoMoreThanTargetCharacters', {num: 30})
+      } else if (this.validateFilterCategory() === false) {
+        this.filterCategoryInputError = this.$t('msg.InvalidInput')
       }
     },
 
@@ -529,6 +617,12 @@ export default{
     validateFilterValue() {
       this.filterValue = this.filterValue.trim()
       return this.filterValue.length <= 30
+    },
+
+    validateFilterCategory() {
+      this.filterCategory = this.filterCategory.trim()
+      if (!this.filterCategory) return true
+      return utilStr.checkSlug(this.filterCategory)
     },
 
     resetFilterError() {

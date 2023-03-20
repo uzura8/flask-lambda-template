@@ -73,6 +73,10 @@ export default {
       }
     }
 
+    if (utilObj.checkObjHasProp(state.adminPostsPager, 'category', true)) {
+      params.category = state.adminPostsPager.category
+    }
+
     if (state.adminPostsPager.lastIndex != null) {
       params.index = state.adminPostsPager.lastIndex
     }

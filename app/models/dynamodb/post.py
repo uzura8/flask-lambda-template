@@ -148,27 +148,33 @@ class Post(Base):
         if filter_conds is None:
             filter_conds = {}
 
+        filter_exps = []
         filter_exps_str = ''
-        if filter_conds and all(filter_conds.values()):
-            if filter_conds['compare'] == 'contains':
+        filters = filter_conds.get('filters', {})
+        if filters and all(filters.values()):
+            if filters['compare'] == 'contains':
                 filter_exps_str = 'contains(#fattr, :fval)'
 
-            elif filter_conds['compare'] == 'eq':
+            elif filters['compare'] == 'eq':
                 filter_exps_str = '#fattr = :fval'
 
             if filter_exps_str:
-                exp_attr_names['#fattr'] = filter_conds['attribute']
-                exp_attr_vals[':fval'] = filter_conds['value']
+                filter_exps.append(filter_exps_str)
+                exp_attr_names['#fattr'] = filters['attribute']
+                exp_attr_vals[':fval'] = filters['value']
 
-        return exp_attr_names, exp_attr_vals, filter_exps_str
+        # Filter for category
+        exp_attr_names, exp_attr_vals, filter_exps = self.get_filter_exps_for_categories(
+                exp_attr_names, exp_attr_vals, filter_exps, filter_conds.get('cate_slugs'))
+
+        filter_exps_str_all = ' AND '.join(filter_exps)
+        return exp_attr_names, exp_attr_vals, filter_exps_str_all
 
 
     @classmethod
     def get_filter_exps_for_pager_published(self, exp_attr_names, exp_attr_vals, filter_conds=None):
         if filter_conds is None:
             filter_conds = {}
-
-        cate_slugs = filter_conds['cate_slugs'] if 'cate_slugs' in filter_conds else None
 
         #current = utc_iso(False, True)
         #if not until_time or until_time > current:
@@ -194,16 +200,9 @@ class Post(Base):
         if filter_exps_time_str:
             filter_exps.append(filter_exps_time_str)
 
-        filter_exp_cids = []
-        if cate_slugs:
-            for i, cid in enumerate(cate_slugs):
-                val_name = 'cid' + str(i)
-                filter_exp_cids.append('#{v} = :{v}'.format(v=val_name))
-                exp_attr_names[f'#{val_name}'] = 'categorySlug'
-                exp_attr_vals[f':{val_name}'] = cid
-        filter_exp_cids_str = '(%s)' % ' OR '.join(filter_exp_cids) if filter_exp_cids else ''
-        if filter_exp_cids_str:
-            filter_exps.append(filter_exp_cids_str)
+        # Filter for category
+        exp_attr_names, exp_attr_vals, filter_exps = self.get_filter_exps_for_categories(
+                exp_attr_names, exp_attr_vals, filter_exps, filter_conds.get('cate_slugs'))
 
         filter_exps_str = ' AND '.join(filter_exps)
         return exp_attr_names, exp_attr_vals, filter_exps_str
@@ -249,6 +248,22 @@ class Post(Base):
             'items': items,
             'pagerKey': pager_key
         }
+
+
+    @staticmethod
+    def get_filter_exps_for_categories(exp_attr_names, exp_attr_vals, filter_exps, cate_slugs):
+        filter_exp_cids = []
+        if cate_slugs:
+            for i, cid in enumerate(cate_slugs):
+                val_name = 'cid' + str(i)
+                filter_exp_cids.append('#{v} = :{v}'.format(v=val_name))
+                exp_attr_names[f'#{val_name}'] = 'categorySlug'
+                exp_attr_vals[f':{val_name}'] = cid
+        filter_exp_cids_str = '(%s)' % ' OR '.join(filter_exp_cids) if filter_exp_cids else ''
+        if filter_exp_cids_str:
+            filter_exps.append(filter_exp_cids_str)
+
+        return exp_attr_names, exp_attr_vals, filter_exps
 
 
     @classmethod

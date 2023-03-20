@@ -2,7 +2,7 @@ import json
 import traceback
 from flask import jsonify, request
 from flask_cognito import cognito_auth_required, current_cognito_jwt
-from app.models.dynamodb import Post, Tag, PostTag, File, PostGroup, ModelInvalidParamsException
+from app.models.dynamodb import Post, Tag, Category, PostTag, File, PostGroup, ModelInvalidParamsException
 from app.common.site import media_accept_mimetypes
 from app.common.error import InvalidUsage
 from app.common.request import validate_req_params
@@ -62,9 +62,27 @@ def post_list(service_id):
 
     else:
         params = {}
-        for key in ['count', 'sort', 'order', 'withCategory', 'filters', 'pagerKey']:
+        for key in ['count', 'sort', 'order', 'filters', 'category', 'pagerKey']:
             params[key] = request.args.get(key)
         vals = validate_req_params(validation_schema_posts_get(), params)
+
+        cate_slug = vals.get('category')
+        cate = None
+        if cate_slug:
+            cate = Category.get_one_by_slug(service_id, cate_slug, False, True, False, False)
+            if not cate:
+                raise InvalidUsage('Category does not exist', 404)
+
+        filter_conds = {}
+        if vals.get('filters'):
+            filter_conds['filters'] = vals['filters']
+
+        if cate:
+            cate_slugs = [cate['slug']]
+            if cate['children']:
+                for c in cate['children']:
+                    cate_slugs.append(c['slug'])
+            filter_conds['cate_slugs'] = cate_slugs
 
         if vals['sort'] == 'publishAt':
             index = 'publishAtGsi'
@@ -76,11 +94,9 @@ def post_list(service_id):
         if vals.get('pagerKey'):
             vals['ExclusiveStartKey'] = vals['pagerKey']
 
-        with_cate = vals.get('withCategory')
-
         pkeys = {'key':'serviceId', 'val':service_id}
         pager_keys = {'pkey':'postId', 'index_pkey':'serviceId', 'index_skey':index_skey}
-        post = Post.query_pager_admin(pkeys, vals, pager_keys, index, vals['filters'])
+        post = Post.query_pager_admin(pkeys, vals, pager_keys, index, filter_conds)
 
     return jsonify(post), 200
 
@@ -575,28 +591,35 @@ def validation_schema_posts_get():
             'allowed': ['asc', 'desc'],
             'default': 'desc',
         },
-        'sinceTime': {
-            'type': 'string',
-            'coerce': (NormalizerUtils.trim),
-            'required': False,
-            'nullable': True,
-            'empty': True,
-            'regex': r'\d{4}\-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([\+\-]\d{2}:\d{2}|Z)$',
-        },
-        'untilTime': {
-            'type': 'string',
-            'coerce': (NormalizerUtils.trim),
-            'required': False,
-            'nullable': True,
-            'empty': True,
-            'regex': r'\d{4}\-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([\+\-]\d{2}:\d{2}|Z)$',
-        },
+        #'sinceTime': {
+        #    'type': 'string',
+        #    'coerce': (NormalizerUtils.trim),
+        #    'required': False,
+        #    'nullable': True,
+        #    'empty': True,
+        #    'regex': r'\d{4}\-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([\+\-]\d{2}:\d{2}|Z)$',
+        #},
+        #'untilTime': {
+        #    'type': 'string',
+        #    'coerce': (NormalizerUtils.trim),
+        #    'required': False,
+        #    'nullable': True,
+        #    'empty': True,
+        #    'regex': r'\d{4}\-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([\+\-]\d{2}:\d{2}|Z)$',
+        #},
         'withCategory': {
             'type': 'boolean',
             'coerce': (str, NormalizerUtils.to_bool),
             'required': False,
             'empty': True,
             'default': True,
+        },
+        'category': {
+            'type': 'string',
+            'coerce': (NormalizerUtils.trim),
+            'nullable': True,
+            'required': False,
+            'empty': True,
         },
         'filters' : {
             'type': 'dict',

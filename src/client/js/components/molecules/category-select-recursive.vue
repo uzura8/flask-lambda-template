@@ -72,6 +72,10 @@ export default{
       if (!oldVal) return
       await this.setCategories(val)
     },
+
+    value(val) {
+      if (!val) this.cateSlug = ''
+    },
   },
 
   async created() {

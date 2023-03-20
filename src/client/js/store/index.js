@@ -29,6 +29,7 @@ const state = {
       compare: '',
       value: '',
     },
+    category: '',
   },
   adminShortenUrlsPager: {
     keys: [],
