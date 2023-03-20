@@ -26,7 +26,7 @@
 <script>
 import obj from '@/util/obj'
 import { Category } from '@/api'
-import CategorySelectRecursive from '@/components/molecules/category-select-recursive'
+import CategorySelectRecursive from '@/components/molecules/CategorySelectRecursive'
 
 export default{
   name: 'CategorySelect',

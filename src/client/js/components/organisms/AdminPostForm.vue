@@ -274,7 +274,7 @@ import RichTextEditor from '@/components/atoms/RichTextEditor'
 import MarkdownEditor from '@/components/atoms/MarkdownEditor'
 import FileUploader from '@/components/organisms/FileUploader'
 import LinkInputs from '@/components/molecules/LinkInputs'
-import CategorySelect from '@/components/molecules/category-select'
+import CategorySelect from '@/components/molecules/CategorySelect'
 
 export default{
   name: 'AdminPostForm',

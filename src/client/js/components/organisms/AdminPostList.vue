@@ -234,7 +234,7 @@ import utilStr from '@/util/str'
 import utilObj from '@/util/obj'
 import { Admin, Category } from '@/api'
 import AdminPostsTableRow from '@/components/organisms/AdminPostsTableRow'
-import CategorySelect from '@/components/molecules/category-select'
+import CategorySelect from '@/components/molecules/CategorySelect'
 
 export default{
   name: 'AdminPostList',
