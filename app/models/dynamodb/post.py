@@ -351,7 +351,7 @@ class Post(Base):
         sort_key_prefix = 'hidden' if is_hidden and is_publish else status
         status_publish_at = '#'.join([sort_key_prefix, publish_at])
 
-        required_attrs = ['slug', 'title']
+        required_attrs = ['slug']
         for attr in required_attrs:
             if attr not in vals or len(vals[attr].strip()) == 0:
                 raise ModelInvalidParamsException(f"Argument '{attr}' requires values")
@@ -395,6 +395,8 @@ class Post(Base):
             'postStatus': status,
             'statusPublishAt': status_publish_at,
         }
+        if vals.get('meta'):
+            item['meta'] = vals.get('meta')
 
         if vals.get('updatedAt'):
             item['updatedAt'] = vals.get('updatedAt')

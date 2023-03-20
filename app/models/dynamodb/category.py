@@ -147,10 +147,16 @@ class Category(Base):
             if attr not in vals or len(vals[attr].strip()) == 0:
                 raise ValueError("Argument '%s' requires values" % attr)
 
-        if 'parentId' not in vals or vals['parentId'] is None:
+        publish_status = 'publish'
+        if vals.get('publishStatus'):
+            if vals.get('publishStatus') not in ['publish', 'unpublish']:
+                raise ValueError('publishStatus is invalid')
+            publish_status = vals.get('publishStatus')
+
+        if vals.get('parentId') is None:
             raise ValueError("Argument 'parentId' requires values")
 
-        if vals['parentId'] == 0:
+        if vals.get('parentId') == 0:
             parent_path = '0'
         else:
             parent = self.get_one_by_id(vals['parentId'])
@@ -170,7 +176,11 @@ class Category(Base):
             'label': vals['label'],
             'parentPath': parent_path,
             'serviceIdSlug': '#'.join([service_id, slug]),
+            'publishStatus': publish_status,
         }
+        if vals.get('meta') is not None:
+            item['meta'] = vals.get('meta')
+
         table.put_item(Item=item)
         return item
 
