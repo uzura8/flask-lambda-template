@@ -1,7 +1,7 @@
 <template>
-<div>
+<div class="flex-item">
   <b-field
-    :label="$t('form.Slug')"
+    :label="$t('form.slug')"
     :type="checkEmpty(errors.slug) ? '' : 'is-danger'"
     :message="checkEmpty(errors.slug) ? '' : errors.slug[0]"
   >
@@ -17,24 +17,9 @@
     :message="checkEmpty(errors.category) ? '' : errors.category[0]"
     class="mt-6"
   >
-    <b-select
+    <category-select
       v-model="category"
-      @input="validate('category')"
-      :placeholder="$t('msg.SelectItem', { name:$t('common.category') })"
-    >
-      <optgroup
-        v-if="categories"
-        v-for="pcate in categories"
-        :key="pcate.slug"
-        :label="pcate.label"
-      >
-        <option
-          v-for="cate in pcate.children"
-          :key="cate.slug"
-          :value="cate.slug"
-        >{{ cate.label }}</option>
-      </optgroup>
-    </b-select>
+    ></category-select>
   </b-field>
 
   <b-field
@@ -281,6 +266,7 @@
 import { getTinymce } from '@tinymce/tinymce-vue/lib/cjs/main/ts/TinyMCE'
 import moment from 'moment'
 import str from '@/util/str'
+import obj from '@/util/obj'
 import utilMedia from '@/util/media'
 import { Admin, Category, Tag } from '@/api'
 import config from '@/config/config'
@@ -288,6 +274,7 @@ import RichTextEditor from '@/components/atoms/RichTextEditor'
 import MarkdownEditor from '@/components/atoms/MarkdownEditor'
 import FileUploader from '@/components/organisms/FileUploader'
 import LinkInputs from '@/components/molecules/LinkInputs'
+import CategorySelect from '@/components/molecules/CategorySelect'
 
 export default{
   name: 'AdminPostForm',
@@ -297,6 +284,7 @@ export default{
     LinkInputs,
     RichTextEditor,
     MarkdownEditor,
+    CategorySelect,
   },
 
   props: {
@@ -319,7 +307,6 @@ export default{
       tags: [],
       publishAt: null,
       isHiddenInList: false,
-      categories: [],
       fieldKeys: ['slug', 'category', 'title', 'images', 'files', 'links', 'editorMode', 'body', 'tags', 'publishAt', 'isHiddenInList'],
       savedTags: [],
       filteredTags: [],
@@ -418,7 +405,6 @@ export default{
         await this.setSlug()
       }
     }
-    await this.setCategories()
     await this.setTags()
     await this.setUploaderOptions()
   },
@@ -460,19 +446,6 @@ export default{
           throw new Error('Create Slug Failed')
         }
         this.slug = slug
-      } catch (err) {
-        console.log(err);//!!!!!!
-        this.$store.dispatch('setLoading', false)
-        this.handleApiError(err, this.$t('msg["Failed to get data from server"]'))
-      }
-    },
-
-    async setCategories() {
-      try {
-        const res = await Category.get(this.serviceId)
-        if (res.length > 0) {
-          this.categories = res[0].children
-        }
       } catch (err) {
         console.log(err);//!!!!!!
         this.$store.dispatch('setLoading', false)
@@ -651,11 +624,6 @@ export default{
       this.initError('category')
       if (this.category === null) this.category = ''
       this.category = this.category.trim()
-      //if (this.checkEmpty(this.category)) {
-      //  this.errors.category.push(this.$t('msg["Input required"]'))
-      //} else if (str.checkSlug(this.category) === false) {
-      //  this.errors.category.push(this.$t('msg.InvalidInput'))
-      //}
       if (!this.checkEmpty(this.category) && str.checkSlug(this.category) === false) {
         this.errors.category.push(this.$t('msg.InvalidInput'))
       }
@@ -872,4 +840,6 @@ export default{
   },
 }
 </script>
-
+<style>
+.flex-item { flex:1; }
+</style>

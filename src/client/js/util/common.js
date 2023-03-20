@@ -1,35 +1,9 @@
 import num from './num'
+import UtilObj from '@/util/obj'
 
 export default {
-  isEmpty: (data) => {
-    if (data === null) return true;
-    if (data === undefined) return true;
-    if (data === false) return true;
-    if (data === '') return true;
-    if (data === '0') return true;
-    if (data === 0) return true;
-    if (typeof data === 'object') {
-      if (Array.isArray(data)) return data.length === 0;
-      if (Object.keys(data).length > 0) return false;
-      if (
-        typeof Object.getOwnPropertySymbols !== 'undefined' &&
-        Object.getOwnPropertySymbols(data).length > 0
-      )
-        return false;
-      if (data.valueOf().length !== undefined)
-        return data.valueOf().length === 0;
-      if (typeof data.valueOf() !== 'object') return this.isEmpty(data.valueOf());
-    }
-    return false;
-  },
-
-  checkObjHasProp: (obj, prop) => {
-    if (typeof obj !== 'object') return false
-    if (Array.isArray(obj) === true) return false
-    if (obj.hasOwnProperty(prop) === false) return false
-    if (obj[prop] == null) return false
-    return true
-  },
+  isEmpty: UtilObj.isEmpty,
+  checkObjHasProp: UtilObj.checkObjHasProp,
 
   byteToUnit: (byteSize, returnUnit = 'MB', withUnit = true, digits = 1) => {
     let formattedSize = byteSize

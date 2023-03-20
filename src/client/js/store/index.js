@@ -24,6 +24,12 @@ const state = {
     lastIndex: 0,
     sort: 'createdAt',
     order: 'desc',
+    filters: {
+      attribute: '',
+      compare: '',
+      value: '',
+    },
+    category: '',
   },
   adminShortenUrlsPager: {
     keys: [],

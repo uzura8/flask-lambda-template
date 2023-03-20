@@ -1,5 +1,5 @@
 import utilArr from '@/util/arr'
-import utilCommon from '@/util/common'
+import utilObj from '@/util/obj'
 
 export default {
   //checkUserType: state => (type) => {
@@ -14,29 +14,29 @@ export default {
 
   adminRole: state => () => {
     if (state.adminUser == null) return
-    if (utilCommon.checkObjHasProp(state.adminUser, 'attributes') === false) return
-    if (utilCommon.checkObjHasProp(state.adminUser.attributes, 'role') === false) return
+    if (utilObj.checkObjHasProp(state.adminUser, 'attributes') === false) return
+    if (utilObj.checkObjHasProp(state.adminUser.attributes, 'role') === false) return
     return state.adminUser.attributes.role
   },
 
   checkAdminRole: state => (role) => {
     if (state.adminUser == null) return false
-    if (utilCommon.checkObjHasProp(state.adminUser, 'attributes') === false) return false
-    if (utilCommon.checkObjHasProp(state.adminUser.attributes, 'role') === false) return false
+    if (utilObj.checkObjHasProp(state.adminUser, 'attributes') === false) return false
+    if (utilObj.checkObjHasProp(state.adminUser.attributes, 'role') === false) return false
     return state.adminUser.attributes.role === role
   },
 
   hasAdminRole: state => () => {
     if (state.adminUser == null) return false
-    if (utilCommon.checkObjHasProp(state.adminUser, 'attributes') === false) return false
-    if (utilCommon.checkObjHasProp(state.adminUser.attributes, 'role') === false) return false
+    if (utilObj.checkObjHasProp(state.adminUser, 'attributes') === false) return false
+    if (utilObj.checkObjHasProp(state.adminUser.attributes, 'role') === false) return false
     return state.adminUser.attributes.role === 'admin'
   },
 
   hasEditorRole: state => () => {
     if (state.adminUser == null) return false
-    if (utilCommon.checkObjHasProp(state.adminUser, 'attributes') === false) return false
-    if (utilCommon.checkObjHasProp(state.adminUser.attributes, 'role') === false) return false
+    if (utilObj.checkObjHasProp(state.adminUser, 'attributes') === false) return false
+    if (utilObj.checkObjHasProp(state.adminUser.attributes, 'role') === false) return false
     const editorRoles = ['admin', 'editor']
     return editorRoles.includes(state.adminUser.attributes.role)
   },
@@ -58,11 +58,25 @@ export default {
     return acceptServiceIds.includes(serviceId)
   },
 
-  adminPostsPagerQueryCurrent: state => () => {
+  adminPostsPagerQueryCurrent: state => (forRequest=false) => {
     let params = {
       sort: state.adminPostsPager.sort,
       order: state.adminPostsPager.order,
     }
+
+    const reqKeys = ['attribute', 'compare', 'value']
+    if (utilObj.checkObjItemsNotEmpty(state.adminPostsPager.filters, reqKeys, true)) {
+      if (forRequest) {
+        params.filters = JSON.stringify(state.adminPostsPager.filters)
+      } else {
+        params.filters = state.adminPostsPager.filters
+      }
+    }
+
+    if (utilObj.checkObjHasProp(state.adminPostsPager, 'category', true)) {
+      params.category = state.adminPostsPager.category
+    }
+
     if (state.adminPostsPager.lastIndex != null) {
       params.index = state.adminPostsPager.lastIndex
     }
@@ -84,7 +98,7 @@ export default {
   //  if (!state.auth.state) return
   //  if (state.auth.user == null) return
   //  if (!utilArr.inArray(key, acceptKey)) return
-  //  if (utilCommon.isEmpty(state.auth.user[key])) return
+  //  if (utilObj.isEmpty(state.auth.user[key])) return
   //  return state.auth.user[key]
   //},
 

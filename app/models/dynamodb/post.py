@@ -144,11 +144,37 @@ class Post(Base):
 
 
     @classmethod
-    def get_filter_exps_for_pager(self, exp_attr_names, exp_attr_vals, filter_conds=None):
+    def get_filter_exps_for_pager_admin(self, exp_attr_names, exp_attr_vals, filter_conds=None):
         if filter_conds is None:
             filter_conds = {}
 
-        cate_slugs = filter_conds['cate_slugs'] if 'cate_slugs' in filter_conds else None
+        filter_exps = []
+        filter_exps_str = ''
+        filters = filter_conds.get('filters', {})
+        if filters and all(filters.values()):
+            if filters['compare'] == 'contains':
+                filter_exps_str = 'contains(#fattr, :fval)'
+
+            elif filters['compare'] == 'eq':
+                filter_exps_str = '#fattr = :fval'
+
+            if filter_exps_str:
+                filter_exps.append(filter_exps_str)
+                exp_attr_names['#fattr'] = filters['attribute']
+                exp_attr_vals[':fval'] = filters['value']
+
+        # Filter for category
+        exp_attr_names, exp_attr_vals, filter_exps = self.get_filter_exps_for_categories(
+                exp_attr_names, exp_attr_vals, filter_exps, filter_conds.get('cate_slugs'))
+
+        filter_exps_str_all = ' AND '.join(filter_exps)
+        return exp_attr_names, exp_attr_vals, filter_exps_str_all
+
+
+    @classmethod
+    def get_filter_exps_for_pager_published(self, exp_attr_names, exp_attr_vals, filter_conds=None):
+        if filter_conds is None:
+            filter_conds = {}
 
         #current = utc_iso(False, True)
         #if not until_time or until_time > current:
@@ -174,6 +200,58 @@ class Post(Base):
         if filter_exps_time_str:
             filter_exps.append(filter_exps_time_str)
 
+        # Filter for category
+        exp_attr_names, exp_attr_vals, filter_exps = self.get_filter_exps_for_categories(
+                exp_attr_names, exp_attr_vals, filter_exps, filter_conds.get('cate_slugs'))
+
+        filter_exps_str = ' AND '.join(filter_exps)
+        return exp_attr_names, exp_attr_vals, filter_exps_str
+
+
+    @classmethod
+    def query_pager_admin(self, pkeys, params, pager_keys_def, index_name=None, filter_conds=None):
+        is_desc = params.get('order', 'asc') == 'desc'
+        limit = params.get('count', 20)
+        start_key = params.get('pagerKey')
+
+        option = {
+            'IndexName': index_name,
+            #'ProjectionExpression': self.prj_exps_str(),
+            'ScanIndexForward': not is_desc,
+        }
+        if index_name:
+            option['IndexName'] = index_name
+
+        key_conds = []
+        exp_attr_names = {}
+        exp_attr_vals = {}
+
+        key_conds.append('#pk = :pk')
+        exp_attr_names['#pk'] = pkeys['key']
+        exp_attr_vals[':pk'] = pkeys['val']
+
+        filter_exps_str = ''
+        if filter_conds:
+            exp_attr_names, exp_attr_vals, filter_exps_str =\
+                self.get_filter_exps_for_pager_admin(exp_attr_names, exp_attr_vals, filter_conds)
+
+        if filter_exps_str:
+            option['FilterExpression'] = filter_exps_str
+
+        option['KeyConditionExpression'] = ' AND '.join(key_conds)
+        option['ExpressionAttributeNames'] = exp_attr_names
+        option['ExpressionAttributeValues'] = exp_attr_vals
+
+        items, pager_key = self.query_loop_for_limit(option, limit, start_key,
+                                                 pager_keys_def, len(filter_exps_str) > 0)
+        return {
+            'items': items,
+            'pagerKey': pager_key
+        }
+
+
+    @staticmethod
+    def get_filter_exps_for_categories(exp_attr_names, exp_attr_vals, filter_exps, cate_slugs):
         filter_exp_cids = []
         if cate_slugs:
             for i, cid in enumerate(cate_slugs):
@@ -185,63 +263,7 @@ class Post(Base):
         if filter_exp_cids_str:
             filter_exps.append(filter_exp_cids_str)
 
-        filter_exps_str = ' AND '.join(filter_exps)
-        return exp_attr_names, exp_attr_vals, filter_exps_str
-
-
-    @classmethod
-    def query_pager_admin(self, hkey, params=None, with_cate=False):
-        index = params.get('index')
-        is_desc = params.get('order', 'asc') == 'desc'
-        limit = params.get('count', 20)
-        start_key = params.get('ExclusiveStartKey')
-
-        table = self.get_table()
-
-        key_cond_exps = []
-        exp_attr_names = {}
-        exp_attr_vals = {}
-        option = {
-            'ScanIndexForward': not is_desc,
-            'Limit': limit,
-        }
-        if index:
-            option['IndexName'] = index
-
-        key_cond_exps.append('#hk = :hv')
-        exp_attr_names['#hk'] = hkey['name']
-        exp_attr_vals[':hv'] = hkey['value']
-
-        option['KeyConditionExpression'] = ' AND '.join(key_cond_exps)
-        option['ExpressionAttributeNames'] = exp_attr_names
-        option['ExpressionAttributeValues'] = exp_attr_vals
-
-        if start_key:
-            option['ExclusiveStartKey'] = start_key
-
-        res = table.query(**option)
-        items = res['Items']
-
-        if with_cate:
-            items = self.set_category_to_list(items, hkey['value'])
-
-        return {
-            'items': items,
-            'pagerKey': res['LastEvaluatedKey'] if 'LastEvaluatedKey' in res else None,
-        }
-
-
-    #@classmethod
-    #def get_all_for_published(self, service_id):
-    #    table = self.get_table()
-    #    res = table.query(
-    #        IndexName='statusPublishAtGsi',
-    #        ProjectionExpression='title, categorySlug, isPublish, id, slug, serviceId, publishAt',
-    #        KeyConditionExpression=Key('serviceId').eq(service_id)\
-    #                & Key('statusPublishAt').begins_with('publish#'),
-    #        ScanIndexForward=False
-    #    )
-    #    return res['Items'] if 'Items' in res and res['Items'] else []
+        return exp_attr_names, exp_attr_vals, filter_exps
 
 
     @classmethod
@@ -426,10 +448,13 @@ class Post(Base):
             slug_upd = None
 
         cate_slug_upd = vals.get('category')
-        if cate_slug_upd and cate_slug_upd != saved['categorySlug']:
-            cate_upd = Category.get_one_by_slug(service_id, cate_slug_upd)
-            if not cate_upd:
-                raise ModelInvalidParamsException('Category not exists', 400)
+        if cate_slug_upd is not None and cate_slug_upd != saved['categorySlug']:
+            if cate_slug_upd:
+                cate_upd = Category.get_one_by_slug(service_id, cate_slug_upd)
+                if not cate_upd:
+                    raise ModelInvalidParamsException('Category not exists', 400)
+            else:
+                cate_slug_upd = ''
         else:
             cate_slug_upd = None
 
@@ -465,7 +490,7 @@ class Post(Base):
             exp_items.append('serviceIdSlug=:sis')
             exp_vals[':sis'] = '#'.join([service_id, slug_upd])
 
-        if cate_slug_upd:
+        if cate_slug_upd is not None:
             exp_items.append('categorySlug=:cates')
             exp_vals[':cates'] = cate_slug_upd
 

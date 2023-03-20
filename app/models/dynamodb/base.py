@@ -355,7 +355,7 @@ class Base():
         filter_exps_str = ''
         if filter_conds:
             exp_attr_names, exp_attr_vals, filter_exps_str =\
-                self.get_filter_exps_for_pager(exp_attr_names, exp_attr_vals, filter_conds)
+                self.get_filter_exps_for_pager_published(exp_attr_names, exp_attr_vals, filter_conds)
 
         if filter_exps_str:
             option['FilterExpression'] = filter_exps_str
@@ -373,7 +373,7 @@ class Base():
 
 
     @classmethod
-    def get_filter_exps_for_pager(self, exp_attr_names, exp_attr_vals, filter_conds):
+    def get_filter_exps_for_pager_published(self, exp_attr_names, exp_attr_vals, filter_conds):
         return exp_attr_names, exp_attr_vals, ''
 
 
@@ -381,7 +381,7 @@ class Base():
     def query_loop_for_limit(self, option, target_count, pager_key, pager_keys, use_cate_filter=False):
         items_all = []
         loop_count = 0
-        loop_count_max = 10
+        loop_count_max = 20
         need_count = target_count
 
         while loop_count < loop_count_max:

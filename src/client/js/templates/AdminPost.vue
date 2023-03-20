@@ -212,7 +212,7 @@
 <script>
 import moment from '@/moment'
 import { Admin } from '@/api'
-import common from '@/util/common'
+import obj from '@/util/obj'
 import PostBody from '@/components/atoms/PostBody'
 import InlineTime from '@/components/atoms/InlineTime'
 import EbDropdown from '@/components/molecules/EbDropdown'
@@ -256,15 +256,15 @@ export default{
 
     postsPageUriObj() {
       const path = `/admin/posts/${this.serviceId}`
-      const query = this.$store.getters.adminPostsPagerQueryCurrent()
+      const query = this.$store.getters.adminPostsPagerQueryCurrent(true)
       return { path:path, query:query }
     },
 
     previewUrl() {
       if (!this.post) return ''
-      if (common.checkObjHasProp(this.post, 'service') === false) return ''
-      if (common.checkObjHasProp(this.post.service, 'configs') === false) return ''
-      if (common.checkObjHasProp(this.post.service.configs, 'frontendPostDetailUrlPrefix') === false) return ''
+      if (obj.checkObjHasProp(this.post, 'service') === false) return ''
+      if (obj.checkObjHasProp(this.post.service, 'configs') === false) return ''
+      if (obj.checkObjHasProp(this.post.service.configs, 'frontendPostDetailUrlPrefix') === false) return ''
 
       const previewUrlPrefix = this.post.service.configs.frontendPostDetailUrlPrefix
       const previewUrl = `${previewUrlPrefix}${this.post.slug}`
