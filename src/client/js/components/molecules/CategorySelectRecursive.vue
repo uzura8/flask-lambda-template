@@ -100,9 +100,9 @@ export default{
         if (this.checkEmpty(items)) this.isHide = true
         this.$store.dispatch('setLoading', false)
       } catch (err) {
-        console.log(err);//!!!!!!
+        //console.log(err);//!!!!!!
         this.$store.dispatch('setLoading', false)
-        this.handleApiError(err, this.$t('msg["Failed to get data from server"]'))
+        //this.handleApiError(err, this.$t('msg["Failed to get data from server"]'))
       }
     },
   },

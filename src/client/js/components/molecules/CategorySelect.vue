@@ -89,7 +89,14 @@ export default{
   async created() {
     if (this.value) {
       this.defaultCategorySlug = this.value
-      this.inputtedCategory = await Category.get(this.serviceId, this.defaultCategorySlug, { withParents: 1 })
+      this.$store.dispatch('setLoading', true)
+      try {
+        this.inputtedCategory = await Category.get(this.serviceId, this.defaultCategorySlug, { withParents: 1 })
+        this.$store.dispatch('setLoading', false)
+      } catch (err) {
+        //console.log(err)
+        this.$store.dispatch('setLoading', false)
+      }
     }
     if (!this.defaultCategorySlug || !this.inputtedCategory) this.isEditModeActive = true
   },
