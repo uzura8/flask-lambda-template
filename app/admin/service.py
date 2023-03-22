@@ -1,6 +1,6 @@
 from flask import jsonify, request
 from flask_cognito import cognito_auth_required
-from app.models.dynamodb import Service, ServiceConfig
+from app.models.dynamodb import Service, ServiceConfig, Category
 from app.common.error import InvalidUsage
 from app.common.request import validate_req_params
 from app.validators import NormalizerUtils
@@ -36,6 +36,16 @@ def service_list():
                 ServiceConfig.save(service['serviceId'], name, val)
 
         service['configs'] = ServiceConfig.get_all_by_service(service['serviceId'], True, True, True)
+
+        # Create root category
+        vals = {
+            'serviceId': service['serviceId'],
+            'parentId': 0,
+            'slug': 'root',
+            'label': 'ルート{}'.format(service['label']) ,
+        }
+        Category.create(vals)
+
         return jsonify(service), 200
 
     return jsonify(services), 200
