@@ -106,7 +106,7 @@ export default {
 
   checkPostSlugNotExists: (serviceId, slug, token = null) => {
     return new Promise((resolve, reject) => {
-      const params = {slug:slug, checkNotExists:1}
+      const params = { slug: slug }
       const options = utilUri.getReqOptions(params, token)
       const uri = `admin/posts/${serviceId}/slug`
       client.get(uri, options)
@@ -177,7 +177,7 @@ export default {
 
   checkPostGroupSlugNotExists: (serviceId, slug, token = null) => {
     return new Promise((resolve, reject) => {
-      const params = {slug:slug, checkNotExists:1}
+      const params = { slug: slug }
       const options = utilUri.getReqOptions(params, token)
       const uri = `admin/posts/${serviceId}/groups/slug`
       client.get(uri, options)
@@ -250,6 +250,42 @@ export default {
       const options = utilUri.getReqOptions(null, token)
       const uri = `admin/files/${serviceId}/${fileId}`
       client.delete(uri, options)
+        .then(res => resolve(res.data))
+        .catch(err => reject(err))
+    })
+  },
+
+  checkCategorySlugNotExists: (serviceId, slug, token = null) => {
+    return new Promise((resolve, reject) => {
+      const params = { slug: slug }
+      const options = utilUri.getReqOptions(params, token)
+      const uri = `admin/categories/${serviceId}/slug`
+      client.get(uri, options)
+        .then((res) => {
+          resolve(res.data)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+
+  createCategory: (serviceId, vals, token = null) => {
+    return new Promise((resolve, reject) => {
+      const options = utilUri.getReqOptions(null, token)
+      const uri = `admin/categories/${serviceId}`
+      client.post(uri, vals, options)
+        .then(res => resolve(res.data))
+        .catch(err => reject(err))
+    })
+  },
+
+  updateCategory: (serviceId, identifer, vals, token = null) => {
+    return new Promise((resolve, reject) => {
+      if (utilCommon.isEmpty(vals)) throw new Error('No value')
+      const options = utilUri.getReqOptions(null, token)
+      const uri = `admin/categories/${serviceId}/${identifer}`
+      client.post(uri, vals, options)
         .then(res => resolve(res.data))
         .catch(err => reject(err))
     })

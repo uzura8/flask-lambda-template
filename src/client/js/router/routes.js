@@ -33,6 +33,9 @@ import AdminPostGroups from '@/templates/AdminPostGroups'
 import AdminPostGroup from '@/templates/AdminPostGroup'
 import AdminPostGroupCreate from '@/templates/AdminPostGroupCreate'
 import AdminPostGroupEdit from '@/templates/AdminPostGroupEdit'
+import AdminCategories from '@/templates/AdminCategories'
+import AdminCategoryCreate from '@/templates/AdminCategoryCreate'
+import AdminCategoryEdit from '@/templates/AdminCategoryEdit'
 import AdminShortenUrlCreate from '@/templates/AdminShortenUrlCreate'
 import AdminShortenUrlEdit from '@/templates/AdminShortenUrlEdit'
 import AdminShortenUrl from '@/templates/AdminShortenUrl'
@@ -217,6 +220,33 @@ export default [
     path: '/admin/posts/:serviceId/groups/:slug',
     name: 'AdminPostGroup',
     component: AdminPostGroup,
+    meta: {
+      requiresAuth: true,
+      requiresAcceptService: true,
+    },
+  },
+  {
+    path: '/admin/categories/:serviceId',
+    name: 'AdminCategories',
+    component: AdminCategories,
+    meta: {
+      requiresAuth: true,
+      requiresAcceptService: true,
+    },
+  },
+  {
+    path: '/admin/categories/:serviceId/create',
+    name: 'AdminCategoryCreate',
+    component: AdminCategoryCreate,
+    meta: {
+      requiresAuth: true,
+      requiresAcceptService: true,
+    },
+  },
+  {
+    path: '/admin/categories/:serviceId/:slug/edit',
+    name: 'AdminCategoryEdit',
+    component: AdminCategoryEdit,
     meta: {
       requiresAuth: true,
       requiresAcceptService: true,

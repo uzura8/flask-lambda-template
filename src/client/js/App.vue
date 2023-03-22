@@ -42,7 +42,9 @@ export default {
     },
 
     isAdminPostPages() {
-      return this.$route.path.startsWith('/admin/posts')
+      if (this.$route.path.startsWith('/admin/posts') === true) return true
+      if (this.$route.path.startsWith('/admin/categories') === true) return true
+      return false
     },
   },
 
