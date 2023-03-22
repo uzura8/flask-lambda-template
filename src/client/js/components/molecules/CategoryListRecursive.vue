@@ -17,12 +17,14 @@
       </span>
     </a>
     <ul
-      v-if="hasEditorRole && activeCateSlugs.includes(cate.slug)"
+      v-if="activeCateSlugs.includes(cate.slug)"
       class="is-flex ml-5 mb-3"
     >
-      <li class="mr-5">
+      <li
+        v-if="hasEditorRole"
+        class="mr-5"
+      >
         <router-link
-          v-if="activeCateSlugs.includes(cate.slug)"
           :to="{path:`/admin/categories/${serviceId}/create`, 'query':{parent:cate.slug}}"
           class="u-clickable icon-text is-size-6i has-text-grey"
         >
@@ -32,9 +34,11 @@
           <span>{{ $t('common.add') }}</span>
         </router-link>
       </li>
-      <li>
+      <li
+        v-if="hasEditorRole"
+        class="mr-5"
+      >
         <router-link
-          v-if="activeCateSlugs.includes(cate.slug)"
           :to="`/admin/categories/${serviceId}/${cate.slug}/edit`"
           class="u-clickable icon-text is-size-6 has-text-grey"
         >
@@ -43,6 +47,12 @@
           </span>
           <span>{{ $t('common.edit') }}</span>
         </router-link>
+      </li>
+      <li class="mr-5">
+        <router-link
+          :to="{path:`/admin/posts/${serviceId}`, 'query':{category:cate.slug}}"
+          class="u-clickable icon-text is-size-6 has-text-grey"
+        >{{ $t('common.posts') }}</router-link>
       </li>
     </ul>
 
