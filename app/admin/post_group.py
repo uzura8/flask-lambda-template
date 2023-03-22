@@ -59,7 +59,7 @@ def post_group_list(service_id):
 def post_group_detail_slug(service_id):
     check_acl_service_id(service_id)
     params = {}
-    for key in ['checkNotExists', 'slug', 'withPostDetail']:
+    for key in ['slug', 'withPostDetail']:
         params[key] = request.args.get(key)
     vals = validate_req_params(validation_schema_group_detail_slug_get(), params)
 
@@ -194,12 +194,5 @@ def validation_schema_group_detail_slug_get():
             'regex': r'^[0-9a-z\-]+$',
             'valid_ulid': False,
             'forbidden': reserved_slugs,
-        },
-        'checkNotExists': {
-            'type': 'boolean',
-            'coerce': (str, NormalizerUtils.to_bool),
-            'required': True,
-            'empty': False,
-            'default': False,
         },
     }

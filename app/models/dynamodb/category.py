@@ -147,7 +147,7 @@ class Category(Base):
             if attr not in vals or len(vals[attr].strip()) == 0:
                 raise ValueError("Argument '%s' requires values" % attr)
 
-        if 'parentId' not in vals or vals['parentId'] is None:
+        if vals.get('parentId') is None:
             raise ValueError("Argument 'parentId' requires values")
 
         if vals['parentId'] == 0:
@@ -172,6 +172,33 @@ class Category(Base):
             'serviceIdSlug': '#'.join([service_id, slug]),
         }
         table.put_item(Item=item)
+        return item
+
+
+    @classmethod
+    def update(self, cate_id, vals, is_check_service_id=False):
+        service_id = vals.get('serviceId')
+        if is_check_service_id and not Service.check_exists(service_id):
+            raise ValueError('serviceId is invalid')
+
+        if vals.get('parentId') is None:
+            raise ValueError("Argument 'parentId' requires values")
+
+        if vals['parentId'] == 0:
+            parent_path = '0'
+        else:
+            parent = self.get_one_by_id(vals['parentId'])
+            if parent['parentPath'] == '0':
+                parent_path = str(vals['parentId'])
+            else:
+                parent_path = '#'.join([parent['parentPath'], str(vals['parentId'])])
+
+        upd_val = {
+            'label': vals['label'],
+            'parentPath': parent_path,
+        }
+        query_keys = {'p': {'key':'id', 'val':cate_id}}
+        item = super().update(query_keys, upd_val)
         return item
 
 

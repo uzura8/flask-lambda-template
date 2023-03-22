@@ -51,6 +51,7 @@
     "postsOf": "{label} の投稿一覧",
     "category": "カテゴリ",
     "categories": "カテゴリ一覧",
+    "parentCategory": "親カテゴリ",
     "tag": "タグ",
     "tags": "タグ一覧",
     "comments": "コメント一覧",
@@ -179,6 +180,7 @@
     "generateItemRequiresTimes": "{target}の生成に時間がかかる場合があります",
     "inputNoMoreThanTargetCharacters": "入力は{num}以下にしてください",
     "inputLessThanTargetCharacters": "入力は{num}未満にしてください",
+    "inputDifferentValueFrom": "{target}とは異なる値を入力してください",
     "signInGreeting": "こんにちは、{name} さん！"
   },
   "error": {
@@ -201,6 +203,7 @@
     "siteUrl": "サイトのURL",
     "DisplayPostForm": "投稿する",
     "PostforDetail": "詳細投稿",
+    "label": "ラベル",
     "title": "タイトル",
     "body": "本文",
     "files": "ファイル",
@@ -274,6 +277,7 @@
     "AdminUserSettings": "管理ユーザ設定",
     "AdminUserManagement": "ユーザ管理",
     "AdminPostGroupManagement": "投稿グループ管理",
+    "AdminPostCategoryManagement": "投稿カテゴリ管理",
     "ShortenUrlList": "登録済み短縮URL一覧",
     "adminFunctions": {
       "post": "投稿管理",

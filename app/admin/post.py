@@ -106,11 +106,8 @@ def post_list(service_id):
 @admin_role_editor_required
 def slug_util(service_id):
     check_acl_service_id(service_id)
-    params = {}
-    for key in ['checkNotExists', 'slug']:
-        params[key] = request.args.get(key)
+    params = {'slug':request.args.get('slug')}
     vals = validate_req_params(validation_schema_posts_get(), params)
-
     post = Post.get_one_by_slug(service_id, vals['slug'])
     is_not_exists = not post
     return jsonify(is_not_exists), 200
@@ -564,13 +561,6 @@ def validation_schema_posts_post(service_configs=None):
 def validation_schema_posts_get():
     return {
         'slug': schema_slug,
-        'checkNotExists': {
-            'type': 'boolean',
-            'coerce': (str, NormalizerUtils.to_bool),
-            'required': True,
-            'empty': False,
-            'default': False,
-        },
         'count': {
             'type': 'integer',
             'coerce': int,

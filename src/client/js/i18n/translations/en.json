@@ -50,6 +50,7 @@
     "postsOf": "Posts of {label}",
     "category": "Category",
     "categories": "Categories",
+    "parentCategory": "Parent Category",
     "tag": "Tag",
     "tags": "Tags",
     "comments": "Comments",
@@ -178,6 +179,7 @@
     "generateItemRequiresTimes": "Generating {target} requires times in case",
     "inputNoMoreThanTargetCharacters": "Please input no more than {num} characters",
     "inputLessThanTargetCharacters": "Please input less than {num} characters",
+    "inputDifferentValueFrom": "Please input different value from {target}",
     "signInGreeting": "Hi, {name} !"
   },
   "error": {
@@ -200,6 +202,7 @@
     "siteUrl": "your site URL",
     "DisplayPostForm": "Display Post Form",
     "PostforDetail": "Post for Detail",
+    "label": "Label",
     "title": "Title",
     "body": "Body",
     "files": "Files",
@@ -273,6 +276,7 @@
     "AdminUserSettings": "Admin User Settings",
     "AdminUserManagement": "Admin User Management",
     "AdminPostGroupManagement": "Posts Group Management",
+    "AdminPostCategoryManagement": "Posts Category Management",
     "ShortenUrlList": "Registered Shorten URLs",
     "adminFunctions": {
       "post": "Posts Management",
