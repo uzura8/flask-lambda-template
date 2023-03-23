@@ -10,6 +10,7 @@ class Category(Base):
         'label',
         'serviceId',
         'parentPath',
+        'orderNo',
     ]
     response_attrs = public_attrs + [
         'parents',
@@ -131,8 +132,10 @@ class Category(Base):
         res = result['Items']
         if is_nested:
             res = self.convert_to_nested(res, for_response)
-        elif for_response:
-            res = [ self.to_response(item) for item in res ]
+        else:
+            res.sort(key=lambda x: x.get('orderNo', 0))
+            if for_response:
+                res = [ self.to_response(item) for item in res ]
 
         return res
 
@@ -201,6 +204,18 @@ class Category(Base):
         query_keys = {'p': {'key':'id', 'val':cate_id}}
         item = super().update(query_keys, upd_val)
         return item
+
+
+    @classmethod
+    def batch_update_order_no_by_ids(self, sorted_ids):
+        saveds = []
+        i = 1
+        for cid in sorted_ids:
+            query_keys = {'p': {'key':'id', 'val':cid}}
+            res = super().update(query_keys, {'orderNo':i})
+            saveds.append(res)
+            i += 1
+        return saveds
 
 
     @classmethod

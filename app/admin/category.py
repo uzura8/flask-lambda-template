@@ -123,6 +123,49 @@ def category_detail(service_id, slug):
     return jsonify(res), 200
 
 
+@bp.route('/categories/<string:service_id>/<string:slug>/children', methods=['POST', 'GET'])
+@cognito_auth_required
+@admin_role_editor_required
+def category_detail_children(service_id, slug):
+    service = check_acl_service_id(service_id, True)
+    category = Category.get_one_by_slug(service_id, slug, False, False, False, False)
+    if not category:
+        raise InvalidUsage('Not Found', 404)
+
+    if category['parentPath'] == '0':
+        parent_path = str(category['id'])
+    else:
+        parent_path = '#'.join([category['parentPath'], str(category['id'])])
+    items = Category.get_children_by_parent_path(service_id, parent_path, False, True, False)
+
+    if request.method == 'POST':
+        if not items:
+            return jsonify([]), 200
+
+        exist_ids = [ item.get('id') for item in items ]
+
+        vals = validate_req_params(validation_schema_category_children_post(), request.json)
+        sorted_ids = vals['sortedIds']
+
+        upd_ids = [i for i in sorted_ids if i in exist_ids]
+        if not upd_ids:
+            raise InvalidUsage('All ids are invalid', 400)
+
+        try:
+            res = Category.batch_update_order_no_by_ids(upd_ids)
+
+        except ModelInvalidParamsException as e:
+            raise InvalidUsage(e.message, 400)
+
+        except Exception as e:
+            print(traceback.format_exc())
+            raise InvalidUsage('Server Error', 500)
+
+        return jsonify(res), 200
+
+    return jsonify(items), 200
+
+
 validation_schema_slug = {
     'type': 'string',
     'coerce': (str, NormalizerUtils.trim),
@@ -155,4 +198,17 @@ def validation_schema_categories_post():
             'empty': False,
         },
         'parentCategorySlug': validation_schema_slug,
+    }
+
+
+def validation_schema_category_children_post():
+    return {
+        'sortedIds' : {
+            'type': 'list',
+            'required': True,
+            'schema': {
+                'type': 'integer',
+                'coerce': int,
+            }
+        },
     }
