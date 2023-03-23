@@ -3,7 +3,6 @@
   <li
     v-for="cate in categories"
     :key="cate.slug"
-    :value="cate.slug"
     class="list-box"
   >
     <a
