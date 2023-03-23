@@ -4,6 +4,7 @@
     v-for="cate in categories"
     :key="cate.slug"
     class="list-box"
+    v-if="deletedCateSlugs.includes(cate.slug) === false"
   >
     <a
       @click="toggleBlock(cate.slug)"
@@ -25,7 +26,7 @@
       >
         <router-link
           :to="{path:`/admin/categories/${serviceId}/create`, 'query':{parent:cate.slug}}"
-          class="u-clickable icon-text is-size-6i has-text-grey"
+          class="icon-text is-size-6i has-text-grey"
         >
           <span class="icon">
             <i class="fas fa-plus"></i>
@@ -39,13 +40,27 @@
       >
         <router-link
           :to="`/admin/categories/${serviceId}/${cate.slug}/edit`"
-          class="u-clickable icon-text is-size-6 has-text-grey"
+          class="icon-text is-size-6 has-text-grey"
         >
           <span class="icon">
             <i class="fas fa-edit"></i>
           </span>
           <span>{{ $t('common.edit') }}</span>
         </router-link>
+      </li>
+      <li
+        v-if="hasEditorRole"
+        class="mr-5"
+      >
+        <a
+          @click="confirmDeleteCategory(cate.slug)"
+          class="u-clickable icon-text is-size-6 has-text-grey"
+        >
+          <span class="icon">
+            <i class="fas fa-trash"></i>
+          </span>
+          <span>{{ $t('common.delete') }}</span>
+        </a>
       </li>
       <li class="mr-5">
         <router-link
@@ -59,12 +74,11 @@
       v-if="activeCateSlugs.includes(cate.slug)"
       :parent-category-slug="cate.slug"
     ></category-list-recursive>
-
   </li>
 </ul>
 </template>
 <script>
-import { Category } from '@/api'
+import { Category, Admin } from '@/api'
 import CategoryListRecursive from '@/components/molecules/CategoryListRecursive'
 
 export default{
@@ -86,7 +100,7 @@ export default{
       //cateSlug: '',
       categories: [],
       activeCateSlugs: [],
-      isHide: false,
+      deletedCateSlugs: []
     }
   },
 
@@ -109,12 +123,37 @@ export default{
         items.map((item) => {
           this.categories.push(item)
         })
-        if (this.checkEmpty(items)) this.isHide = true
         this.$store.dispatch('setLoading', false)
       } catch (err) {
         console.log(err);//!!!!!!
         this.$store.dispatch('setLoading', false)
         this.handleApiError(err, this.$t('msg["Failed to get data from server"]'))
+      }
+    },
+
+    confirmDeleteCategory(cateSlug) {
+      this.$buefy.dialog.confirm({
+        title: this.$t('msg.DeleteFor', {'target': this.$t('common.category')}),
+        message: this.$t('msg.cofirmToDelete'),
+        confirmText: this.$t('common.delete'),
+        type: 'is-danger',
+        hasIcon: true,
+        onConfirm: async () => {
+          await this.deleteCategory(cateSlug)
+        },
+      })
+    },
+
+    async deleteCategory(cateSlug) {
+      this.$store.dispatch('setLoading', true)
+      try {
+        await Admin.deleteCategory(this.serviceId, cateSlug, this.adminUserToken)
+        this.deletedCateSlugs.push(cateSlug)
+        this.$store.dispatch('setLoading', false)
+      } catch (err) {
+        console.log(err);//!!!!!!
+        this.$store.dispatch('setLoading', false)
+        this.handleApiError(err, this.$t('msg["Delete failed"]'))
       }
     },
 

@@ -51,7 +51,7 @@ class Category(Base):
             KeyConditionExpression=Key('serviceIdSlug').eq('#'.join([service_id, slug])),
             ProjectionExpression=self.prj_exps_str(for_response),
         )
-        if 'Items' not in res or not res['Items']:
+        if not res.get('Items'):
             return None
 
         item = res['Items'][0]
@@ -65,7 +65,8 @@ class Category(Base):
                 parents = self.get_all_by_ids(parent_ids)
                 item['parents'] = parents
 
-            del item['parentPath']# Removed unnecessary attr
+            if for_response:
+                del item['parentPath']# Removed unnecessary attr
 
         if with_children:
             if parent_path == '0':

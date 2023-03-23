@@ -291,6 +291,16 @@ export default {
     })
   },
 
+  deleteCategory: (serviceId, identifer, token = null) => {
+    return new Promise((resolve, reject) => {
+      const options = utilUri.getReqOptions(null, token)
+      const uri = `admin/categories/${serviceId}/${identifer}`
+      client.delete(uri, options)
+        .then(res => resolve(res.data))
+        .catch(err => reject(err))
+    })
+  },
+
   getShortenUrls: (serviceId, identifer = '', params = {}, token = null) => {
     return new Promise((resolve, reject) => {
       const options = utilUri.getReqOptions(params, token)
