@@ -327,6 +327,26 @@ class Post(Base):
 
 
     @classmethod
+    def check_exists_posts_related_with_category(self, service_id, cate_slug, category=None, count=5):
+        if not category:
+            category = Category.get_one_by_slug(service_id, cate_slug, True, True, False, False)
+        if not category:
+            raise ModelInvalidParamsException('Category not exists')
+
+        filter_conds = {}
+        cate_slugs = [cate_slug]
+        if category['children']:
+            for c in category['children']:
+                cate_slugs.append(c['slug'])
+        filter_conds['cate_slugs'] = cate_slugs
+
+        vals = {'count':count}
+        pkeys = {'key':'serviceId', 'val':service_id}
+        res = Post.query_pager_admin(pkeys, vals, None, 'createdAtGsi', filter_conds)
+        return bool(res.get('items'))
+
+
+    @classmethod
     def create(self, vals):
         service_id = vals.get('serviceId')
         if not service_id:

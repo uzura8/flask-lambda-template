@@ -17,6 +17,11 @@
     >{{ cate.label }}</option>
   </b-select>
 
+  <b-loading
+    v-model="isLoadingLocal"
+    :is-full-page="false"
+  ></b-loading>
+
   <category-select-recursive
     v-if="cateSlug"
     v-model="inputtedValue"
@@ -53,6 +58,7 @@ export default{
       cateSlug: '',
       categories: [],
       isHide: false,
+      isLoadingLocal: false,
     }
   },
 
@@ -90,7 +96,7 @@ export default{
     },
 
     async setCategories(parentCateSlug) {
-      this.$store.dispatch('setLoading', true)
+      this.isLoadingLocal = true
       try {
         this.categories.splice(0, this.categories.length);
         const items = await Category.getChildren(this.serviceId, parentCateSlug)
@@ -98,10 +104,10 @@ export default{
           this.categories.push(item)
         })
         if (this.checkEmpty(items)) this.isHide = true
-        this.$store.dispatch('setLoading', false)
+        this.isLoadingLocal = false
       } catch (err) {
         //console.log(err);//!!!!!!
-        this.$store.dispatch('setLoading', false)
+        this.isLoadingLocal = false
         //this.handleApiError(err, this.$t('msg["Failed to get data from server"]'))
       }
     },

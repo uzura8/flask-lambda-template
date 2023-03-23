@@ -255,6 +255,20 @@ export default {
     })
   },
 
+  getCategoryChildrenByParentSlug: (serviceId, slug, params = {}, token = null) => {
+    return new Promise((resolve, reject) => {
+      const options = utilUri.getReqOptions(params, token)
+      const uri = `categories/${serviceId}/${slug}/children`
+      client.get(uri, options)
+        .then((res) => {
+          resolve(res.data)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+
   checkCategorySlugNotExists: (serviceId, slug, token = null) => {
     return new Promise((resolve, reject) => {
       const params = { slug: slug }
@@ -285,6 +299,27 @@ export default {
       if (utilCommon.isEmpty(vals)) throw new Error('No value')
       const options = utilUri.getReqOptions(null, token)
       const uri = `admin/categories/${serviceId}/${identifer}`
+      client.post(uri, vals, options)
+        .then(res => resolve(res.data))
+        .catch(err => reject(err))
+    })
+  },
+
+  deleteCategory: (serviceId, identifer, token = null) => {
+    return new Promise((resolve, reject) => {
+      const options = utilUri.getReqOptions(null, token)
+      const uri = `admin/categories/${serviceId}/${identifer}`
+      client.delete(uri, options)
+        .then(res => resolve(res.data))
+        .catch(err => reject(err))
+    })
+  },
+
+  updateCategoriesOrder: (serviceId, parentCateSlug, vals, token = null) => {
+    return new Promise((resolve, reject) => {
+      if (utilCommon.isEmpty(vals)) throw new Error('No value')
+      const options = utilUri.getReqOptions(null, token)
+      const uri = `admin/categories/${serviceId}/${parentCateSlug}/children`
       client.post(uri, vals, options)
         .then(res => resolve(res.data))
         .catch(err => reject(err))

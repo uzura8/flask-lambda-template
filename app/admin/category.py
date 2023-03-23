@@ -1,7 +1,7 @@
 import traceback
 from flask import jsonify, request
 from flask_cognito import cognito_auth_required, current_cognito_jwt
-from app.models.dynamodb import Category, Service, ModelInvalidParamsException
+from app.models.dynamodb import Category, Service, Post, ModelInvalidParamsException
 from app.common.error import InvalidUsage
 from app.common.request import validate_req_params
 from app.validators import NormalizerUtils
@@ -57,12 +57,12 @@ def category_slug(service_id):
     return jsonify(is_not_exists), 200
 
 
-@bp.route('/categories/<string:service_id>/<string:slug>', methods=['POST', 'GET', 'HEAD'])
+@bp.route('/categories/<string:service_id>/<string:slug>', methods=['POST', 'GET', 'HEAD', 'DELETE'])
 @cognito_auth_required
 @admin_role_editor_required
 def category_detail(service_id, slug):
     service = check_acl_service_id(service_id, True)
-    category = Category.get_one_by_slug(service_id, slug, True, False, False, False)
+    category = Category.get_one_by_slug(service_id, slug, True, True, False, False)
     if not category:
         raise InvalidUsage('Not Found', 404)
     category_id = category['id']
@@ -95,17 +95,24 @@ def category_detail(service_id, slug):
         if not saved:
             saved = category
 
-    #elif request.method == 'DELETE':
-    #    try:
-    #        Category.delete({'id':category_id})
-    #        return jsonify(), 200
+    elif request.method == 'DELETE':
+        if category.get('children'):
+            raise InvalidUsage('Disabled to delete category having children', 400)
 
-    #    except ModelInvalidParamsException as e:
-    #        raise InvalidUsage(e.message, 400)
+        is_exists_posts = Post.check_exists_posts_related_with_category(service_id, slug, category)
+        if is_exists_posts:
+            raise InvalidUsage('Disabled to delete category related to posts', 400)
 
-    #    except Exception as e:
-    #        print(traceback.format_exc())
-    #        raise InvalidUsage('Server Error', 500)
+        try:
+            Category.delete({'id':category_id})
+            return jsonify(), 200
+
+        except ModelInvalidParamsException as e:
+            raise InvalidUsage(e.message, 400)
+
+        except Exception as e:
+            print(traceback.format_exc())
+            raise InvalidUsage('Server Error', 500)
 
     if request.method == 'HEAD':
         return jsonify(), 200
@@ -114,6 +121,49 @@ def category_detail(service_id, slug):
     res['service'] = service
 
     return jsonify(res), 200
+
+
+@bp.route('/categories/<string:service_id>/<string:slug>/children', methods=['POST', 'GET'])
+@cognito_auth_required
+@admin_role_editor_required
+def category_detail_children(service_id, slug):
+    service = check_acl_service_id(service_id, True)
+    category = Category.get_one_by_slug(service_id, slug, False, False, False, False)
+    if not category:
+        raise InvalidUsage('Not Found', 404)
+
+    if category['parentPath'] == '0':
+        parent_path = str(category['id'])
+    else:
+        parent_path = '#'.join([category['parentPath'], str(category['id'])])
+    items = Category.get_children_by_parent_path(service_id, parent_path, False, True, False)
+
+    if request.method == 'POST':
+        if not items:
+            return jsonify([]), 200
+
+        exist_ids = [ item.get('id') for item in items ]
+
+        vals = validate_req_params(validation_schema_category_children_post(), request.json)
+        sorted_ids = vals['sortedIds']
+
+        upd_ids = [i for i in sorted_ids if i in exist_ids]
+        if not upd_ids:
+            raise InvalidUsage('All ids are invalid', 400)
+
+        try:
+            res = Category.batch_update_order_no_by_ids(upd_ids)
+
+        except ModelInvalidParamsException as e:
+            raise InvalidUsage(e.message, 400)
+
+        except Exception as e:
+            print(traceback.format_exc())
+            raise InvalidUsage('Server Error', 500)
+
+        return jsonify(res), 200
+
+    return jsonify(items), 200
 
 
 validation_schema_slug = {
@@ -148,4 +198,17 @@ def validation_schema_categories_post():
             'empty': False,
         },
         'parentCategorySlug': validation_schema_slug,
+    }
+
+
+def validation_schema_category_children_post():
+    return {
+        'sortedIds' : {
+            'type': 'list',
+            'required': True,
+            'schema': {
+                'type': 'integer',
+                'coerce': int,
+            }
+        },
     }

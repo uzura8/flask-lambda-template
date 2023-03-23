@@ -87,6 +87,11 @@ export default {
       required: false,
       default: '',
     },
+
+    isModalIncludes: {
+      type: Boolean,
+      default: false,
+    },
   },
 
   data() {
@@ -95,7 +100,6 @@ export default {
       label: '',
       parentCategorySlug: '',
       fieldKeys: ['slug', 'label', 'parentCategorySlug'],
-      //queryParentCate: null,
     }
   },
 
@@ -181,8 +185,7 @@ export default {
         }
         this.$store.dispatch('setLoading', false)
         this.$emit('posted', res)
-        this.resetInputs()
-        this.$router.push(`/admin/categories/${this.serviceId}`)
+        this.cancel()
       } catch (err) {
         console.log(err);//!!!!!!
         this.$store.dispatch('setLoading', false)
@@ -196,7 +199,11 @@ export default {
 
     cancel() {
       this.resetInputs()
-      this.$router.push(`/admin/categories/${this.serviceId}`)
+      if (this.isModalIncludes) {
+        this.$emit('close')
+      } else {
+        this.$router.push(`/admin/categories/${this.serviceId}`)
+      }
     },
 
     async checkSlugNotExists(slug) {

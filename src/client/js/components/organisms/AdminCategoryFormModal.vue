@@ -21,45 +21,41 @@
       />
     </header>
     <section class="modal-card-body">
-        <b-field :label="$t('form.slug')">
-          <b-input
-            v-model="slug"
-            type="text"
-            required
-          ></b-input>
-        </b-field>
-
-        <b-field :label="$t('form.label')">
-          <b-input
-            v-model="label"
-            type="text"
-            required
-          ></b-input>
-        </b-field>
+      <admin-category-form
+        :parent-category-slug-default="parentCategorySlug"
+        :category="category"
+        :is-modal-includes="true"
+        @close="$emit('close')"
+      ></admin-category-form>
     </section>
-    <footer class="modal-card-foot">
-      <b-button
-        :label="$t('common.close')"
-        @click="$emit('close')"
-      />
-      <b-button
-        :label="$t('common.add')"
-        type="is-primary"
-      />
-    </footer>
   </div>
 </b-modal>
 </template>
-
 <script>
+import AdminCategoryForm from '@/components/organisms/AdminCategoryForm'
+
 export default {
   name: 'CategoryEditModal',
+
+  components: {
+    AdminCategoryForm,
+  },
 
   props: {
     active: {
       type: Boolean,
       default: false,
-    }
+    },
+
+    parentCategorySlug: {
+      type: String,
+      default: '',
+    },
+
+   category: {
+      type: Object,
+      default: null,
+    },
   },
 
   data() {
@@ -93,3 +89,9 @@ export default {
   },
 }
 </script>
+<style>
+.modal-card {
+  width: auto;
+  min-width: 360px;
+}
+</style>

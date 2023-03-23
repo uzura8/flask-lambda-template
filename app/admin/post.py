@@ -66,16 +66,16 @@ def post_list(service_id):
             params[key] = request.args.get(key)
         vals = validate_req_params(validation_schema_posts_get(), params)
 
+        filter_conds = {}
+        if vals.get('filters'):
+            filter_conds['filters'] = vals['filters']
+
         cate_slug = vals.get('category')
         cate = None
         if cate_slug:
             cate = Category.get_one_by_slug(service_id, cate_slug, False, True, False, False)
             if not cate:
                 raise InvalidUsage('Category does not exist', 404)
-
-        filter_conds = {}
-        if vals.get('filters'):
-            filter_conds['filters'] = vals['filters']
 
         if cate:
             cate_slugs = [cate['slug']]
