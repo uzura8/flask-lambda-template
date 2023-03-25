@@ -12,6 +12,7 @@
   "adminAuthHeaderTokenPrefix": "Bearer",
   "availableFunctions": ["post", "urlShortener"],
   "post": {
+    "defaultEditorMode": "richText",
     "autoSlugSet": {
       "isEnabled": false,
       "format": "date"
