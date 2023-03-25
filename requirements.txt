@@ -14,9 +14,11 @@ ecdsa==0.18.0
 Flask==1.1.4
 Flask-Cognito==1.18
 idna==3.4
+importlib-metadata==6.1.0
 itsdangerous==1.1.0
 Jinja2==2.11.3
 jmespath==1.0.1
+Markdown==3.4.3
 MarkupSafe==2.0.1
 mistletoe==0.9.0
 pyasn1==0.4.8
@@ -32,3 +34,4 @@ six==1.16.0
 ulid-py==1.1.0
 urllib3==1.26.13
 Werkzeug==1.0.1
+zipp==3.15.0

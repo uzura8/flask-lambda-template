@@ -1,5 +1,5 @@
 import secrets
-import mistletoe
+import markdown
 from app.common.date import utc_iso, iso_offset2utc
 from app.common.string import new_uuid, nl2br, url2link, strip_html_tags
 from app.common.dict import keys_from_dicts
@@ -628,7 +628,10 @@ class Post(Base):
         body_html = ''
         body_text = ''
         if body_format == 'markdown':
-            body_html = mistletoe.markdown(body_raw)
+            body_raw = url2link(body_raw)
+            extensions = ['extra', 'admonition', 'nl2br', 'sane_lists', 'toc']
+            md = markdown.Markdown(safe_mode=True, extensions=extensions)
+            body_html = md.convert(body_raw)
             body_text = strip_html_tags(body_html)
         elif body_format == 'text':
             body_html = nl2br(url2link(body_raw))
@@ -636,6 +639,7 @@ class Post(Base):
         else:
             body_html = body_raw
             body_text = strip_html_tags(body_raw)
+
         return body_html, body_text
 
 
