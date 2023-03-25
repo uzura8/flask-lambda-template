@@ -303,7 +303,7 @@ export default{
       files: [],
       links: [],
       body: '',
-      editorMode: 'richText',
+      editorMode: '',
       tags: [],
       publishAt: null,
       isHiddenInList: false,
@@ -397,6 +397,7 @@ export default{
   },
 
   async created() {
+    this.setEditorMode()
     if (this.isEnabledRichText === false) this.editorMode = 'text'
     if (this.isEdit === true) {
       this.setPost()
@@ -410,6 +411,16 @@ export default{
   },
 
   methods: {
+    setEditorMode() {
+      this.editorMode = 'richText'
+      if (this.checkObjHasProp(config.post, 'defaultEditorMode', true)) {
+        this.editorMode = config.post.defaultEditorMode
+      }
+      if (this.editorMode === 'richText' && this.isEnabledRichText === false) {
+        this.editorMode = 'text'
+      }
+    },
+
     setPost() {
       this.slug = this.post.slug != null ? String(this.post.slug) : ''
       this.category = ('category' in this.post && this.post.category && this.post.category.slug != null)

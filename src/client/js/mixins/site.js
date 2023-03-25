@@ -65,7 +65,8 @@ export default {
 
   methods: {
     siteUri: util.site.uri,
-    checkEmpty: util.common.isEmpty,
+    checkEmpty: util.obj.isEmpty,
+    checkObjHasProp: util.obj.checkObjHasProp,
     inArray: util.arr.inArray,
     listenComponent: listener.listen,
     destroyedComponent: listener.destroyed,
