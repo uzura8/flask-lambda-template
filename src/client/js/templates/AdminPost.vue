@@ -104,7 +104,13 @@
     </div>
   </div>
 
+  <post-body-markdown
+    v-if="post.bodyFormat === 'markdown'"
+    :body="post.body"
+  ></post-body-markdown>
+
   <post-body
+    v-else
     :body="post.bodyHtml"
   ></post-body>
 
@@ -214,6 +220,7 @@ import moment from '@/moment'
 import { Admin } from '@/api'
 import obj from '@/util/obj'
 import PostBody from '@/components/atoms/PostBody'
+import PostBodyMarkdown from '@/components/atoms/PostBodyMarkdown'
 import InlineTime from '@/components/atoms/InlineTime'
 import EbDropdown from '@/components/molecules/EbDropdown'
 import FbImg from '@/components/atoms/FbImg'
@@ -225,6 +232,7 @@ export default{
     InlineTime,
     EbDropdown,
     PostBody,
+    PostBodyMarkdown,
     FbImg,
   },
 
