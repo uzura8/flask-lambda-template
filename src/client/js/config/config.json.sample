@@ -7,7 +7,6 @@
     "site": "/assets/img/logo.png",
     "admin": "/assets/img/logo-w.png"
   },
-  "voteTypesDefault": ["like", "dislike"],
   "isEnabledComment": true,
   "adminAuthHeader": "Authorization",
   "adminAuthHeaderTokenPrefix": "Bearer",
@@ -22,6 +21,7 @@
     "url": "https://media.example.com"
   },
   "tinyMCEApiKey": null,
+  "voteTypesDefault": ["like", "dislike"],
   "shortenUrl": {
     "redirectBaseUrl": "https://rd.example.com/",
     "waitingTimeForQrCodeCreated": 12
