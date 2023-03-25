@@ -25,20 +25,24 @@ export default{
 
   data(){
     return {
+      bodyMarkdown: '',
     }
   },
 
   computed: {
-    bodyMarkdown() {
-      return marked(this.body)
-    },
   },
 
   created() {
-    marked.setOptions({ breaks: true })
+    marked.setOptions({
+      breaks: true,
+      highlight: (code, lang) => {
+        return hljs.highlightAuto(code, [lang]).value
+      },
+    })
   },
 
   mounted() {
+    this.bodyMarkdown = marked(this.body)
     window.hljs.highlightAll()
   },
 
@@ -52,7 +56,7 @@ export default{
 .post-body {
   @import "../scss/browser-default.scss";
   pre {
-    padding: 0 0;
+    padding: 1.25rem 1.5rem;
   }
 }
 </style>

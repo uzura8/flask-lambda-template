@@ -31,7 +31,10 @@
     {{ post.title }}
   </h1>
 
-  <div class="is-clearfix">
+  <div
+    class="is-clearfix"
+    :class="{ 'mb-4': isEditablePostBody }"
+  >
     <div class="is-pulled-right">
       <eb-dropdown
         position="is-bottom-left"
@@ -102,17 +105,62 @@
         </div>
       </eb-dropdown>
     </div>
+    <div
+      v-if="isEditablePostBody"
+      class="is-pulled-left"
+    >
+      <span v-if="isEditPostBody === true">
+        <button
+          @click="updatePostBody()"
+          :disabled="isEditedPostBody === false"
+          class="button is-warning is-small"
+        >
+          <span class="icon is-small">
+            <i class="fas fa-save"></i>
+          </span>
+          <span>{{ $t('common.save') }}</span>
+        </button>
+
+        <button
+          @click="cancelEditBody()"
+          class="button is-small ml-3"
+        >
+          <span class="icon is-small">
+            <i class="fas fa-undo"></i>
+          </span>
+          <span>{{ $t('common.cancel') }}</span>
+        </button>
+      </span>
+
+      <button
+        v-else
+        @click="isEditPostBody = true"
+        class="button is-small"
+      >
+        <span class="icon is-small">
+          <i class="fas fa-pen"></i>
+        </span>
+        <span>{{ $t('common.editDirectly') }}</span>
+      </button>
+    </div>
   </div>
 
-  <post-body-markdown
-    v-if="post.bodyFormat === 'markdown'"
-    :body="post.body"
-  ></post-body-markdown>
+  <div v-if="isEditPostBody === true">
+    <markdown-editor
+      v-model="body"
+    ></markdown-editor>
+  </div>
+  <div v-else>
+    <post-body-markdown
+      v-if="post.bodyFormat === 'markdown'"
+      :body="body"
+    ></post-body-markdown>
 
-  <post-body
-    v-else
-    :body="post.bodyHtml"
-  ></post-body>
+    <post-body
+      v-else
+      :body="post.bodyHtml"
+    ></post-body>
+  </div>
 
   <ul class="mt-5">
     <li v-if="'images' in post && post.images.length > 0">
@@ -218,11 +266,13 @@
 <script>
 import moment from '@/moment'
 import { Admin } from '@/api'
+import config from '@/config/config'
 import obj from '@/util/obj'
 import PostBody from '@/components/atoms/PostBody'
 import PostBodyMarkdown from '@/components/atoms/PostBodyMarkdown'
 import InlineTime from '@/components/atoms/InlineTime'
 import EbDropdown from '@/components/molecules/EbDropdown'
+import MarkdownEditor from '@/components/atoms/MarkdownEditor'
 import FbImg from '@/components/atoms/FbImg'
 
 export default{
@@ -233,6 +283,7 @@ export default{
     EbDropdown,
     PostBody,
     PostBodyMarkdown,
+    MarkdownEditor,
     FbImg,
   },
 
@@ -240,6 +291,8 @@ export default{
     return {
       post: null,
       isImagesModalActive: false,
+      isEditPostBody: false,
+      body: '',
     }
   },
 
@@ -282,15 +335,27 @@ export default{
       const delimitter = previewUrl.indexOf('?') === -1 ? '?' : '&'
       return `${previewUrl}${delimitter}token=${this.post.previewToken}`
     },
+
+    isEditablePostBody() {
+      if (this.checkObjHasProp(config.post, 'isEditablePostBodyOnPageByMarkdown', true) === false) {
+        return false
+      }
+      return this.post.bodyFormat === 'markdown'
+    },
+
+    isEditedPostBody() {
+      return this.body !== this.post.body
+    },
   },
 
   async created() {
-    await this.getPost()
+    await this.setPost()
   },
 
   methods: {
-    async getPost() {
+    async setPost() {
       this.post = await Admin.getPosts(this.serviceId, this.postId, null, this.adminUserToken)
+      this.body = this.post.body
     },
 
     confirmPublish() {
@@ -324,6 +389,29 @@ export default{
         message: this.$t('msg.cofirmToDelete'),
         onConfirm: async () => await this.deletePost()
       })
+    },
+
+    async updatePostBody() {
+      try {
+        this.$store.dispatch('setLoading', true)
+        this.body = this.body.trimEnd()
+        const vals = { body: this.body, bodyFormat: this.post.bodyFormat }
+        await Admin.updatePost(this.serviceId, this.post.postId, vals, this.adminUserToken)
+        this.isEditPostBody = false
+        this.$store.dispatch('setLoading', false)
+      } catch (err) {
+        console.log(err);//!!!!!!
+        this.$store.dispatch('setLoading', false)
+        if (this.checkResponseHasErrorMessage(err, true)) {
+          this.setErrors(err.response.data.errors)
+        }
+        this.handleApiError(err, this.$t(`msg["Update failed"]`))
+      }
+    },
+
+    cancelEditBody() {
+      this.isEditPostBody = false
+      this.body = this.post.body
     },
 
     async deletePost() {

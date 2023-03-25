@@ -12,6 +12,7 @@
   "adminAuthHeaderTokenPrefix": "Bearer",
   "availableFunctions": ["post", "urlShortener"],
   "post": {
+    "isEditablePostBodyOnPageByMarkdown": false,
     "defaultEditorMode": "richText",
     "autoSlugSet": {
       "isEnabled": false,

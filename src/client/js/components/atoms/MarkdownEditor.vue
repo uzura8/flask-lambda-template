@@ -62,5 +62,13 @@ export default{
     @import "@/../scss/browser-default.scss";
   }
 }
+.editor-toolbar {
+  &.fullscreen {
+    height: 60px;
+    z-index: 1000;
+    padding-top: 15px;
+    padding-bottom: 15px;
+  }
+}
 </style>
 
