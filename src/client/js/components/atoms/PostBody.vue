@@ -47,6 +47,9 @@ export default{
 
 .post-body {
   @import "../scss/browser-default.scss";
+  pre {
+    padding: 0 0;
+  }
 }
 </style>
 
