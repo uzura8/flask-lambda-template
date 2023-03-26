@@ -115,27 +115,40 @@ class Category(Base):
     def get_children_by_parent_path(self, service_id, parent_path,
                                 with_children=False, for_response=False, is_nested=True):
         table = self.get_table()
-        option = {
+        common_opt = {
             'IndexName': 'gsi-list-by-service',
             'ProjectionExpression': self.prj_exps_str(for_response),
             'ExpressionAttributeNames': {'#si':'serviceId', '#pp':'parentPath'},
-            'ExpressionAttributeValues': {':si':service_id, ':pp':parent_path},
+            'ExpressionAttributeValues': {':si':service_id},
         }
-        option['KeyConditionExpression'] = '#si = :si'
-        if with_children:
-            option['KeyConditionExpression'] += ' AND begins_with(#pp, :pp)'
-        else:
-            option['KeyConditionExpression'] += ' AND #pp = :pp'
 
-        result = table.query(**option)
-        if 'Items' not in result or not result['Items']:
+        eq_opt = common_opt
+        eq_opt['ExpressionAttributeValues'][':pp'] = parent_path
+        eq_opt['KeyConditionExpression'] = '#si = :si AND #pp = :pp'
+        result = table.query(**eq_opt)
+        if not result.get('Items'):
             return []
+        eq_res = result['Items']
 
-        res = result['Items']
+        # Execute a query to retrieve all items under a specified category, and merge the results.
+        begin_with_res = []
+        if with_children:
+            begin_with_opt = common_opt
+            # Include delimiter to condition string
+            begin_with_opt['ExpressionAttributeValues'][':pp'] = f'{parent_path}#'
+            begin_with_opt['KeyConditionExpression'] = '#si = :si AND begins_with(#pp, :pp)'
+            result = table.query(**begin_with_opt)
+            if result.get('Items'):
+                begin_with_res = result['Items']
+
+        res = eq_res + begin_with_res
+
         if is_nested:
             res = self.convert_to_nested(res, for_response)
         else:
-            res.sort(key=lambda x: x.get('orderNo', 0))
+            # Sort only not included children, because order number is enabled only for same layler
+            if not with_children:
+                res.sort(key=lambda x: x.get('orderNo', 0))
             if for_response:
                 res = [ self.to_response(item) for item in res ]
 
