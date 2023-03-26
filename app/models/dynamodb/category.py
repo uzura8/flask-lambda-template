@@ -11,6 +11,8 @@ class Category(Base):
         'serviceId',
         'parentPath',
         'orderNo',
+        'meta',
+        'publishStatus',
     ]
     response_attrs = public_attrs + [
         'parents',
@@ -217,15 +219,11 @@ class Category(Base):
 
 
     @classmethod
-    def batch_update_order_no_by_ids(self, sorted_ids):
-        saveds = []
-        i = 1
-        for cid in sorted_ids:
-            query_keys = {'p': {'key':'id', 'val':cid}}
-            res = super().update(query_keys, {'orderNo':i})
-            saveds.append(res)
-            i += 1
-        return saveds
+    def updated_by_delete_insert(self, upd_cates):
+        del_ids = [ {'id':c['id']} for c in upd_cates ]
+        res_del = self.batch_delete(del_ids)
+        res_save = self.batch_save(upd_cates)
+        return upd_cates, res_del, res_save
 
 
     @classmethod

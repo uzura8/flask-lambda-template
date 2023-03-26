@@ -142,7 +142,7 @@ export default{
       this.$store.dispatch('setLoading', true)
       try {
         this.categories.splice(0, this.categories.length);
-        const items = await Category.getChildren(this.serviceId, parentCateSlug)
+        const items = await Admin.getCategoryChildrenByParentSlug(this.serviceId, parentCateSlug, null, this.adminUserToken)
         items.map((item) => {
           this.categories.push(item)
         })
