@@ -11,6 +11,7 @@ dynamoDbBackupTargetTagValue: 'aws-backup' # 'aws-backup':backup target / other 
 
 appMemorySize: 256
 appTimeout: 20 # s
+appProvisionedConcurrency: 5
 
 mediaS3BucketName: "media.example.com"
 mediaImageMakerMemorySize: 256 # MB

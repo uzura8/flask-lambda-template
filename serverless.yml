@@ -156,7 +156,7 @@ functions:
       - http: ANY /
       - http: ANY /{proxy+}
     timeout: ${file(${self:custom.stageConfigFileName}):appTimeout}
-    provisionedConcurrency: 2
+    provisionedConcurrency: ${file(${self:custom.stageConfigFileName}):appProvisionedConcurrency}
 
   mediaImageMaker:
     handler: app/media_image_maker_handler.handler
