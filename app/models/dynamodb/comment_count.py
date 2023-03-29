@@ -9,11 +9,11 @@ class CommentCount(Base):
         'serviceId',
         'contentId',
         'updatedAt',
+        'publishStatus',
     ]
     response_attrs = public_attrs + []
     private_attrs = [
         'contentIdPublishStatus',
-        'publishStatus',
     ]
     all_attrs = public_attrs + private_attrs
 
