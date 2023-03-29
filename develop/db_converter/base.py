@@ -100,6 +100,14 @@ class DbConverterBase():
         return res
 
 
+    def get_all_where(self, table, wehre_cond, order_by='id'):
+        params = (table, wehre_cond, order_by)
+        sql = 'SELECT * FROM %s WHERE %s ORDER BY %s' % params
+        self.cursor.execute(sql)
+        res = self.cursor.fetchall()
+        return res
+
+
     def get_all_by_id(self, table, cond_val, cond_key='id'):
         params = (table, cond_key, cond_val)
         sql = "SELECT * FROM %s WHERE %s = '%s'" % params
@@ -108,15 +116,39 @@ class DbConverterBase():
         return res
 
 
-    def get_category_slug_by_id(self, from_id, from_id_name='fromId'):
+    def get_category_by_from_id(self, from_id, from_id_name='fromId'):
         if not self.category_exc_table:
-            return ''
+            return None
 
         items = [x for x in self.category_exc_table if x[from_id_name] == from_id]
         if not items:
-            return ''
+            return None
 
-        return items[0].get('toSlug', '')
+        return items[0]
+
+
+    def get_category_id_by_from_id(self, from_id, from_id_name='fromId'):
+        item = self.get_category_by_from_id(from_id, from_id_name)
+        if not item:
+            return None
+
+        return item.get('toId')
+
+
+    def get_category_slug_by_id(self, from_id, from_id_name='fromId'):
+        item = self.get_category_by_from_id(from_id, from_id_name)
+        if not item:
+            return None
+
+        return item.get('toSlug', '')
+
+
+    def get_is_unpublished_category(self, from_id, from_id_name='fromId'):
+        item = self.get_category_by_from_id(from_id, from_id_name)
+        if not item:
+            return None
+
+        return item.get('fromIsPrivate', '')
 
 
     def make_logs_dir(self):
@@ -140,6 +172,13 @@ class DbConverterBase():
         json_file = open(path, mode='w', encoding='utf-8')
         json.dump(data, json_file, default=self.encode_decimal)
         json_file.close()
+
+
+    def load_exc_table_category(self):
+        table_name = 'category'
+        path = '%s/%s.json' % (self.logs_dir, table_name)
+        with open(path, encoding='utf-8') as f:
+            self.category_exc_table = json.load(f)
 
 
     def reset_file_exc_table(self):

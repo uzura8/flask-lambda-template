@@ -258,7 +258,7 @@ export default {
   getCategoryChildrenByParentSlug: (serviceId, slug, params = {}, token = null) => {
     return new Promise((resolve, reject) => {
       const options = utilUri.getReqOptions(params, token)
-      const uri = `categories/${serviceId}/${slug}/children`
+      const uri = `admin/categories/${serviceId}/${slug}/children`
       client.get(uri, options)
         .then((res) => {
           resolve(res.data)

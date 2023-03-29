@@ -136,23 +136,31 @@ def category_detail_children(service_id, slug):
         parent_path = str(category['id'])
     else:
         parent_path = '#'.join([category['parentPath'], str(category['id'])])
-    items = Category.get_children_by_parent_path(service_id, parent_path, False, True, False)
+    cates = Category.get_children_by_parent_path(service_id, parent_path, False, False, False)
 
     if request.method == 'POST':
-        if not items:
+        if not cates:
             return jsonify([]), 200
 
-        exist_ids = [ item.get('id') for item in items ]
+        exist_ids = [ c.get('id') for c in cates ]
 
         vals = validate_req_params(validation_schema_category_children_post(), request.json)
         sorted_ids = vals['sortedIds']
 
-        upd_ids = [i for i in sorted_ids if i in exist_ids]
-        if not upd_ids:
-            raise InvalidUsage('All ids are invalid', 400)
+        if set(sorted_ids) != set(exist_ids):
+            raise InvalidUsage('ids are invalid', 400)
+
+        # Generate a list of dict sorted by the values in 'sorted_ids'
+        # and add a new attribute, 'orderNo', where the value is sequential numbers.
+        sorted_cates = [
+            {**c, 'orderNo': i+1}
+            for i, cid in enumerate(sorted_ids)
+            for c in cates
+            if c['id'] == cid
+        ]
 
         try:
-            res = Category.batch_update_order_no_by_ids(upd_ids)
+            Category.updated_by_delete_insert(sorted_cates)
 
         except ModelInvalidParamsException as e:
             raise InvalidUsage(e.message, 400)
@@ -161,9 +169,9 @@ def category_detail_children(service_id, slug):
             print(traceback.format_exc())
             raise InvalidUsage('Server Error', 500)
 
-        return jsonify(res), 200
+        return jsonify(sorted_cates), 200
 
-    return jsonify(items), 200
+    return jsonify(cates), 200
 
 
 validation_schema_slug = {
