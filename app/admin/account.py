@@ -14,7 +14,7 @@ def before_request():
 @cognito_auth_required
 @admin_role_editor_required
 def account_service_list():
-    accept_sids = current_cognito_jwt.get('custom:acceptServiceIds').split(',')
+    accept_sids = current_cognito_jwt.get('custom:acceptServiceIds', '').split(',')
     if not accept_sids:
         return jsonify([]), 200
 
