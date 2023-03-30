@@ -85,9 +85,16 @@ def user_detail(username):
             UserPoolId = COGNITO_USERPOOL_ID,
             Username=username
         )
-        accept_service_ids = AdminUserConfig.get_val(username, 'acceptServiceIds')
     except cognito.exceptions.UserNotFoundException:
         raise InvalidUsage('User does not exist', 404)
+
+    try:
+        accept_service_ids = AdminUserConfig.get_val(username, 'acceptServiceIds')
+    except ModelInvalidParamsException as e:
+        raise InvalidUsage(e.message, 400)
+    except Exception as e:
+        print(traceback.format_exc())
+        raise InvalidUsage('Server Error', 500)
 
     user = user_to_dict_for_response(coguser, accept_service_ids)
     return json.dumps(user, default=support_datetime_default), 200
