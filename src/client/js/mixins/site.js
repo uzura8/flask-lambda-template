@@ -42,9 +42,9 @@ export default {
       return this.$store.getters.adminRole()
     },
 
-    adminUserAcceptServiceIds() {
-      return this.$store.getters.adminUserAcceptServiceIds()
-    },
+    //adminUserAcceptServiceIds() {
+    //  return this.$store.getters.adminUserAcceptServiceIds()
+    //},
 
     adminUserToken() {
       return this.$store.state.adminUser.token
