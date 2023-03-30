@@ -340,6 +340,7 @@ export default{
       if (this.checkObjHasProp(config.post, 'isEditablePostBodyOnPageByMarkdown', true) === false) {
         return false
       }
+      if (this.hasEditorRole === false) return false
       return this.post.bodyFormat === 'markdown'
     },
 

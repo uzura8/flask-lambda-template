@@ -34,7 +34,15 @@ export default{
 
   methods: {
     async setService() {
-      this.service = await Admin.getServices(this.serviceId, null, this.adminUserToken)
+      this.$store.dispatch('setLoading', true)
+      try {
+        this.service = await Admin.getServices(this.serviceId, null, this.adminUserToken)
+        this.$store.dispatch('setLoading', false)
+      } catch (err) {
+        console.log(err);//!!!!!!
+        this.$store.dispatch('setLoading', false)
+        this.handleApiError(err, this.$t('msg["Failed to get data from server"]'))
+      }
     },
   },
 }
