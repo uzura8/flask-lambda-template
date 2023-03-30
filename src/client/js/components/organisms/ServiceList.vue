@@ -17,6 +17,7 @@
         <td>{{ service.label }}</td>
         <td>
           <router-link
+            v-if="editableServiceIds.includes(service.serviceId)"
             :to="`/admin/services/${service.serviceId}/edit`"
           >
             <span class="icon"><i class="fas fa-edit"></i></span>
@@ -42,6 +43,7 @@ export default{
   data(){
     return {
       services: [],
+      editableServiceIds: [],
     }
   },
 
@@ -50,6 +52,7 @@ export default{
 
   async created() {
     await this.fetchServices()
+    await this.setEditableServiceIds()
   },
 
   methods: {
@@ -66,7 +69,19 @@ export default{
         this.$store.dispatch('setLoading', false)
         this.handleApiError(err, this.$t('msg["Failed to get data from server"]'))
       }
-    }
+    },
+
+    async setEditableServiceIds() {
+      this.$store.dispatch('setLoading', true)
+      try {
+        const user = await Admin.getUsers(this.adminUserName, null, this.adminUserToken)
+        this.editableServiceIds = user.acceptServiceIds
+        this.$store.dispatch('setLoading', false)
+      } catch (err) {
+        this.$store.dispatch('setLoading', false)
+        this.handleApiError(err, this.$t('msg["Failed to get data from server"]'))
+      }
+    },
   }
 }
 </script>
