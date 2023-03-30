@@ -378,7 +378,7 @@ export default{
     async checkServiceIdExists(slug) {
       try {
         this.$store.dispatch('setLoading', true)
-        await Admin.getServices(this.serviceIdInput, null, this.adminUserToken)
+        await Admin.checkServiceExists(this.serviceIdInput, this.adminUserToken)
         this.$store.dispatch('setLoading', false)
         return true
       } catch (err) {

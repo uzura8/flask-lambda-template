@@ -58,14 +58,18 @@ def service_configs():
     return jsonify(configs), 200
 
 
-@bp.route('/services/<string:service_id>', methods=['POST', 'GET'])
+@bp.route('/services/<string:service_id>', methods=['POST', 'GET', 'HEAD'])
 @cognito_auth_required
 @admin_role_editor_required
 def service_detail(service_id):
-    service = check_acl_service_id(service_id)
+    if request.method == 'HEAD':
+        service = Service.get_one({'p': {'key':'serviceId', 'val':service_id}})
+        if service:
+            return jsonify(), 200
+        else:
+            return jsonify(), 404
 
-    key = {'p': {'key':'serviceId', 'val':service_id}}
-    service = Service.get_one(key)
+    service = check_acl_service_id(service_id)
     if not service:
         raise InvalidUsage('ServiceId does not exist', 404)
 
@@ -78,7 +82,7 @@ def service_detail(service_id):
         if 'configs' in vals:
             configs = vals.pop('configs')
 
-        service = Service.update(key, vals, True)
+        service = Service.update({'p': {'key':'serviceId', 'val':service_id}}, vals, True)
 
         if configs is not None and any(configs):
             for name, val in configs.items():
@@ -86,6 +90,7 @@ def service_detail(service_id):
 
     service['configs'] = ServiceConfig.get_all_by_service(service_id, True, True, True)
     return jsonify(service), 200
+
 
 mimetype_regex = r'^[0-9a-z_\-\.]+/[0-9a-z_\-\.]+$'
 

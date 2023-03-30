@@ -17,6 +17,19 @@ export default {
     })
   },
 
+  checkServiceExists: (identifer, token = null) => {
+    return new Promise((resolve, reject) => {
+      const options = utilUri.getReqOptions(null, token)
+      client.head(`admin/services/${identifer}`, options)
+        .then((res) => {
+          resolve(res.headers)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  },
+
   getServiceConfigs: (token = null) => {
     return new Promise((resolve, reject) => {
       const options = utilUri.getReqOptions({}, token)
