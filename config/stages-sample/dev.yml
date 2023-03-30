@@ -58,6 +58,11 @@ dynamodbConfig:
     provisionedThroughput:
       readCapacityUnits: 0
       writeCapacityUnits: 0
+  adminUserConfig:
+    billingMode: 'PAY_PER_REQUEST'
+    provisionedThroughput:
+      readCapacityUnits: 0
+      writeCapacityUnits: 0
   category:
     billingMode: 'PAY_PER_REQUEST'
     provisionedThroughput:
