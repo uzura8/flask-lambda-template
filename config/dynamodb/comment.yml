@@ -21,7 +21,12 @@ Properties:
     -
       AttributeName: commentId
       KeyType: HASH
-  BillingMode: PAY_PER_REQUEST
+
+  BillingMode: ${self:custom.dynamodbConfig.comment.billingMode}
+  ProvisionedThroughput:
+    ReadCapacityUnits: ${self:custom.dynamodbConfig.comment.provisionedThroughput.readCapacityUnits}
+    WriteCapacityUnits: ${self:custom.dynamodbConfig.comment.provisionedThroughput.writeCapacityUnits}
+
   Tags:
     - Key: backup
       Value: ${self:custom.dynamoDbBackupTargetTagValue}

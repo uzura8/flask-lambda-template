@@ -15,10 +15,12 @@ Properties:
     -
       AttributeName: createdAt
       KeyType: RANGE
-  #ProvisionedThroughput:
-  #  ReadCapacityUnits: 1
-  #  WriteCapacityUnits: 5
-  BillingMode: PAY_PER_REQUEST
+
+  BillingMode: ${self:custom.dynamodbConfig.voteLog.billingMode, 'PAY_PER_REQUEST'}
+  ProvisionedThroughput:
+    ReadCapacityUnits: ${self:custom.dynamodbConfig.voteLog.provisionedThroughput.readCapacityUnits}
+    WriteCapacityUnits: ${self:custom.dynamodbConfig.voteLog.provisionedThroughput.writeCapacityUnits}
+
   Tags:
     - Key: backup
       Value: ${self:custom.dynamoDbBackupTargetTagValue}

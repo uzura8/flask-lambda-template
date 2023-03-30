@@ -18,10 +18,12 @@ Properties:
     -
       AttributeName: id
       KeyType: HASH
-  BillingMode: PAY_PER_REQUEST
-  #ProvisionedThroughput:
-  #  ReadCapacityUnits: 5
-  #  WriteCapacityUnits: 3
+
+  BillingMode: ${self:custom.dynamodbConfig.category.billingMode}
+  ProvisionedThroughput:
+    ReadCapacityUnits: ${self:custom.dynamodbConfig.category.provisionedThroughput.readCapacityUnits}
+    WriteCapacityUnits: ${self:custom.dynamodbConfig.category.provisionedThroughput.writeCapacityUnits}
+
   Tags:
     - Key: backup
       Value: ${self:custom.dynamoDbBackupTargetTagValue}

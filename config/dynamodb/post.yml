@@ -24,10 +24,12 @@ Properties:
     -
       AttributeName: postId
       KeyType: HASH
-  #ProvisionedThroughput:
-  #  ReadCapacityUnits: 5
-  #  WriteCapacityUnits: 3
-  BillingMode: PAY_PER_REQUEST
+
+  BillingMode: ${self:custom.dynamodbConfig.post.billingMode}
+  ProvisionedThroughput:
+    ReadCapacityUnits: ${self:custom.dynamodbConfig.post.provisionedThroughput.readCapacityUnits}
+    WriteCapacityUnits: ${self:custom.dynamodbConfig.post.provisionedThroughput.writeCapacityUnits}
+
   Tags:
     - Key: backup
       Value: ${self:custom.dynamoDbBackupTargetTagValue}

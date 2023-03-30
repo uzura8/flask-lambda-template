@@ -18,10 +18,12 @@ Properties:
     -
       AttributeName: tagId
       KeyType: RANGE
-  BillingMode: PAY_PER_REQUEST
-  #ProvisionedThroughput:
-  #  ReadCapacityUnits: 5
-  #  WriteCapacityUnits: 3
+
+  BillingMode: ${self:custom.dynamodbConfig.postTag.billingMode}
+  ProvisionedThroughput:
+    ReadCapacityUnits: ${self:custom.dynamodbConfig.postTag.provisionedThroughput.readCapacityUnits}
+    WriteCapacityUnits: ${self:custom.dynamodbConfig.postTag.provisionedThroughput.writeCapacityUnits}
+
   Tags:
     - Key: backup
       Value: ${self:custom.dynamoDbBackupTargetTagValue}

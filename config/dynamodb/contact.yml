@@ -15,10 +15,12 @@ Properties:
     -
       AttributeName: serviceIdCode
       KeyType: HASH
-  #ProvisionedThroughput:
-  #  ReadCapacityUnits: 5
-  #  WriteCapacityUnits: 3
-  BillingMode: PAY_PER_REQUEST
+
+  BillingMode: ${self:custom.dynamodbConfig.contact.billingMode}
+  ProvisionedThroughput:
+    ReadCapacityUnits: ${self:custom.dynamodbConfig.contact.provisionedThroughput.readCapacityUnits}
+    WriteCapacityUnits: ${self:custom.dynamodbConfig.contact.provisionedThroughput.writeCapacityUnits}
+
   Tags:
     - Key: backup
       Value: ${self:custom.dynamoDbBackupTargetTagValue}

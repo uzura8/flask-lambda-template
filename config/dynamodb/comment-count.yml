@@ -18,10 +18,12 @@ Properties:
     -
       AttributeName: contentIdPublishStatus
       KeyType: RANGE
-  #ProvisionedThroughput:
-  #  ReadCapacityUnits: 8
-  #  WriteCapacityUnits: 8
-  BillingMode: PAY_PER_REQUEST
+
+  BillingMode: ${self:custom.dynamodbConfig.commentCount.billingMode}
+  ProvisionedThroughput:
+    ReadCapacityUnits: ${self:custom.dynamodbConfig.commentCount.provisionedThroughput.readCapacityUnits}
+    WriteCapacityUnits: ${self:custom.dynamodbConfig.commentCount.provisionedThroughput.writeCapacityUnits}
+
   Tags:
     - Key: backup
       Value: ${self:custom.dynamoDbBackupTargetTagValue}

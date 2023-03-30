@@ -23,6 +23,7 @@ custom:
   awsAccontId: ${file(./config/stages/common.yml):awsAccountId}
   cognitoRegion: ${file(${self:custom.stageConfigFileName}):cognitoRegion}
   cognitoUserpoolId: ${file(${self:custom.stageConfigFileName}):cognitoUserpoolId}
+  dynamodbConfig: ${file(${self:custom.stageConfigFileName}):dynamodbConfig}
   wsgi:
     app: app/handler.app
     packRequirements: false
@@ -235,8 +236,6 @@ resources:
     SiteConfigDynamoDBTable: ${file(./config/dynamodb/site-config.yml)}
     ServiceDynamoDBTable: ${file(./config/dynamodb/service.yml)}
     ServiceConfigDynamoDBTable: ${file(./config/dynamodb/service-config.yml)}
-    VoteLogDynamoDBTable: ${file(./config/dynamodb/vote-log.yml)}
-    VoteCountDynamoDBTable: ${file(./config/dynamodb/vote-count.yml)}
     CategoryDynamoDBTable: ${file(./config/dynamodb/category.yml)}
     PostDynamoDBTable: ${file(./config/dynamodb/post.yml)}
     PostGroupDynamoDBTable: ${file(./config/dynamodb/post-group.yml)}
@@ -245,5 +244,7 @@ resources:
     TagDynamoDBTable: ${file(./config/dynamodb/tag.yml)}
     PostTagDynamoDBTable: ${file(./config/dynamodb/post-tag.yml)}
     FileDynamoDBTable: ${file(./config/dynamodb/file.yml)}
-    #ContactDynamoDBTable: ${file(./config/dynamodb/contact.yml)}
     ShortenUrlDynamoDBTable: ${file(./config/dynamodb/shorten-url.yml)}
+    VoteCountDynamoDBTable: ${file(./config/dynamodb/vote-count.yml)}
+    VoteLogDynamoDBTable: ${file(./config/dynamodb/vote-log.yml)}
+    #ContactDynamoDBTable: ${file(./config/dynamodb/contact.yml)}
