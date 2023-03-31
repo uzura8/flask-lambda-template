@@ -8,6 +8,14 @@ export default {
   //  return state.auth.user.type == type
   //},
 
+  loadingItemCount: state => () => {
+    return state.common.loadingItems.length
+  },
+
+  isLoading: state => () => {
+    return state.common.loadingItems.length > 0
+  },
+
   isAdminUser: state => () => {
     return Boolean(state.adminUser)
   },

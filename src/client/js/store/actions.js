@@ -5,8 +5,12 @@ export default {
     ctx.commit(types.SET_COMMON_HEADER_MENU_OPEN, isOpen)
   },
 
-  setLoading: (ctx, isLoading) => {
-    ctx.commit(types.SET_COMMON_LOADING, isLoading)
+  setLoading: (ctx, payload) => {
+    ctx.commit(types.SET_COMMON_LOADING, payload)
+  },
+
+  resetLoading: (ctx) => {
+    ctx.commit(types.RESET_COMMON_LOADING)
   },
 
   setAdminUser: async (ctx, payload) => {

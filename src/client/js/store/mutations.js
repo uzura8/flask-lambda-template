@@ -1,9 +1,35 @@
 import * as types from './mutation-types'
 import arr from '@/util/arr'
+import obj from '@/util/obj'
 
 export default {
-  [types.SET_COMMON_LOADING] (state, isLoading) {
-    state.common.isLoading = isLoading
+  [types.SET_COMMON_LOADING] (state, payload) {
+    let isLoading = false
+    let item = 'item'
+
+    if (obj.isObject(payload) === true) {
+      isLoading = payload.status
+      item = payload.key
+    } else if (typeof payload === 'boolean') {
+      isLoading = payload
+    } else {
+      isLoading = Boolean(payload)
+    }
+
+    if (isLoading) {
+      state.common.loadingItems.push(item)
+    } else {
+      let idx = state.common.loadingItems.indexOf(item)
+      if (idx !== -1) {
+        state.common.loadingItems.splice(idx, 1)
+      }
+    }
+  },
+
+  [types.RESET_COMMON_LOADING] (state) {
+    if (state.common.loadingItems.length > 0) {
+      state.common.loadingItems.splice(0, state.common.loadingItems.length)
+    }
   },
 
   [types.SET_ADMIN_USER] (state, payload) {

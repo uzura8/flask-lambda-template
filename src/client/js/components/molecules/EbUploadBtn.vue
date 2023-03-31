@@ -50,7 +50,7 @@ export default {
 
   computed: {
     isDisabled: function() {
-      return this.$store.state.common.isLoading
+      return this.isLoading
     },
 
     fieldClass: function() {
