@@ -11,6 +11,7 @@ const state = {
   common: {
     loadingItems: [],
     isHeaderMenuOpen: false,
+    loadingTimerId: null,
   },
   auth: {
     state: null,

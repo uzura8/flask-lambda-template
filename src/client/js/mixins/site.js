@@ -14,10 +14,6 @@ export default {
   },
 
   computed: {
-    loadingItemCount: function () {
-      return this.$store.getters.loadingItemCount()
-    },
-
     isLoading: function () {
       return this.$store.getters.isLoading()
     },
@@ -64,15 +60,6 @@ export default {
 
     serviceId() {
       return this.$route.params.serviceId
-    },
-  },
-
-  watch: {
-    loadingItemCount(val, oldVal) {
-      if (oldVal === 0 && val === 1) {
-        const duration = util.obj.getVal(config, 'loadingMaxDuration', 30) * 1000
-        setTimeout(() => store.dispatch('resetLoading'), duration)
-      }
     },
   },
 
