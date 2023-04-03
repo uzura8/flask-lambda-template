@@ -10,7 +10,6 @@
           <th>Username</th>
           <th>Email</th>
           <th>Role</th>
-          <th>ServiceId</th>
         </tr>
       </thead>
       <tbody>
@@ -20,7 +19,6 @@
           </td>
           <td>{{ user.email }}</td>
           <td>{{ $t(`term.userRoles.${user.role}`) }}</td>
-          <td v-text="user.acceptServiceIds.join(', ')"></td>
         </tr>
       </tbody>
     </table>

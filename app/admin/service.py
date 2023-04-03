@@ -1,6 +1,6 @@
 from flask import jsonify, request
-from flask_cognito import cognito_auth_required
-from app.models.dynamodb import Service, ServiceConfig, Category
+from flask_cognito import cognito_auth_required, current_cognito_jwt
+from app.models.dynamodb import Service, ServiceConfig, Category, AdminUserConfig
 from app.common.error import InvalidUsage
 from app.common.request import validate_req_params
 from app.validators import NormalizerUtils
@@ -36,6 +36,15 @@ def service_list():
                 ServiceConfig.save(service['serviceId'], name, val)
 
         service['configs'] = ServiceConfig.get_all_by_service(service['serviceId'], True, True, True)
+
+        admin_username = current_cognito_jwt.get('cognito:username', '')
+        if not admin_username:
+            raise InvalidUsage('username is empty', 400)
+
+        # Add serviceId to acceptServiceIds in admin user configs
+        accepted_sids = AdminUserConfig.get_val(admin_username, 'acceptServiceIds')
+        accepted_sids.append(service['serviceId'])
+        AdminUserConfig.save(admin_username, 'acceptServiceIds', accepted_sids)
 
         # Create root category
         vals = {

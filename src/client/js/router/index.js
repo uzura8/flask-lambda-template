@@ -4,6 +4,8 @@ import cognito from '@/cognito'
 import store from '@/store'
 import routes from './routes'
 import arr from '@/util/arr'
+import site from '@/util/site'
+import { Admin } from '@/api'
 
 Vue.use(Router)
 
@@ -73,7 +75,9 @@ router.beforeEach(async(to, from, next) => {
         }
       }
       if (to.matched.some(record => record.meta.requiresAcceptService)) {
-        if (store.getters.checkServiceIdAccepted(to.params.serviceId) === false) {
+          const services = await Admin.getAccountServices(null, token)
+          const service = services.find(item => item['serviceId'] === to.params.serviceId)
+          if (service == null) {
           next({ path: '/error/forbidden' })
         }
       }
