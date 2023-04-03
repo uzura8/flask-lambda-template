@@ -355,8 +355,16 @@ export default{
 
   methods: {
     async setPost() {
-      this.post = await Admin.getPosts(this.serviceId, this.postId, null, this.adminUserToken)
-      this.body = this.post.body
+      this.$store.dispatch('setLoading', true)
+      try {
+        this.post = await Admin.getPosts(this.serviceId, this.postId, null, this.adminUserToken)
+        this.body = this.post.body
+        this.$store.dispatch('setLoading', false)
+      } catch (err) {
+        this.debugOutput(err)
+        this.$store.dispatch('setLoading', false)
+        this.handleApiError(err, 'Failed to get data from server')
+      }
     },
 
     confirmPublish() {
