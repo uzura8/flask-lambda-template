@@ -173,7 +173,7 @@ export default{
         this.$store.dispatch('setLoading', false)
         this.$router.push(`/admin/shorten-urls/${this.serviceId}`)
       } catch (err) {
-        console.log(err);//!!!!!!
+        this.debugOutput(err)
         this.$store.dispatch('setLoading', false)
         if (this.checkResponseHasErrorMessage(err, true)) {
           this.setErrors(err.response.data.errors)

@@ -94,7 +94,7 @@ export default{
         this.inputtedCategory = await Category.get(this.serviceId, this.defaultCategorySlug, { withParents: 1 })
         this.$store.dispatch('setLoading', false)
       } catch (err) {
-        //console.log(err)
+        //this.debugOutput(err)
         this.$store.dispatch('setLoading', false)
       }
     }

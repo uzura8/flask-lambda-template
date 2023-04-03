@@ -274,7 +274,7 @@ export default{
           if (!this.paramKey) this.paramKey = this.serviceConfigs.analysisParamKeyDefault
         }
       } catch (err) {
-        console.log(err);//!!!!!!
+        this.debugOutput(err)
         this.$store.dispatch('setLoading', false)
         this.handleApiError(err, this.$t('msg["Failed to get data from server"]'))
       }
@@ -305,7 +305,7 @@ export default{
         this.resetInputs()
         this.$router.push(`/admin/shorten-urls/${this.serviceId}/${res.urlId}`)
       } catch (err) {
-        console.log(err);//!!!!!!
+        this.debugOutput(err)
         this.$store.dispatch('setLoading', false)
         if (this.checkResponseHasErrorMessage(err, true)) {
           this.setErrors(err.response.data.errors)

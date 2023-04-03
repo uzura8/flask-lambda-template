@@ -5,6 +5,8 @@ import listener from '@/listener'
 import util from '@/util'
 import config from '@/config/config'
 
+const isDebug = util.obj.getVal(config, 'isDebug', false)
+
 export default {
   data(){
     return {
@@ -196,6 +198,11 @@ export default {
       if (this.checkEmpty(cates)) return ''
       const cate = cates.find(item => item.slug === slug)
       return cate != null ? cate.label : ''
+    },
+
+    debugOutput(data) {
+      if (isDebug === false) return
+      console.log(data)
     },
   },
 }

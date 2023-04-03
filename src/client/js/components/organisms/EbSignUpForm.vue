@@ -116,7 +116,7 @@ export default {
             if (!this.isInclude) this.$router.push({ name: 'SentVerificationMail' })
           })
         .catch((err) => {
-          console.log(err)// FOR DEBUG
+          this.debugOutput(err)
           const i18nKey = site.convFirebaseErrorCodeToI18n(err.code)
           this.showGlobalMessage(this.$t(i18nKey))
         })
@@ -142,7 +142,7 @@ export default {
           }
         })
         .catch(err => {
-          console.log(err)// FOR DEBUG
+          this.debugOutput(err)
           const i18nKey = site.convFirebaseErrorCodeToI18n(err.code)
           this.showGlobalMessage(this.$t(i18nKey))
         })

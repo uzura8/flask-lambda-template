@@ -148,7 +148,7 @@ export default{
         })
         this.$store.dispatch('setLoading', false)
       } catch (err) {
-        console.log(err);//!!!!!!
+        this.debugOutput(err)
         this.$store.dispatch('setLoading', false)
         this.handleApiError(err, this.$t('msg["Failed to get data from server"]'))
       }
@@ -174,7 +174,7 @@ export default{
         this.deletedCateSlugs.push(cateSlug)
         this.$store.dispatch('setLoading', false)
       } catch (err) {
-        console.log(err);//!!!!!!
+        this.debugOutput(err)
         this.$store.dispatch('setLoading', false)
         this.handleApiError(err, this.$t('msg["Delete failed"]'))
       }
@@ -196,7 +196,7 @@ export default{
         await Admin.updateCategoriesOrder(this.serviceId, this.parentCategorySlug, vals, this.adminUserToken)
         this.$store.dispatch('setLoading', false)
       } catch (err) {
-        console.log(err);//!!!!!!
+        this.debugOutput(err)
         this.$store.dispatch('setLoading', false)
         this.handleApiError(err, this.$t(`msg["Delete failed"]`))
       }

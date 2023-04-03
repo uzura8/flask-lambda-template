@@ -3,6 +3,7 @@
   "port": null,
   "baseUrl": "/",
   "isSSL": false,
+  "isDebug": false,
   "logoUrls": {
     "site": "/assets/img/logo.png",
     "admin": "/assets/img/logo-w.png"

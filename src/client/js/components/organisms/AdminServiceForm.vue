@@ -326,7 +326,7 @@ export default{
       try {
         this.defaultConfigs = await Admin.getServiceConfigs(this.adminUserToken)
       } catch (err) {
-        console.log(err)
+        this.debugOutput(err)
         this.showGlobalMessage(this.$t('msg["Server error"]'))
       }
     },
@@ -365,7 +365,7 @@ export default{
         this.resetInputs()
         this.$router.push('/admin/services')
       } catch (err) {
-        console.log(err)
+        this.debugOutput(err)
         this.$store.dispatch('setLoading', false)
         if (this.checkResponseHasErrorMessage(err, true)) {
           this.setErrors(err.response.data.errors)

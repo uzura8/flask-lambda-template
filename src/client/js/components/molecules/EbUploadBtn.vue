@@ -85,7 +85,7 @@ export default {
         this.$emit('uploaded', res)
         this.$store.dispatch('setLoading', false)
       } catch (err) {
-        console.log(err); //!!!!!!
+        this.debugOutput(err)
         this.$store.dispatch('setLoading', false)
         this.handleApiError(err, this.$t('msg["Upload failed"]'))
       }

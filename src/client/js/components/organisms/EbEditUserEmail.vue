@@ -142,7 +142,7 @@ export default {
         this.showGlobalMessage(this.$t('msg["Sent verification email"]'), 'is-success')
         this.isEdit = false
       } catch (err) {
-        console.log(err)// FOR DEBUG
+        this.debugOutput(err)
         const i18nKey = site.convFirebaseErrorCodeToI18n(err.code)
         this.errorGlobal = this.$t(i18nKey)
       }

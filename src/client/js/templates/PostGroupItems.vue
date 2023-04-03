@@ -68,7 +68,7 @@ export default{
         this.group = await Post.getGroups(this.serviceId, this.slug, params)
         this.$store.dispatch('setLoading', false)
       } catch (err) {
-        console.log(err);//!!!!!!
+        this.debugOutput(err)
         this.$store.dispatch('setLoading', false)
         this.handleApiError(err, this.$t('msg["Failed to get data from server"]'))
       }
