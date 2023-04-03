@@ -42,7 +42,7 @@ export default {
         await this.$store.dispatch('resendEmailVerification')
         this.showGlobalMessage(this.$t('msg["Sent verification email"]'), 'is-success')
       } catch (err) {
-        console.log(err)// FOR DEBUG
+        this.debugOutput(err)
         const i18nKey = site.convFirebaseErrorCodeToI18n(err.code)
         this.showGlobalMessage(this.$t(i18nKey, 'is-success'))
       }

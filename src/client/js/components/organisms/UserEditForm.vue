@@ -148,7 +148,7 @@ export default {
           this.showGlobalMessage(msg, 'is-success')
         })
         .catch((err) => {
-          console.log(err)// FOR DEBUG
+          this.debugOutput(err)
           const i18nKey = site.convFirebaseErrorCodeToI18n(err.code)
           this.showGlobalMessage(this.$t(i18nKey))
         })

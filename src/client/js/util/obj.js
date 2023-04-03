@@ -33,6 +33,15 @@ export default {
   checkObjHasProp: checkObjHasProp,
   isEmpty: isEmpty,
 
+  isObject(obj) {
+    return typeof obj === 'object' && obj !== null && !Array.isArray(obj)
+  },
+
+  getVal(obj, key, defval = null) {
+    if (checkObjHasProp(obj, key) === true) return obj[key]
+    return defval
+  },
+
   checkObjItemsNotEmpty(obj, reqKeys=[], checkEmpty=false) {
     if (isEmpty(obj) === true) return false
 

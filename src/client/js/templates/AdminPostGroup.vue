@@ -205,7 +205,7 @@ export default{
         this.groupItems = this.postGroup.posts
         this.$store.dispatch('setLoading', false)
       } catch (err) {
-        console.log(err);//!!!!!!
+        this.debugOutput(err)
         this.$store.dispatch('setLoading', false)
         this.handleApiError(err, this.$t('msg["Failed to get data from server"]'))
       }
@@ -234,7 +234,7 @@ export default{
         await Admin.updatePostGroup(this.serviceId, this.slug, vals, this.adminUserToken)
         this.$store.dispatch('setLoading', false)
       } catch (err) {
-        console.log(err);//!!!!!!
+        this.debugOutput(err)
         this.$store.dispatch('setLoading', false)
         this.handleApiError(err, this.$t(`msg["Delete failed"]`))
       }
@@ -255,7 +255,7 @@ export default{
         this.$store.dispatch('setLoading', false)
         this.$router.push(`/admin/posts/${this.serviceId}/groups`)
       } catch (err) {
-        console.log(err);//!!!!!!
+        this.debugOutput(err)
         this.$store.dispatch('setLoading', false)
         if (this.checkResponseHasErrorMessage(err, true)) {
           this.setErrors(err.response.data.errors)

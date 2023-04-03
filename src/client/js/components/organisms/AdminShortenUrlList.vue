@@ -154,7 +154,7 @@ export default{
         }
         this.$store.dispatch('setLoading', false)
       } catch (err) {
-        console.log(err)
+        this.debugOutput(err)
         this.handleApiError(err, 'Failed to get data from server')
         this.$store.dispatch('setLoading', false)
       }

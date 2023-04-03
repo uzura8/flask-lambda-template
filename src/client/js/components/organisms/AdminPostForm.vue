@@ -458,7 +458,7 @@ export default{
         }
         this.slug = slug
       } catch (err) {
-        console.log(err);//!!!!!!
+        this.debugOutput(err)
         this.$store.dispatch('setLoading', false)
         this.handleApiError(err, this.$t('msg["Failed to get data from server"]'))
       }
@@ -472,7 +472,7 @@ export default{
           this.filteredTags = res
         }
       } catch (err) {
-        console.log(err);//!!!!!!
+        this.debugOutput(err)
         this.$store.dispatch('setLoading', false)
         this.handleApiError(err, this.$t('msg["Failed to get data from server"]'))
       }
@@ -503,7 +503,7 @@ export default{
           this.uploaderOptions.image.extensions.push(ext)
         })
       } catch (err) {
-        console.log(err);//!!!!!!
+        this.debugOutput(err)
         this.$store.dispatch('setLoading', false)
         this.handleApiError(err, this.$t('msg["Failed to get data from server"]'))
       }
@@ -571,7 +571,7 @@ export default{
         this.resetInputs()
         this.$router.push(`/admin/posts/${this.serviceId}/${res.postId}`)
       } catch (err) {
-        console.log(err);//!!!!!!
+        this.debugOutput(err)
         this.$store.dispatch('setLoading', false)
         if (this.checkResponseHasErrorMessage(err, true)) {
           this.setErrors(err.response.data.errors)
@@ -588,7 +588,7 @@ export default{
         this.$store.dispatch('setLoading', false)
         return res
       } catch (err) {
-        console.log(err);//!!!!!!
+        this.debugOutput(err)
         this.$store.dispatch('setLoading', false)
         this.handleApiError(err)
       }

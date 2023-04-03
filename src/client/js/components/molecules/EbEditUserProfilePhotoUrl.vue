@@ -97,7 +97,7 @@ export default {
         this.uploadedImageName = media[0].name
         this.isEdit = false
       } catch (err) {
-        console.log(err)// FOR DEBUG
+        this.debugOutput(err)
         this.errorMsg = this.$t('msg["Error occurred"]')
       }
     },
@@ -117,7 +117,7 @@ export default {
         this.showGlobalMessage(this.$t('msg.Updated'), 'is-success')
         this.isEdit = false
       } catch (err) {
-        console.log(err)// FOR DEBUG
+        this.debugOutput(err)
         this.errorMsg = this.$t('msg["Error occurred"]')
       }
     },

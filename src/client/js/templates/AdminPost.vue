@@ -384,7 +384,7 @@ export default{
         this.$emit('posted', res)
         this.showGlobalMessage(this.$t('msg.changePublishStatusCompleted'), 'is-success')
       } catch (err) {
-        console.log(err);//!!!!!!
+        this.debugOutput(err)
         this.$store.dispatch('setLoading', false)
         if (this.checkResponseHasErrorMessage(err, true)) {
           this.setErrors(err.response.data.errors)
@@ -409,7 +409,7 @@ export default{
         this.isEditPostBody = false
         this.$store.dispatch('setLoading', false)
       } catch (err) {
-        console.log(err);//!!!!!!
+        this.debugOutput(err)
         this.$store.dispatch('setLoading', false)
         if (this.checkResponseHasErrorMessage(err, true)) {
           this.setErrors(err.response.data.errors)
@@ -430,7 +430,7 @@ export default{
         this.$store.dispatch('setLoading', false)
         this.$router.push(`/admin/posts/${this.serviceId}`)
       } catch (err) {
-        console.log(err);//!!!!!!
+        this.debugOutput(err)
         this.$store.dispatch('setLoading', false)
         if (this.checkResponseHasErrorMessage(err, true)) {
           this.setErrors(err.response.data.errors)

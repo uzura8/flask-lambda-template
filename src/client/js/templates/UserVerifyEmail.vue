@@ -65,7 +65,7 @@ export default {
           'type': 'success',
         }
       } catch (err) {
-        console.log(err)
+        this.debugOutput(err)
         return {
           'title': this.$t('msg["Verify Email Failed"]'),
           'body': this.$t('msg["Check verification email"]'),

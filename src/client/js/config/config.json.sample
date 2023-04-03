@@ -3,10 +3,12 @@
   "port": null,
   "baseUrl": "/",
   "isSSL": false,
+  "isDebug": false,
   "logoUrls": {
     "site": "/assets/img/logo.png",
     "admin": "/assets/img/logo-w.png"
   },
+  "loadingMaxDuration": 30,
   "isEnabledComment": true,
   "adminAuthHeader": "Authorization",
   "adminAuthHeaderTokenPrefix": "Bearer",
