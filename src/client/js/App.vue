@@ -46,10 +46,6 @@ export default {
   },
 
   computed: {
-    isLoading() {
-      return this.$store.state.common.isLoading
-    },
-
     isAdminPostPages() {
       if (this.$route.path.startsWith('/admin/posts') === true) return true
       if (this.$route.path.startsWith('/admin/categories') === true) return true

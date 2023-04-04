@@ -136,7 +136,7 @@ export default {
         this.$store.dispatch('setLoading', false)
         this.redirectByQueryForAdmin()
       } catch (err) {
-        console.log(err);//!!!!!!
+        this.debugOutput(err)
         this.$store.dispatch('setLoading', false)
         this.handleApiError(err, this.$t('msg["Sign In failed"]'))
       }

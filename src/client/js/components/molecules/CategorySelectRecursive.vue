@@ -106,7 +106,7 @@ export default{
         if (this.checkEmpty(items)) this.isHide = true
         this.isLoadingLocal = false
       } catch (err) {
-        //console.log(err);//!!!!!!
+        //this.debugOutput(err)
         this.isLoadingLocal = false
         //this.handleApiError(err, this.$t('msg["Failed to get data from server"]'))
       }

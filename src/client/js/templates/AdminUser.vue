@@ -135,7 +135,7 @@ export default{
         if (common.checkObjHasProp(this.user, 'role')) this.selectedRole = this.user.role
         this.$store.dispatch('setLoading', false)
       } catch (err) {
-        console.log(err);//!!!!!!
+        this.debugOutput(err)
         this.$store.dispatch('setLoading', false)
         this.handleApiError(err, this.$t('msg["Failed to get data from server"]'))
       }
@@ -148,7 +148,7 @@ export default{
         this.services = await Admin.getServices(null, params_copied, this.adminUserToken)
         this.$store.dispatch('setLoading', false)
       } catch (err) {
-        console.log(err);//!!!!!!
+        this.debugOutput(err)
         this.$store.dispatch('setLoading', false)
         this.handleApiError(err, this.$t('msg["Failed to get data from server"]'))
       }
@@ -167,7 +167,7 @@ export default{
         this.$store.dispatch('setLoading', false)
         this.showGlobalMessage(this.$t('msg.Updated'), 'is-success')
       } catch (err) {
-        console.log(err);//!!!!!!
+        this.debugOutput(err)
         this.$store.dispatch('setLoading', false)
         this.handleApiError(err, this.$t('msg["Update failed"]'))
       }
@@ -187,7 +187,7 @@ export default{
         this.$store.dispatch('setLoading', false)
         this.showGlobalMessage(this.$t('msg.Updated'), 'is-success')
       } catch (err) {
-        console.log(err);//!!!!!!
+        this.debugOutput(err)
         this.$store.dispatch('setLoading', false)
         this.handleApiError(err, this.$t('msg["Update failed"]'))
       }

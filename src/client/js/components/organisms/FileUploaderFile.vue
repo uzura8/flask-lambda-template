@@ -152,7 +152,7 @@ export default{
         this.isUploading = false
         this.$emit('delete-file', this.file.fileId)
       } catch (err) {
-        console.log(err)//!!!!!!
+        this.debugOutput(err)
         this.error = this.$t('msg["Delete failed"]')
         this.isUploading = false
       }
@@ -188,7 +188,7 @@ export default{
         this.isUploading = ''
         return res
       } catch (err) {
-        console.log(err);//!!!!!!
+        this.debugOutput(err)
         this.isUploading = false
         this.error = this.$t('msg["Upload failed"]')
       }
@@ -206,7 +206,7 @@ export default{
         this.isUploading = false
         return res
       } catch (err) {
-        console.log(err);//!!!!!!
+        this.debugOutput(err)
         this.isUploading = false
         this.error = this.$t('msg["Upload failed"]')
       }

@@ -146,7 +146,7 @@ export default{
         this.resetInputs()
         this.$router.push(`/admin/posts/${this.serviceId}/groups/${vals.slug}`)
       } catch (err) {
-        console.log(err);//!!!!!!
+        this.debugOutput(err)
         this.$store.dispatch('setLoading', false)
         if (this.checkResponseHasErrorMessage(err, true)) {
           this.setErrors(err.response.data.errors)
@@ -163,7 +163,7 @@ export default{
         this.$store.dispatch('setLoading', false)
         return res
       } catch (err) {
-        console.log(err);//!!!!!!
+        this.debugOutput(err)
         this.$store.dispatch('setLoading', false)
         this.handleApiError(err)
       }

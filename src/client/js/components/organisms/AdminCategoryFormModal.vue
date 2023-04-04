@@ -79,13 +79,9 @@ export default {
   },
 
   watch: {
-    active(val) {
-      console.log([3332222, val]);//!!!!!!
-    },
   },
 
   created() {
-    console.log([333000, this.active]);//!!!!!!
   },
 }
 </script>

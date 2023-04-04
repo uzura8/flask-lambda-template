@@ -9,8 +9,9 @@ Vue.use(Vuex)
 
 const state = {
   common: {
-    isLoading: false,
+    loadingItems: [],
     isHeaderMenuOpen: false,
+    loadingTimerId: null,
   },
   auth: {
     state: null,
