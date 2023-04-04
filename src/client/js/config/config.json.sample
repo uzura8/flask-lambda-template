@@ -3,6 +3,8 @@
   "port": null,
   "baseUrl": "/",
   "isSSL": false,
+  "isDebug": false,
+  "siteName": "GPCMS",
   "logoUrls": {
     "site": "/assets/img/logo.png",
     "admin": "/assets/img/logo-w.png"

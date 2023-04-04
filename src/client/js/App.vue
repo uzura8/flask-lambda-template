@@ -21,6 +21,7 @@
 </template>
 
 <script>
+import config from '@/config/config'
 import EbNavbar from '@/components/organisms/EbNavbar'
 import EbAdminNavbar from '@/components/organisms/EbAdminNavbar'
 import EbAdminTabMenuPost from '@/components/organisms/EbAdminTabMenuPost'
@@ -34,6 +35,14 @@ export default {
     EbAdminNavbar,
     EbAdminTabMenuPost,
     EbSideNavMenu,
+  },
+
+  metaInfo() {
+    return {
+      titleTemplate(titleChunk) {
+        return titleChunk ? `${titleChunk} | ${config.siteName}` : config.siteName
+      },
+    }
   },
 
   computed: {
