@@ -11,6 +11,7 @@ plugins:
   - serverless-plugin-lambda-insights
   - serverless-plugin-aws-alerts
   - serverless-associate-waf
+  - serverless-plugin-ifelse
 
 custom:
   defaultStage: dev
@@ -76,6 +77,10 @@ custom:
   associateWaf:
     name: pscms-api-acl # If need to use WAF, create WebACL named "web-api-acl". If not create, ignore this.
     version: V2 #(optional) Regional | V2
+  serverlessIfElse:
+    - If: ${file(${self:custom.stageConfigFileName}):excludeFunctions}
+      Exclude:
+        ${file(${self:custom.stageConfigFileName}):excludeFunctions}
 
 provider:
   name: aws
@@ -185,13 +190,13 @@ functions:
     events:
       - schedule: ${file(${self:custom.stageConfigFileName}):mediaUnusedFilesCleanerEventSchedule}
 
-  #mediaImageModifier:
-  #  handler: app/media_image_modifier_handler.handler
-  #  name: ${self:service}-${self:provider.stage}-mediaImageModifier
-  #  layers:
-  #    - arn:aws:lambda:ap-northeast-1:770693421928:layer:Klayers-p38-Pillow:5 # Ref https://github.com/keithrozario/Klayers/tree/master/deployments
-  #  memorySize: ${file(${self:custom.stageConfigFileName}):mediaImageMakerMemorySize}
-  #  timeout: ${file(${self:custom.stageConfigFileName}):mediaImageMakerTimeout}
+  mediaImageModifier:
+    handler: app/media_image_modifier_handler.handler
+    name: ${self:service}-${self:provider.stage}-mediaImageModifier
+    layers:
+      - arn:aws:lambda:ap-northeast-1:770693421928:layer:Klayers-p38-Pillow:5 # Ref https://github.com/keithrozario/Klayers/tree/master/deployments
+    memorySize: ${file(${self:custom.stageConfigFileName}):mediaImageMakerMemorySize}
+    timeout: ${file(${self:custom.stageConfigFileName}):mediaImageMakerTimeout}
 
   urlShortenQrcodeMaker:
     handler: app/url_shorten_qrcode_maker.handler
