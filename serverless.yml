@@ -1,5 +1,7 @@
 service: ${file(./config/stages/common.yml):service}
 
+frameworkVersion: '3'
+
 plugins:
   - serverless-deployment-bucket
   - serverless-python-requirements
@@ -37,7 +39,10 @@ custom:
     blockPublicAccess: true
   dynamodb:
     start:
+      port: 8000
       migrate: true
+      docker: true
+      noStart: true
     stages:
       - dev
   prune:
@@ -174,13 +179,12 @@ functions:
     events:
       - s3:
           bucket: ${self:custom.mediaS3BucketName}
-          events:
-            - "s3:ObjectCreated:*"
+          event: s3:ObjectCreated:*
           #rules:
           #  #- prefix: /
           #  #- suffix: .jpg
           existing: true # If use existing bucket, set true
-          forceDeploy: true
+          #forceDeploy: true
 
   mediaUnusedFilesCleaner:
     handler: app/media_unused_files_cleaner_handler.handler
@@ -221,13 +225,12 @@ functions:
     events:
       - s3:
           bucket: ${self:custom.commentImportS3BucketName}
-          events:
-            - "s3:ObjectCreated:*"
+          event: s3:ObjectCreated:*
           rules:
             - prefix: ${self:custom.commentImportS3BucketPath}/
             - suffix: .csv
           existing: true # If use existing bucket, set true
-          forceDeploy: true
+          #forceDeploy: true
 
   commentTruncater:
     handler: app/comment_truncater.handler
