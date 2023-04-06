@@ -384,6 +384,12 @@ Set venv
 . .venv/bin/activate
 ```
 
+Create Docker container only for the first time
+
+```bash
+docker-compose build
+```
+
 Start DynamoDB Local on Docker
 
 ```bash
