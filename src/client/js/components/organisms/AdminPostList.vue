@@ -95,8 +95,11 @@
     </div>
   </div>
 
-  <div v-if="posts.length > 0">
-    <table class="table is-fullwidth mt-6">
+  <div>
+    <table
+      v-if="posts.length > 0"
+      class="table is-fullwidth mt-6"
+    >
       <thead>
         <tr>
           <th class="is-size-7">{{ $t('common.status') }}</th>
@@ -184,6 +187,13 @@
       </tbody>
     </table>
 
+    <div
+      v-else
+      class="mb-6"
+    >
+      <p class="mt-6">{{ $t('msg["Data is empty"]') }}</p>
+    </div>
+
     <nav class="pagination" role="navigation" aria-label="pagination">
       <router-link
         :to="getUrlObjByPageIndex(index - 1)"
@@ -223,9 +233,6 @@
       </ul>
 
     </nav>
-  </div>
-  <div v-else>
-    <p class="mt-6">{{ $t('msg["Data is empty"]') }}</p>
   </div>
 </div>
 </template>
