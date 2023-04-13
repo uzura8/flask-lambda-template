@@ -8,7 +8,30 @@
     <b-input
       v-model="slug"
       @blur="validate('slug')"
+      expanded
     ></b-input>
+    <div
+      v-if="isEnableSlugAutoSetButton"
+      class="controll"
+    >
+      <eb-dropdown
+        position="is-bottom-left"
+      >
+        <span slot="label">{{ $t('term.autoInput') }}</span>
+        <div class="dropdown-content">
+          <a
+            class="dropdown-item"
+            @click="setSlug('date')"
+          >{{ $t('common.date') }}
+          </a>
+          <a
+            class="dropdown-item"
+            @click="setSlug('randString')"
+          >{{ $t('term.randString') }}
+          </a>
+        </div>
+      </eb-dropdown>
+    </div>
   </b-field>
 
   <b-field
@@ -275,6 +298,7 @@ import MarkdownEditor from '@/components/atoms/MarkdownEditor'
 import FileUploader from '@/components/organisms/FileUploader'
 import LinkInputs from '@/components/molecules/LinkInputs'
 import CategorySelect from '@/components/molecules/CategorySelect'
+import EbDropdown from '@/components/molecules/EbDropdown'
 
 export default{
   name: 'AdminPostForm',
@@ -285,6 +309,7 @@ export default{
     RichTextEditor,
     MarkdownEditor,
     CategorySelect,
+    EbDropdown,
   },
 
   props: {
@@ -375,6 +400,10 @@ export default{
     bodyFormat() {
       return this.getFormatByMode(this.editorMode)
     },
+
+    isEnableSlugAutoSetButton() {
+      return obj.getVal(config.post, 'isEnableSlugAutoSetButton', false)
+    },
   },
 
   watch: {
@@ -403,7 +432,7 @@ export default{
       this.setPost()
     } else {
       if (config.post.autoSlugSet.isEnabled === true) {
-        await this.setSlug()
+        await this.setSlug(config.post.autoSlugSet.format)
       }
     }
     await this.setTags()
@@ -437,7 +466,8 @@ export default{
       this.isHiddenInList = this.post.isHiddenInList
     },
 
-    async setSlug() {
+    async setSlug(format) {
+      this.initError('slug')
       try {
         let slug
         let isNotExists = false
@@ -445,10 +475,9 @@ export default{
         for (let i = 0, n = 10; i < n; i++) {
           if (isNotExists === true) break
 
-          if (config.post.autoSlugSet.format === 'randString') {
-            // TODO
-            //slug = str.getRandStr(11)
-          } else if (config.post.autoSlugSet.format === 'date') {
+          if (format === 'randString') {
+            slug = str.getRandStr(11)
+          } else {
             slug = this.getSlugAsDateFormat(slug)
           }
           isNotExists = await this.checkSlugNotExists(slug)

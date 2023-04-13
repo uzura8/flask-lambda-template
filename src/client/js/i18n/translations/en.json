@@ -5,6 +5,7 @@
     "toPrev": "Previous",
     "toFirst": "To First",
     "status": "Status",
+    "date": "Date",
     "createdAt": "Created",
     "updatedAt": "Updated",
     "lastUpdatedAt": "Last Updated",
@@ -257,6 +258,8 @@
       "post": "Post",
       "urlShortener": "URL Shortener"
     },
+    "autoInput": "Auto Imput",
+    "randString": "Random Strings",
     "facebook": "Facebook",
     "twitter": "Twitter"
   },
