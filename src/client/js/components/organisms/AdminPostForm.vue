@@ -650,7 +650,7 @@ export default{
       this.slug = this.slug.trim()
       if (this.checkEmpty(this.slug)) {
         this.errors.slug.push(this.$t('msg["Input required"]'))
-      } else if (str.checkSlug(this.slug) === false) {
+      } else if (str.checkSlug(this.slug, true) === false) {
         this.errors.slug.push(this.$t('msg.InvalidInput'))
       } else if (this.isEdit === false || this.slug !== this.post.slug) {
         const isNotExists = await this.checkSlugNotExists(this.slug)

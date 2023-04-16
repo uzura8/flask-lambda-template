@@ -143,8 +143,8 @@ export default {
     return regexp.test(text)
   },
 
-  checkSlug: function(text) {
-    const regexp = /^[0-9a-z\-]+$/
+  checkSlug: function(text, isPost = false) {
+    const regexp = isPost ? /^[0-9a-z\-]+$/ : /^[0-9a-zA-Z\-_]+$/
     return regexp.test(text)
   },
 
