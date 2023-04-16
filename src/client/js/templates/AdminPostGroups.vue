@@ -19,7 +19,6 @@
         <tr>
           <th class="is-size-6">{{ $t('form.slug') }}</th>
           <th class="is-size-6">{{ $t('common.dispLabel') }}</th>
-          <th class="is-size-7">{{ $t('common.edit') }}</th>
         </tr>
       </thead>
       <tbody>
