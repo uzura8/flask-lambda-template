@@ -37,6 +37,7 @@
     "cancel": "Cancel",
     "add": "Add",
     "addFor": "Add {target}",
+    "addTo": "Add to {target}",
     "publish": "Publish",
     "published": "Published",
     "unpublished": "Unpublished",

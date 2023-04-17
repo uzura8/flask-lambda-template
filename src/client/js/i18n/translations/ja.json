@@ -37,6 +37,7 @@
     "cancel": "キャンセル",
     "add": "追加",
     "addFor": "{target} を追加",
+    "addTo": "{target} に追加",
     "publish": "公開する",
     "published": "公開済",
     "unpublish": "非公開にする",

@@ -224,6 +224,17 @@ export default {
     })
   },
 
+  updatePostGroupPostIdsRegistered: (serviceId, slug, vals, token = null) => {
+    return new Promise((resolve, reject) => {
+      if (utilCommon.isEmpty(vals)) throw new Error('No value')
+      const options = utilUri.getReqOptions(null, token)
+      const uri = `admin/posts/${serviceId}/groups/${slug}/post-ids`
+      client.post(uri, vals, options)
+        .then(res => resolve(res.data))
+        .catch(err => reject(err))
+    })
+  },
+
   deletePostGroup: (serviceId, identifer, token = null) => {
     return new Promise((resolve, reject) => {
       const options = utilUri.getReqOptions(null, token)

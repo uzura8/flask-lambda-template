@@ -93,6 +93,17 @@
 
           <a
             v-if="hasEditorRole"
+            @click="openGroupSelectModal"
+            class="dropdown-item is-clickable"
+          >
+            <span class="icon">
+              <i class="far fa-star"></i>
+            </span>
+            <span>{{ $t('term.postGroup') }}</span>
+          </a>
+
+          <a
+            v-if="hasEditorRole"
             @click="confirmDelete()"
             class="dropdown-item is-clickable"
           >
@@ -104,6 +115,43 @@
 
         </div>
       </eb-dropdown>
+
+      <b-modal
+        v-model="isGroupSelectModalActive"
+        :destroy-on-hide="false"
+        aria-role="dialog"
+        close-button-aria-label="Close"
+        aria-modal
+        width="420px"
+      >
+        <template #default="props">
+          <div class="modal-card" style="width: auto">
+            <header class="modal-card-head">
+              <p class="modal-card-title">
+                {{ $t('term.postGroup') }}
+              </p>
+              <button
+                type="button"
+                class="delete"
+                @click="isGroupSelectModalActive = false"
+              ></button>
+            </header>
+            <section class="modal-card-body">
+              <admin-post-groups-by-post
+                :post-id="post.postId"
+                @close="isGroupSelectModalActive = false"
+              ></admin-post-groups-by-post>
+            </section>
+            <footer class="modal-card-foot">
+              <button
+                class="button"
+                type="button"
+                @click="isGroupSelectModalActive = false"
+              >{{ $t('common.close') }}</button>
+            </footer>
+          </div>
+        </template>
+      </b-modal>
     </div>
     <div
       v-if="isEditablePostBody"
@@ -274,6 +322,7 @@ import InlineTime from '@/components/atoms/InlineTime'
 import EbDropdown from '@/components/molecules/EbDropdown'
 import MarkdownEditor from '@/components/atoms/MarkdownEditor'
 import FbImg from '@/components/atoms/FbImg'
+import AdminPostGroupsByPost from '@/components/organisms/AdminPostGroupsByPost'
 
 export default{
   name: 'AdminPost',
@@ -285,6 +334,7 @@ export default{
     PostBodyMarkdown,
     MarkdownEditor,
     FbImg,
+    AdminPostGroupsByPost,
   },
 
   data(){
@@ -293,6 +343,7 @@ export default{
       isImagesModalActive: false,
       isEditPostBody: false,
       body: '',
+      isGroupSelectModalActive: false,
     }
   },
 
@@ -437,6 +488,10 @@ export default{
         }
         this.handleApiError(err, this.$t(`msg["Delete failed"]`))
       }
+    },
+
+    async openGroupSelectModal() {
+      this.isGroupSelectModalActive = true
     },
   },
 }
