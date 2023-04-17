@@ -40,6 +40,13 @@ export default {
     })
   },
 
+  [types.SET_ADMIN_POST_LIST] (state, posts) {
+    state.adminPostList = []
+    posts.map((post) => {
+      state.adminPostList.push(post)
+    })
+  },
+
   [types.PUSH_ITEM_TO_ADMIN_POSTS_PAGER_KEYS] (state, payload) {
     const index = payload.index
     if (state.adminPostsPager.keys.find(item => item.index === index)) return

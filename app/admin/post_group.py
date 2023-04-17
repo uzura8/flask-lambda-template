@@ -117,6 +117,8 @@ def post_group_detail(service_id, slug):
                 for pid in group['postIds']:
                     p = next((p for p in batch_res if p.get('postId') == pid), None)
                     if p:
+                        if p.get('publishAt') == 'None':
+                            p['publishAt'] = None
                         posts.append(p)
             group['posts'] = posts
 

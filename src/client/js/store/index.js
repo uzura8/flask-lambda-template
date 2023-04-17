@@ -20,6 +20,7 @@ const state = {
   },
   categoryItems: [],
   adminUser: null,
+  adminPostList: [],
   adminPostsPager: {
     keys: [],
     lastIndex: 0,

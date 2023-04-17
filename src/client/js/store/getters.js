@@ -62,6 +62,10 @@ export default {
     return acceptServiceIds.includes(serviceId)
   },
 
+  adminPostListStored: state => () => {
+    return state.adminPostList.length > 0
+  },
+
   adminPostsPagerQueryCurrent: state => (forRequest=false) => {
     let params = {
       sort: state.adminPostsPager.sort,

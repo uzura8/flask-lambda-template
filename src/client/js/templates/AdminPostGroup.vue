@@ -132,7 +132,8 @@
           </div>
           <div class="is-size-7">
             <span>{{ $t('common.publishAt') }}</span>
-            <span>{{ post.publishAt | dateFormat }}</span>
+            <span v-if="post.publishAt">{{ post.publishAt | dateFormat }}</span>
+            <span v-else>-</span>
           </div>
         </div>
 

@@ -256,7 +256,6 @@ export default{
 
   data(){
     return {
-      posts: [],
       sortsAllowed: ['createdAt', 'publishAt'],
       ordersAllowed: ['asc', 'desc'],
       isFilterActive: false,
@@ -280,6 +279,10 @@ export default{
   },
 
   computed: {
+    posts() {
+      return this.$store.state.adminPostList
+    },
+
     index() {
       return this.$route.query.index ? Number(this.$route.query.index) : 0
     },
@@ -436,17 +439,17 @@ export default{
 
   watch: {
     index(val) {
-      this.fetchPosts()
+      this.fetchPosts(null, true)
     },
 
     sort(val) {
       this.$store.dispatch('resetAdminPostsPager', true)
-      this.fetchPosts()
+      this.fetchPosts(null, true)
     },
 
     order(val) {
       this.$store.dispatch('resetAdminPostsPager', true)
-      this.fetchPosts()
+      this.fetchPosts(null, true)
     },
   },
 
@@ -464,7 +467,8 @@ export default{
       this.filterCategory = this.filterCategoryQuery
       this.isFilterActive = true
     }
-    await this.fetchPosts()
+    const isReqLatestPosts = this.$store.getters.adminPostListStored() === false
+    await this.fetchPosts(null, isReqLatestPosts)
   },
 
   methods: {
@@ -518,7 +522,7 @@ export default{
 
       this.$store.dispatch('resetAdminPostsPager', true)
       this.$router.push({ query:this.currentParamsForReq })
-      await this.fetchPosts()
+      await this.fetchPosts(null, true)
     },
 
     async resetFilter() {
@@ -536,7 +540,7 @@ export default{
 
       this.$store.dispatch('resetAdminPostsPager', true)
       this.$router.push({ query: params })
-      await this.fetchPosts(params)
+      await this.fetchPosts(params, true)
     },
 
     async setCategories() {
@@ -554,7 +558,7 @@ export default{
       }
     },
 
-    async fetchPosts(params = null) {
+    async fetchPosts(params = null, isForceUpdate = true) {
       if (this.validateAll() === false) {
         this.showGlobalMessage(this.$t('msg.InvalidInput'))
         return
@@ -568,17 +572,19 @@ export default{
 
       this.$store.dispatch('setLoading', true)
       try {
-        const res = await Admin.getPosts(this.serviceId, null, paramsForApi, this.adminUserToken)
-        this.posts = res.items
+        if (isForceUpdate === true) {
+          const res = await Admin.getPosts(this.serviceId, null, paramsForApi, this.adminUserToken)
+          this.$store.dispatch('setAdminPostList', res.items)
+          if (res.pagerKey) {
+            const nextPagerKey = {index: this.index + 1, key: res.pagerKey}
+            this.$store.dispatch('pushItemToAdminPostsPagerKeys', nextPagerKey)
+          }
+        }
         this.setRequestedParams(params)
 
         let paramsForStore = {...this.currentParams}
         paramsForStore.index = this.index
         this.$store.dispatch('setAdminPostsPagerParams', paramsForStore)
-        if (res.pagerKey) {
-          const nextPagerKey = {index: this.index + 1, key: res.pagerKey}
-          this.$store.dispatch('pushItemToAdminPostsPagerKeys', nextPagerKey)
-        }
         this.$store.dispatch('setLoading', false)
       } catch (err) {
         this.debugOutput(err)
