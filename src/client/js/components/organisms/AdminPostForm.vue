@@ -404,6 +404,12 @@ export default{
     isEnableSlugAutoSetButton() {
       return obj.getVal(config.post, 'isEnableSlugAutoSetButton', false)
     },
+
+    postsPageUriObj() {
+      const path = `/admin/posts/${this.serviceId}`
+      const query = this.$store.getters.adminPostsPagerQueryCurrent(true)
+      return { path:path, query:query }
+    },
   },
 
   watch: {
@@ -625,7 +631,7 @@ export default{
 
     cancel() {
       this.resetInputs()
-      this.$router.push(`/admin/posts/${this.serviceId}`)
+      this.$router.push(this.postsPageUriObj)
     },
 
     validateAll() {
