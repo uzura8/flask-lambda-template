@@ -81,7 +81,7 @@ def post_group_detail(service_id, slug):
 
     saved = None
     if request.method == 'POST':
-        vals = validate_req_params(validation_schema_group_post_ids_post(), request.json)
+        vals = validate_req_params(validation_schema_group_list_post(), request.json)
         vals['serviceId'] = service_id
         vals['updatedBy'] = current_cognito_jwt.get('cognito:username', '')
 
