@@ -393,7 +393,7 @@ schema_slug = {
     'required': True,
     'empty': False,
     'maxlength': 128,
-    'regex': r'^[0-9a-z\-]+$',
+    'regex': r'^[0-9a-zA-Z_\-]+$',
     'valid_ulid': False,
 }
 schema_status = {

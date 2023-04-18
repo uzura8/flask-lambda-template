@@ -16,10 +16,13 @@ const state = {
   auth: {
     state: null,
     user: null,
-    token: null,
+    token: null,// idToken
+    accessToken: null,
+    refreshToken: null,
   },
   categoryItems: [],
   adminUser: null,
+  adminPostList: [],
   adminPostsPager: {
     keys: [],
     lastIndex: 0,

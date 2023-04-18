@@ -6,7 +6,7 @@ export default {
   getServices: (identifer = '', params = {}, token = null) => {
     return new Promise((resolve, reject) => {
       const options = utilUri.getReqOptions(params, token)
-      const uri = identifer ? `admin/services/${identifer}` : `admin/services`
+      const uri = identifer ? `admin/services/${identifer}` : 'admin/services'
       client.get(uri, options)
         .then((res) => {
           resolve(res.data)
@@ -67,7 +67,7 @@ export default {
   getUsers: (identifer = '', params = {}, token = null) => {
     return new Promise((resolve, reject) => {
       const options = utilUri.getReqOptions(params, token)
-      const uri = identifer ? `admin/users/${identifer}` : `admin/users`
+      const uri = identifer ? `admin/users/${identifer}` : 'admin/users'
       client.get(uri, options)
         .then((res) => {
           resolve(res.data)
@@ -218,6 +218,17 @@ export default {
       if (utilCommon.isEmpty(vals)) throw new Error('No value')
       const options = utilUri.getReqOptions(null, token)
       const uri = `admin/posts/${serviceId}/groups/${identifer}`
+      client.post(uri, vals, options)
+        .then(res => resolve(res.data))
+        .catch(err => reject(err))
+    })
+  },
+
+  updatePostGroupPostIdsRegistered: (serviceId, slug, vals, token = null) => {
+    return new Promise((resolve, reject) => {
+      if (utilCommon.isEmpty(vals)) throw new Error('No value')
+      const options = utilUri.getReqOptions(null, token)
+      const uri = `admin/posts/${serviceId}/groups/${slug}/post-ids`
       client.post(uri, vals, options)
         .then(res => resolve(res.data))
         .catch(err => reject(err))

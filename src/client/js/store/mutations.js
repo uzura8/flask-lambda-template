@@ -30,6 +30,12 @@ export default {
     state.adminUser = payload
   },
 
+  [types.SET_ADMIN_USER_TOKENS] (state, payload) {
+    state.adminUser.token = payload.idToken
+    state.adminUser.accessToken = payload.accessToken
+    state.adminUser.refreshToken = payload.refreshToken
+  },
+
   [types.SET_CATEGORY_ITEMS] (state, payload) {
     state.categoryItems = []
     payload.map((item) => {
@@ -37,6 +43,13 @@ export default {
         slug: item.slug,
         label: item.label,
       })
+    })
+  },
+
+  [types.SET_ADMIN_POST_LIST] (state, posts) {
+    state.adminPostList = []
+    posts.map((post) => {
+      state.adminPostList.push(post)
     })
   },
 

@@ -1,6 +1,7 @@
 import moment from '@/moment'
 import store from '@/store'
 import router from '@/router'
+import cognito from '@/cognito'
 import listener from '@/listener'
 import util from '@/util'
 import config from '@/config/config'
@@ -36,7 +37,7 @@ export default {
       return this.$store.getters.checkAdminRole(role)
     },
 
-    hasEditorRole(role) {
+    hasEditorRole() {
       return this.$store.getters.hasEditorRole()
     },
 
@@ -198,6 +199,41 @@ export default {
       if (this.checkEmpty(cates)) return ''
       const cate = cates.find(item => item.slug === slug)
       return cate != null ? cate.label : ''
+    },
+
+    getTokenExpirationTime(isFormat = false) {
+      const utime = cognito.getTokenExpirationTime(this.adminUserToken)
+      if (isFormat === false) return utime
+
+      return moment.unix(utime).format('LLL')
+    },
+
+    async checkAndRefreshTokens() {
+      if (cognito.checkTokenExpired(this.adminUserToken) === false) return
+
+      const res = await this.refreshSession()
+      if (res === false) {
+        store.dispatch('setAdminUser', null)
+        this.$router.push({
+          path: '/signin',
+          query: { redirect: this.$route.fullPath }
+        })
+      }
+    },
+
+    async refreshSession() {
+      const username = this.adminUserName
+      const refreshToken = this.$store.state.adminUser.refreshToken
+      if (!username || !refreshToken) return false
+      const session = await cognito.refreshSession(username, refreshToken)
+      if (!session) return false
+      
+      store.dispatch('setAdminUserTokens', {
+        idToken: session.getIdToken().getJwtToken(),
+        accessToken: session.getAccessToken().getJwtToken(),
+        refreshToken: session.getRefreshToken().getToken(),
+      })
+      return true
     },
 
     debugOutput(data) {

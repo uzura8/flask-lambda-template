@@ -1,16 +1,10 @@
 <template>
   <tr>
-    <td class="is-size-6">{{ group.slug }}</td>
-    <td class="is-size-6">{{ group.label }}</td>
-    <td>
+    <td class="is-size-6 w-180">{{ group.slug }}</td>
+    <td class="is-size-6">
       <router-link
-        :to="`/admin/posts/${serviceId}/groups/${slug}`"
-        class="button is-small"
-      >
-        <span class="icon is-small">
-          <i class="fas fa-pen"></i>
-        </span>
-      </router-link>
+        :to="`/admin/posts/${serviceId}/groups/${group.slug}`"
+      >{{ group.label }}</router-link>
     </td>
   </tr>
 </template>
@@ -51,4 +45,8 @@ export default{
   },
 }
 </script>
-
+<style lang="scss" scoped>
+.w-180 {
+  width: 180px;
+}
+</style>

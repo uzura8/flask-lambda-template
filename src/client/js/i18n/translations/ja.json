@@ -5,6 +5,7 @@
     "toPrev": "前へ",
     "toFirst": "最初へ",
     "status": "状態",
+    "date": "日付",
     "createdAt": "作成日時",
     "updatedAt": "変更日時",
     "lastUpdatedAt": "最終変更日時",
@@ -36,6 +37,7 @@
     "cancel": "キャンセル",
     "add": "追加",
     "addFor": "{target} を追加",
+    "addTo": "{target} に追加",
     "publish": "公開する",
     "published": "公開済",
     "unpublish": "非公開にする",
@@ -258,6 +260,8 @@
       "post": "投稿",
       "urlShortener": "短縮URL"
     },
+    "autoInput": "自動入力",
+    "randString": "ランダム文字列",
     "facebook": "Facebook",
     "twitter": "Twitter"
   },

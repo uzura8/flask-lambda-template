@@ -20,7 +20,8 @@
     "autoSlugSet": {
       "isEnabled": false,
       "format": "date"
-    }
+    },
+    "isEnableSlugAutoSetButton": true
   },
   "media": {
     "url": "https://media.example.com"
