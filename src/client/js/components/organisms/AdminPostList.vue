@@ -573,6 +573,7 @@ export default{
       this.$store.dispatch('setLoading', true)
       try {
         if (isForceUpdate === true) {
+          await this.checkAndRefreshTokens()
           const res = await Admin.getPosts(this.serviceId, null, paramsForApi, this.adminUserToken)
           this.$store.dispatch('setAdminPostList', res.items)
           if (res.pagerKey) {
