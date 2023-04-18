@@ -384,21 +384,42 @@ Set venv
 . .venv/bin/activate
 ```
 
-Start dynamodb local
+Create Docker container only for the first time
 
 ```bash
-sls dynamodb install
+docker-compose build
+```
+
+Start DynamoDB Local on Docker
+
+```bash
+cd (project_root)/develop/
+docker-compose up -d
+```
+
+DynamomDB setup
+
+```bash
+cd (project_root)
 sls dynamodb start
 ```
 
 Execute below command
 
 ```bash
+cd (project_root)
 sls wsgi serve
 ```
 
 Request [http://127.0.0.1:5000](http://127.0.0.1:5000/hoge)
+  
 
+If you want to stop DynamoDB Local on Docker
+
+```bash
+cd (project_root)/develop/
+docker-compose stop
+```
 
 #### Execute Script
 

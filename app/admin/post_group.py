@@ -76,6 +76,8 @@ def post_group_detail(service_id, slug):
     check_acl_service_id(service_id)
     query_key = '#'.join([service_id, slug])
     group = PostGroup.get_one_by_pkey('serviceIdSlug', query_key)
+    if not group:
+        raise InvalidUsage('Group does not exist', 404)
 
     saved = None
     if request.method == 'POST':
@@ -115,11 +117,61 @@ def post_group_detail(service_id, slug):
                 for pid in group['postIds']:
                     p = next((p for p in batch_res if p.get('postId') == pid), None)
                     if p:
+                        if p.get('publishAt') == 'None':
+                            p['publishAt'] = None
                         posts.append(p)
             group['posts'] = posts
 
     res = saved if saved else group
     return jsonify(res), 200
+
+
+@bp.route('/posts/<string:service_id>/groups/<string:slug>/post-ids', methods=['POST', 'GET'])
+@cognito_auth_required
+@admin_role_editor_required
+def post_group_detail_post_ids(service_id, slug):
+    check_acl_service_id(service_id)
+    query_key = '#'.join([service_id, slug])
+    group = PostGroup.get_one_by_pkey('serviceIdSlug', query_key)
+    if not group:
+        raise InvalidUsage('Group does not exist', 404)
+
+    post_ids = group.get('postIds', [])
+
+    saved = None
+    if request.method == 'POST':
+        vals = validate_req_params(validation_schema_group_detail_post_ids(), request.json)
+        post_id = vals['postId']
+        post = Post.get_one_by_id(post_id, False, False)
+        if not post:
+            raise InvalidUsage('Post not Found', 404)
+
+        is_registered = post_id in post_ids
+        if is_registered and vals['isRegister']:
+            raise InvalidUsage('Already Registered', 400)
+
+        elif not is_registered and not vals['isRegister']:
+            raise InvalidUsage('Already Unregistered', 400)
+
+        if vals['isRegister']:
+            post_ids.append(post_id)
+        else:
+            post_ids.remove(post_id)
+
+        upd_vals = {'postIds':post_ids}
+
+        try:
+            query_keys = {'p': {'key':'serviceIdSlug', 'val':query_key}}
+            saved = PostGroup.update(query_keys, upd_vals)
+
+        except ModelInvalidParamsException as e:
+            raise InvalidUsage(e.message, 400)
+
+        except Exception as e:
+            print(traceback.format_exc())
+            raise InvalidUsage('Server Error', 500)
+
+    return jsonify(post_ids), 200
 
 
 def validation_schema_group_list_post():
@@ -194,5 +246,23 @@ def validation_schema_group_detail_slug_get():
             'regex': r'^[0-9a-z\-]+$',
             'valid_ulid': False,
             'forbidden': reserved_slugs,
+        },
+    }
+
+
+def validation_schema_group_detail_post_ids():
+    return {
+        'postId': {
+            'type': 'string',
+            'coerce': (str, NormalizerUtils.trim),
+            'required': True,
+            'empty': False,
+            'nullable': False,
+        },
+        'isRegister': {
+            'type': 'boolean',
+            'coerce': (str, NormalizerUtils.to_bool),
+            'required': True,
+            'nullable': False,
         },
     }

@@ -2,7 +2,8 @@ import {
   CognitoUserPool,
   CognitoUser,
   AuthenticationDetails,
-  CognitoUserAttribute
+  CognitoUserAttribute,
+  CognitoRefreshToken,
 } from 'amazon-cognito-identity-js'
 //import { Config, CognitoIdentityCredentials } from 'aws-sdk'
 import * as AWS from 'aws-sdk';
@@ -64,7 +65,7 @@ export default class Cognito {
     attributeList.push(new CognitoUserAttribute(updatedAt))
 
     return new Promise((resolve, reject) => {
-    if (this.userPool == null) return
+      if (this.userPool == null) return
       this.userPool.signUp(username, password, attributeList, [], (err, result) => {
         if (err) {
           reject(err)
@@ -138,6 +139,42 @@ export default class Cognito {
         }
       })
     })
+  }
+
+  refreshSession(username, refreshToken) {
+    if (this.userPool == null) return
+
+    const userData = { Username: username, Pool: this.userPool }
+    const cognitoUser = new CognitoUser(userData)
+    const refreshTokenNew = new CognitoRefreshToken({ RefreshToken: refreshToken })
+    return new Promise((resolve, reject) => {
+      cognitoUser.refreshSession(refreshTokenNew, (err, session) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(session)
+        }
+      })
+    })
+  }
+
+  getTokenExpirationTime(idToken) {
+    const jwtPayloadBase64Url = idToken.split('.')[1]
+    const jwtPayloadBase64 = jwtPayloadBase64Url.replace('-', '+').replace('_', '/')
+    const jwtPayloadJson = atob(jwtPayloadBase64)
+    const jwtPayload = JSON.parse(jwtPayloadJson)
+    return jwtPayload.exp // unixtimestamp
+  }
+
+  checkTokenExpired(idToken) {
+    try {
+      const expirationTime = this.getTokenExpirationTime(idToken)
+      const currentTime = Math.floor(Date.now() / 1000) // unixtimestamp
+      return currentTime >= expirationTime // If currentTime is past expirationTime, the token is expired
+    } catch (error) {
+      //console.error('Error parsing ID token:', error)
+      return true // If error occurs, the token handled as expired
+    }
   }
 
   getAttribute() {

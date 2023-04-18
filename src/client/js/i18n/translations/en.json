@@ -5,6 +5,7 @@
     "toPrev": "Previous",
     "toFirst": "To First",
     "status": "Status",
+    "date": "Date",
     "createdAt": "Created",
     "updatedAt": "Updated",
     "lastUpdatedAt": "Last Updated",
@@ -36,6 +37,7 @@
     "cancel": "Cancel",
     "add": "Add",
     "addFor": "Add {target}",
+    "addTo": "Add to {target}",
     "publish": "Publish",
     "published": "Published",
     "unpublished": "Unpublished",
@@ -257,6 +259,8 @@
       "post": "Post",
       "urlShortener": "URL Shortener"
     },
+    "autoInput": "Auto Imput",
+    "randString": "Random Strings",
     "facebook": "Facebook",
     "twitter": "Twitter"
   },

@@ -8,7 +8,30 @@
     <b-input
       v-model="slug"
       @blur="validate('slug')"
+      expanded
     ></b-input>
+    <div
+      v-if="isEnableSlugAutoSetButton"
+      class="controll"
+    >
+      <eb-dropdown
+        position="is-bottom-left"
+      >
+        <span slot="label">{{ $t('term.autoInput') }}</span>
+        <div class="dropdown-content">
+          <a
+            class="dropdown-item"
+            @click="setSlug('date')"
+          >{{ $t('common.date') }}
+          </a>
+          <a
+            class="dropdown-item"
+            @click="setSlug('randString')"
+          >{{ $t('term.randString') }}
+          </a>
+        </div>
+      </eb-dropdown>
+    </div>
   </b-field>
 
   <b-field
@@ -275,6 +298,7 @@ import MarkdownEditor from '@/components/atoms/MarkdownEditor'
 import FileUploader from '@/components/organisms/FileUploader'
 import LinkInputs from '@/components/molecules/LinkInputs'
 import CategorySelect from '@/components/molecules/CategorySelect'
+import EbDropdown from '@/components/molecules/EbDropdown'
 
 export default{
   name: 'AdminPostForm',
@@ -285,6 +309,7 @@ export default{
     RichTextEditor,
     MarkdownEditor,
     CategorySelect,
+    EbDropdown,
   },
 
   props: {
@@ -375,6 +400,16 @@ export default{
     bodyFormat() {
       return this.getFormatByMode(this.editorMode)
     },
+
+    isEnableSlugAutoSetButton() {
+      return obj.getVal(config.post, 'isEnableSlugAutoSetButton', false)
+    },
+
+    postsPageUriObj() {
+      const path = `/admin/posts/${this.serviceId}`
+      const query = this.$store.getters.adminPostsPagerQueryCurrent(true)
+      return { path:path, query:query }
+    },
   },
 
   watch: {
@@ -403,7 +438,7 @@ export default{
       this.setPost()
     } else {
       if (config.post.autoSlugSet.isEnabled === true) {
-        await this.setSlug()
+        await this.setSlug(config.post.autoSlugSet.format)
       }
     }
     await this.setTags()
@@ -437,7 +472,8 @@ export default{
       this.isHiddenInList = this.post.isHiddenInList
     },
 
-    async setSlug() {
+    async setSlug(format) {
+      this.initError('slug')
       try {
         let slug
         let isNotExists = false
@@ -445,10 +481,9 @@ export default{
         for (let i = 0, n = 10; i < n; i++) {
           if (isNotExists === true) break
 
-          if (config.post.autoSlugSet.format === 'randString') {
-            // TODO
-            //slug = str.getRandStr(11)
-          } else if (config.post.autoSlugSet.format === 'date') {
+          if (format === 'randString') {
+            slug = str.getRandStr(11)
+          } else {
             slug = this.getSlugAsDateFormat(slug)
           }
           isNotExists = await this.checkSlugNotExists(slug)
@@ -559,6 +594,7 @@ export default{
           if (this.isEdit === false) vals.status = 'unpublish'
         }
         this.$store.dispatch('setLoading', true)
+        await this.checkAndRefreshTokens()
         let res
         if (this.isEdit) {
           res = await Admin.updatePost(this.serviceId, this.post.postId, vals, this.adminUserToken)
@@ -584,6 +620,7 @@ export default{
     async checkSlugNotExists(slug) {
       try {
         this.$store.dispatch('setLoading', true)
+        await this.checkAndRefreshTokens()
         const res = await Admin.checkPostSlugNotExists(this.serviceId, slug, this.adminUserToken)
         this.$store.dispatch('setLoading', false)
         return res
@@ -596,7 +633,7 @@ export default{
 
     cancel() {
       this.resetInputs()
-      this.$router.push(`/admin/posts/${this.serviceId}`)
+      this.$router.push(this.postsPageUriObj)
     },
 
     validateAll() {
@@ -621,7 +658,7 @@ export default{
       this.slug = this.slug.trim()
       if (this.checkEmpty(this.slug)) {
         this.errors.slug.push(this.$t('msg["Input required"]'))
-      } else if (str.checkSlug(this.slug) === false) {
+      } else if (str.checkSlug(this.slug, true) === false) {
         this.errors.slug.push(this.$t('msg.InvalidInput'))
       } else if (this.isEdit === false || this.slug !== this.post.slug) {
         const isNotExists = await this.checkSlugNotExists(this.slug)

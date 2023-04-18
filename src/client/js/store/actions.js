@@ -48,8 +48,16 @@ export default {
     ctx.commit(types.SET_ADMIN_USER, payload)
   },
 
+  setAdminUserTokens: async (ctx, payload) => {
+    ctx.commit(types.SET_ADMIN_USER_TOKENS, payload)
+  },
+
   setCategoryItems: async (ctx, payload) => {
     ctx.commit(types.SET_CATEGORY_ITEMS, payload)
+  },
+
+  setAdminPostList: async (ctx, posts) => {
+    ctx.commit(types.SET_ADMIN_POST_LIST, posts)
   },
 
   pushItemToAdminPostsPagerKeys: async (ctx, payload) => {

@@ -381,7 +381,7 @@ class Base():
     def query_loop_for_limit(self, option, target_count, pager_key, pager_keys, use_cate_filter=False):
         items_all = []
         loop_count = 0
-        loop_count_max = 20
+        loop_count_max = 10
         need_count = target_count
 
         while loop_count < loop_count_max:

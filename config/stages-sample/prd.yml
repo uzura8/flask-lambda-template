@@ -40,6 +40,14 @@ cognitoUserpoolId: 'ap-northeast-1_*********'
 cognitoAppClientId: '**************************'
 cognitoCheckTokenExpiration: True # If set Falsae, disable token expiration checking for testing purposes
 
+excludeFunctions:
+  #- functions.mediaUnusedFilesCleaner
+  - functions.mediaImageModifier
+  - functions.urlShortenQrcodeMaker
+  - functions.commentImporter
+  - functions.commentTruncater
+# excludeFunctions: [] # If not set exclude
+
 dynamoDbBackupTargetTagValue: 'aws-backup' # 'aws-backup':backup target / other value: not target
 
 dynamodbConfig:
