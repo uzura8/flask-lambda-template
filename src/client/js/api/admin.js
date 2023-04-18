@@ -6,7 +6,7 @@ export default {
   getServices: (identifer = '', params = {}, token = null) => {
     return new Promise((resolve, reject) => {
       const options = utilUri.getReqOptions(params, token)
-      const uri = identifer ? `admin/services/${identifer}` : `admin/services`
+      const uri = identifer ? `admin/services/${identifer}` : 'admin/services'
       client.get(uri, options)
         .then((res) => {
           resolve(res.data)
@@ -67,7 +67,7 @@ export default {
   getUsers: (identifer = '', params = {}, token = null) => {
     return new Promise((resolve, reject) => {
       const options = utilUri.getReqOptions(params, token)
-      const uri = identifer ? `admin/users/${identifer}` : `admin/users`
+      const uri = identifer ? `admin/users/${identifer}` : 'admin/users'
       client.get(uri, options)
         .then((res) => {
           resolve(res.data)
