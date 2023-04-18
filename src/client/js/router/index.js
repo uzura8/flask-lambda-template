@@ -3,8 +3,6 @@ import Router from 'vue-router'
 import cognito from '@/cognito'
 import store from '@/store'
 import routes from './routes'
-import arr from '@/util/arr'
-import site from '@/util/site'
 import { Admin } from '@/api'
 
 Vue.use(Router)
@@ -65,8 +63,10 @@ router.beforeEach(async(to, from, next) => {
       }
       const user = {
         username: cognito.currentUser.username,
-        token: token,
         attributes: attrs,
+        token: token,
+        accessToken: session.accessToken.jwtToken,
+        refreshToken: session.refreshToken.token,
       }
       store.dispatch('setAdminUser', user)
       if (to.matched.some(record => record.meta.requiresRoleAdmin)) {
@@ -75,9 +75,9 @@ router.beforeEach(async(to, from, next) => {
         }
       }
       if (to.matched.some(record => record.meta.requiresAcceptService)) {
-          const services = await Admin.getAccountServices(null, token)
-          const service = services.find(item => item['serviceId'] === to.params.serviceId)
-          if (service == null) {
+        const services = await Admin.getAccountServices(null, token)
+        const service = services.find(item => item['serviceId'] === to.params.serviceId)
+        if (service == null) {
           next({ path: '/error/forbidden' })
         }
       }

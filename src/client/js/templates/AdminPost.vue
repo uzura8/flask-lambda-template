@@ -428,6 +428,7 @@ export default{
     async updateStatus(isPublish = false) {
       try {
         this.$store.dispatch('setLoading', true)
+        await this.checkAndRefreshTokens()
         const postStatus = isPublish ? 'publish' : 'unpublish'
         const res = await Admin.updatePostStatus(this.serviceId, this.postId, postStatus, this.adminUserToken)
         this.$store.dispatch('setLoading', false)
@@ -454,6 +455,7 @@ export default{
     async updatePostBody() {
       try {
         this.$store.dispatch('setLoading', true)
+        await this.checkAndRefreshTokens()
         this.body = this.body.trimEnd()
         const vals = { body: this.body, bodyFormat: this.post.bodyFormat }
         await Admin.updatePost(this.serviceId, this.post.postId, vals, this.adminUserToken)
@@ -477,6 +479,7 @@ export default{
     async deletePost() {
       try {
         this.$store.dispatch('setLoading', true)
+        await this.checkAndRefreshTokens()
         const res = await Admin.deletePost(this.serviceId, this.postId, this.adminUserToken)
         this.$store.dispatch('setLoading', false)
         this.$router.push(`/admin/posts/${this.serviceId}`)

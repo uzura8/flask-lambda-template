@@ -594,6 +594,7 @@ export default{
           if (this.isEdit === false) vals.status = 'unpublish'
         }
         this.$store.dispatch('setLoading', true)
+        await this.checkAndRefreshTokens()
         let res
         if (this.isEdit) {
           res = await Admin.updatePost(this.serviceId, this.post.postId, vals, this.adminUserToken)
@@ -619,6 +620,7 @@ export default{
     async checkSlugNotExists(slug) {
       try {
         this.$store.dispatch('setLoading', true)
+        await this.checkAndRefreshTokens()
         const res = await Admin.checkPostSlugNotExists(this.serviceId, slug, this.adminUserToken)
         this.$store.dispatch('setLoading', false)
         return res
