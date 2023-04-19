@@ -20,24 +20,31 @@ class VoteCount(Base):
 
 
     @classmethod
-    def update_count(self, service_id, content_id, vote_type):
+    def update_count(self, service_id, content_id, vote_type, meta_info=None):
         table = self.get_table()
         time = utc_iso(False, True)
+        upd_exps = [
+            'ADD voteCount :incr',
+            'SET updatedAt = :time, contentId = :contId, voteType = :voteType',
+        ]
+        upd_vals = {
+            ':incr': 1,
+            ':time': time,
+            ':contId': content_id,
+            ':voteType': vote_type,
+        }
+        if meta_info:
+            upd_exps[1] += ', metaInfo = :metaInfo'
+            upd_vals[':metaInfo'] = meta_info
+
+        upd_exp_str = '\n'.join(upd_exps)
         table.update_item(
             Key={
                 'serviceId': service_id,
                 'contentIdType': '#'.join([content_id, vote_type]),
             },
-            UpdateExpression="""
-                ADD voteCount :incr
-                SET updatedAt = :time, contentId = :contId, voteType = :voteType
-            """,
-            ExpressionAttributeValues={
-                ':incr': 1,
-                ':time': time,
-                ':contId': content_id,
-                ':voteType': vote_type,
-            }
+            UpdateExpression = upd_exp_str,
+            ExpressionAttributeValues=upd_vals
         )
 
 
