@@ -42,6 +42,7 @@ def vote_by_service_and_content(service_id, content_id):
         if not vote_type:
             raise InvalidUsage('Type is invalid', 400)
 
+        meta_info = request.json.get('metaInfo')
         item = {
             'serviceId': service_id,
             'contentId': vals['contentId'],
@@ -50,13 +51,13 @@ def vote_by_service_and_content(service_id, content_id):
             'ua': request.headers.get('User-Agent', ''),
         }
         VoteLog.create(item)
-        VoteCount.update_count(service_id, vals['contentId'], vote_type)
+        VoteCount.update_count(service_id, vals['contentId'], vote_type, meta_info)
 
     keys = {
         'p': {'key':'serviceId', 'val':service_id},
         's': {'key':'contentId', 'val':vals['contentId']},
     }
-    proj_exps = 'serviceId, contentId, voteType, voteCount, updatedAt'
+    proj_exps = 'serviceId, contentId, voteType, voteCount, updatedAt, metaInfo'
     items = VoteCount.get_all(keys, False, 'ServiceIdContentIdLsi', 0, proj_exps)
 
     return jsonify(items), 200
