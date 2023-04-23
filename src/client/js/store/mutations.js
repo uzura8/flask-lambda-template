@@ -1,5 +1,4 @@
 import * as types from './mutation-types'
-import arr from '@/util/arr'
 
 export default {
   [types.SET_COMMON_LOADING] (state, payload) {

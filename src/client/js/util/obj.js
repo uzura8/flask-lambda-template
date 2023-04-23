@@ -1,7 +1,7 @@
 function checkObjHasProp(obj, prop, checkEmpty=false) {
   if (typeof obj !== 'object') return false
   if (Array.isArray(obj) === true) return false
-  if (obj.hasOwnProperty(prop) === false) return false
+  if (Object.prototype.hasOwnProperty.call(obj, prop) === false) return false
   if (obj[prop] == null) return false
   if (checkEmpty === false) return true
   return isEmpty(obj[prop]) === false
@@ -53,7 +53,7 @@ export default {
       }
     } else {
       for (let key in obj) {
-        if (obj.hasOwnProperty(key) === false) continue
+        if (Object.prototype.hasOwnProperty.call(obj, key) === false) continue
         if (checkEmpty === true && !obj[key]) return false
       }
     }
@@ -71,7 +71,7 @@ export default {
     }
 
     for (let key in obj1) {
-      if (obj1.hasOwnProperty(key) && obj1[key] !== obj2[key]) {
+      if (Object.prototype.hasOwnProperty.call(obj1, key) === true && obj1[key] !== obj2[key]) {
         return false
       }
     }
