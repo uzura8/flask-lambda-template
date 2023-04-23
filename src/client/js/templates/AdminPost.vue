@@ -210,93 +210,137 @@
     ></post-body>
   </div>
 
-  <ul class="mt-5">
-    <li v-if="'images' in post && post.images.length > 0">
-      <span>
-        <button
-          class="button is-ghost"
-          @click="isImagesModalActive = true"
-        >
-          <span class="icon">
-            <i class="fas fa-images"></i>
-          </span>
-          <span>{{ post.images.length }}</span>
-        </button>
+  <div
+    v-if="checkObjHasProp(post, 'images', true)"
+    class="content block mt-6"
+  >
+    <label class="has-text-weight-semibold mr-2">{{ $t('common.images') }}</label>
+    <a
+      class="u-clickable"
+      @click="isImagesModalActive = true"
+    >
+      <span class="icon">
+        <i class="fas fa-images"></i>
       </span>
-      <b-modal
-        v-model="isImagesModalActive"
-        :destroy-on-hide="false"
-        aria-role="dialog"
-        close-button-aria-label="Close"
-        aria-modal
-      >
-        <template #default="props">
-          <ul>
-            <li v-for="image in post.images" class="mb-5">
-              <div class="card">
-                <div class="card-image">
-                  <fb-img
-                    :fileId="image.fileId"
-                    :mimeType="image.mimeType"
-                    size="raw"
-                  />
-                </div>
-                <div
-                  v-if="image.caption"
-                  class="card-content"
-                >
-                  <div class="media">
-                    <div class="media-content">{{ image.caption }}</div>
-                  </div>
+      <span>{{ post.images.length }}</span>
+    </a>
+    <b-modal
+      v-model="isImagesModalActive"
+      :destroy-on-hide="false"
+      aria-role="dialog"
+      close-button-aria-label="Close"
+      aria-modal
+    >
+      <template #default="props">
+        <ul>
+          <li v-for="image in post.images" class="mb-5">
+            <div class="card">
+              <div class="card-image">
+                <fb-img
+                  :fileId="image.fileId"
+                  :mimeType="image.mimeType"
+                  size="raw"
+                />
+              </div>
+              <div
+                v-if="image.caption"
+                class="card-content"
+              >
+                <div class="media">
+                  <div class="media-content">{{ image.caption }}</div>
                 </div>
               </div>
-            </li>
-          </ul>
-        </template>
-      </b-modal>
-    </li>
+            </div>
+          </li>
+        </ul>
+      </template>
+    </b-modal>
+  </div>
 
-    <li v-if="'files' in post && post.files.length > 0">
-      <label>{{ $t('common.files') }}</label>
-      <ul>
-        <li v-for="file in post.files">
-          <a
-            :href="mediaUrl('file', file.fileId, file.mimeType)"
-            target="_blank"
-            v-text="file.caption ? file.caption : file.fileId"
-          ></a>
+  <div
+    v-if="checkObjHasProp(post, 'files', true)"
+    class="content block"
+  >
+    <h4 class="title is-6 mb-1">{{ $t('common.files') }}</h4>
+    <ul class="mt-1">
+      <li v-for="file in post.files">
+        <a
+          :href="mediaUrl('file', file.fileId, file.mimeType)"
+          target="_blank"
+          v-text="file.caption ? file.caption : file.fileId"
+        ></a>
+      </li>
+    </ul>
+  </div>
+
+  <div
+    v-if="checkObjHasProp(post, 'links', true)"
+    class="content block"
+  >
+    <h4 class="title is-6 mb-1">{{ $t('common.links') }}</h4>
+    <ul class="mt-1">
+      <li v-for="link in post.links">
+        <a
+          :href="link.url"
+          target="_blank"
+          v-text="link.label ? link.label : link.url"
+        ></a>
+      </li>
+    </ul>
+  </div>
+
+  <div
+    v-if="checkObjHasProp(post, 'category', true)"
+    class="content block"
+  >
+    <h4 class="title is-6 mb-1">{{ $t('common.category') }}</h4>
+    <nav
+      class="breadcrumb"
+      aria-label="breadcrumbs"
+    >
+      <ul class="">
+        <li
+          v-if="checkObjHasProp(post.category, 'parents', true)"
+          v-for="parent in post.category.parents"
+        >
+          <router-link :to="{
+            path: `/admin/posts/${serviceId}?categories?${parent.slug}`,
+            query: { category: parent.slug }
+          }">
+            {{ parent.label }}
+          </router-link>
+        </li>
+        <li>
+          <router-link
+            :to="{
+              path: `/admin/posts/${serviceId}`,
+              query: { category: post.category.slug }
+          }">
+            {{ post.category.label }}
+          </router-link>
         </li>
       </ul>
-    </li>
+    </nav>
+  </div>
 
-    <li v-if="'links' in post && post.links.length > 0">
-      <label>{{ $t('common.links') }}</label>
-      <ul>
-        <li v-for="link in post.links">
-          <a
-            :href="link.url"
-            target="_blank"
-            v-text="link.label ? link.label : link.url"
-          ></a>
-        </li>
-      </ul>
-    </li>
-
-    <li v-if="'category' in post && post.category">
-      <label>{{ $t('common.category') }}</label>
-      <span>{{ post.category.label }}</span>
-    </li>
-    <li v-if="'tags' in post && post.tags">
-      <label>{{ $t('common.tag') }}</label>
-      <span>
-        <span
-          v-for="tag in post.tags"
-          class="tag ml-2"
-          >{{ tag.label }}</span>
+  <div
+    v-if="checkObjHasProp(post, 'tags', true)"
+    class="content block"
+  >
+    <h4 class="title is-6 mb-1">{{ $t('common.tags') }}</h4>
+    <div>
+      <span
+        v-for="tag in post.tags"
+        class="tag ml-2"
+      >
+        {{ tag.label }}
       </span>
-    </li>
+    </div>
+  </div>
+
+  <ul class="block">
     <li>
-      <label>{{ $t('common.publishAt') }}</label>
+      <label class="has-text-weight-semibold mr-2">{{ $t('common.publishAt') }}</label>
       <inline-time
         :time-class="isReserved ? 'has-text-warning-dark' : ''"
         :datetime="post.publishAt"
@@ -304,11 +348,14 @@
       <span v-if="isReserved" class="tag is-warning">{{ $t('common.reserved') }}</span>
     </li>
     <li>
-      <label>{{ $t('common.lastUpdatedAt') }}</label>
+      <label class="has-text-weight-semibold mr-2">{{ $t('common.createdAt') }}</label>
+      <inline-time :datetime="post.createdAt"></inline-time>
+    </li>
+    <li>
+      <label class="has-text-weight-semibold mr-2">{{ $t('common.lastUpdatedAt') }}</label>
       <inline-time :datetime="post.updatedAt"></inline-time>
     </li>
   </ul>
-
 </div>
 </template>
 <script>
