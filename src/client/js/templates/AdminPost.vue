@@ -196,6 +196,7 @@
   <div v-if="isEditPostBody === true">
     <markdown-editor
       v-model="body"
+      @blur="updatePostBody(false)"
     ></markdown-editor>
   </div>
   <div v-else>
@@ -499,14 +500,14 @@ export default{
       })
     },
 
-    async updatePostBody() {
+    async updatePostBody(isFinishEdit = true) {
       try {
         this.$store.dispatch('setLoading', true)
         await this.checkAndRefreshTokens()
         this.body = this.body.trimEnd()
         const vals = { body: this.body, bodyFormat: this.post.bodyFormat }
         await Admin.updatePost(this.serviceId, this.post.postId, vals, this.adminUserToken)
-        this.isEditPostBody = false
+        if (isFinishEdit === true) this.isEditPostBody = false
         this.$store.dispatch('setLoading', false)
       } catch (err) {
         this.debugOutput(err)

@@ -5,6 +5,7 @@
     :highlight="true"
     :value="value"
     @update:modelValue="changeValue"
+    @blur="$emit('blur')"
   ></vue-easymde>
 </div>
 </template>
