@@ -160,7 +160,7 @@
       <span v-if="isEditPostBody === true">
         <button
           @click="updatePostBody()"
-          :disabled="isEditedPostBody === false"
+          :disabled="isEditedPostBodyFromLoaded === false"
           class="button is-warning is-small"
         >
           <span class="icon is-small">
@@ -391,6 +391,7 @@ export default{
       isImagesModalActive: false,
       isEditPostBody: false,
       body: '',
+      bodyLastPosted: '',
       isGroupSelectModalActive: false,
     }
   },
@@ -443,8 +444,12 @@ export default{
       return this.post.bodyFormat === 'markdown'
     },
 
-    isEditedPostBody() {
+    isEditedPostBodyFromLoaded() {
       return this.body !== this.post.body
+    },
+
+    isEditedPostBodyFromLastPost() {
+      return this.body !== this.bodyLastPosted
     },
   },
 
@@ -458,6 +463,7 @@ export default{
       try {
         this.post = await Admin.getPosts(this.serviceId, this.postId, null, this.adminUserToken)
         this.body = this.post.body
+        this.bodyLastPosted = this.body
         this.$store.dispatch('setLoading', false)
       } catch (err) {
         this.debugOutput(err)
@@ -502,13 +508,16 @@ export default{
 
     async updatePostBody(isFinishEdit = true) {
       try {
-        this.$store.dispatch('setLoading', true)
         await this.checkAndRefreshTokens()
         this.body = this.body.trimEnd()
-        const vals = { body: this.body, bodyFormat: this.post.bodyFormat }
-        await Admin.updatePost(this.serviceId, this.post.postId, vals, this.adminUserToken)
+        if (this.isEditedPostBodyFromLastPost === true) {
+          this.$store.dispatch('setLoading', true)
+          const vals = { body: this.body, bodyFormat: this.post.bodyFormat }
+          await Admin.updatePost(this.serviceId, this.post.postId, vals, this.adminUserToken)
+          this.bodyLastPosted = this.body
+          this.$store.dispatch('setLoading', false)
+        }
         if (isFinishEdit === true) this.isEditPostBody = false
-        this.$store.dispatch('setLoading', false)
       } catch (err) {
         this.debugOutput(err)
         this.$store.dispatch('setLoading', false)
