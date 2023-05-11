@@ -16,7 +16,7 @@
 
     <router-link
       v-if="hasEditorRole"
-      :to="`/admin/posts/${this.serviceId}/create`"
+      :to="{path:`/admin/posts/${this.serviceId}/create`, 'query':{category:categoryQuery}}"
       class="button"
     >{{ $t('common.createNew') }}</router-link>
   </div>
@@ -47,6 +47,12 @@ export default{
       if (common.checkObjHasProp(this.service, 'configs') === false) return ''
       if (common.checkObjHasProp(this.service.configs, 'outerSiteUrl') === false) return ''
       return this.service.configs.outerSiteUrl
+    },
+
+    categoryQuery() {
+      const defaultValue = ''
+      if (!this.$route.query.category) return defaultValue
+      return this.$route.query.category
     },
   },
 

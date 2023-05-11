@@ -368,6 +368,12 @@ export default{
       return this.post.postStatus === 'publish'
     },
 
+    categoryQuery() {
+      const defaultValue = ''
+      if (!this.$route.query.category) return defaultValue
+      return this.$route.query.category
+    },
+
     isAddLinkBtnEnabled() {
       if (this.checkEmpty(this.errors.links) === false) return false
       if (this.checkEmpty(this.links)) return true
@@ -437,6 +443,9 @@ export default{
     if (this.isEdit === true) {
       this.setPost()
     } else {
+      if (this.categoryQuery) {
+        this.category = this.categoryQuery
+      }
       if (config.post.autoSlugSet.isEnabled === true) {
         await this.setSlug(config.post.autoSlugSet.format)
       }
