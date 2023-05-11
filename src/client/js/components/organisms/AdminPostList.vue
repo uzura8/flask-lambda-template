@@ -451,6 +451,13 @@ export default{
       this.$store.dispatch('resetAdminPostsPager', true)
       this.fetchPosts(null, true)
     },
+
+    filterCategoryQuery(val) {
+      this.filterCategory = this.filterCategoryQuery
+      this.isFilterActive = true
+      this.$store.dispatch('resetAdminPostsPager', true)
+      this.fetchPosts(null, true)
+    },
   },
 
   async created() {

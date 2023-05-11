@@ -78,10 +78,16 @@ export default{
       this.$emit('input', val)
     },
 
-    value(val) {
+    async value(val) {
       this.categorySlug = val
+      if (val) {
+        this.defaultCategorySlug = val
+        await this.setCategory()
+      }
       if (!this.categorySlug) {
         this.isEditModeActive = true
+      } else {
+        this.isEditModeActive = false
       }
     },
   },
@@ -89,6 +95,13 @@ export default{
   async created() {
     if (this.value) {
       this.defaultCategorySlug = this.value
+      await this.setCategory()
+    }
+    if (!this.defaultCategorySlug || !this.inputtedCategory) this.isEditModeActive = true
+  },
+
+  methods: {
+    async setCategory() {
       this.$store.dispatch('setLoading', true)
       try {
         this.inputtedCategory = await Category.get(this.serviceId, this.defaultCategorySlug, { withParents: 1 })
@@ -97,11 +110,8 @@ export default{
         //this.debugOutput(err)
         this.$store.dispatch('setLoading', false)
       }
-    }
-    if (!this.defaultCategorySlug || !this.inputtedCategory) this.isEditModeActive = true
-  },
+    },
 
-  methods: {
     updateCategoryEditMode(isActive) {
       if (isActive) {
         this.$emit('input', '')
