@@ -5,7 +5,7 @@
   <eb-admin-tab-menu-post v-if="isAdminPostPages" />
   <div class="container" v-cloak>
     <div class="columns is-desktop">
-      <main class="section column">
+      <main class="section column" id="main-container">
         <b-loading :active="isLoading" :is-full-page="true" :canCancel="true"></b-loading>
         <router-view></router-view>
       </main>
@@ -57,3 +57,9 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+#main-container {
+  overflow: hidden;
+}
+</style>
