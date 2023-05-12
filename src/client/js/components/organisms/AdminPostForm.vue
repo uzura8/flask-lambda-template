@@ -611,6 +611,7 @@ export default{
           res = await Admin.createPost(this.serviceId, vals, this.adminUserToken)
           this.$store.dispatch('resetAdminPostsPager', false)
         }
+        this.$store.dispatch('setAdminPostList', null)
         this.$store.dispatch('setLoading', false)
         this.$emit('posted', res)
         this.resetInputs()

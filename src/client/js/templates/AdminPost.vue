@@ -485,6 +485,7 @@ export default{
         await this.checkAndRefreshTokens()
         const postStatus = isPublish ? 'publish' : 'unpublish'
         const res = await Admin.updatePostStatus(this.serviceId, this.postId, postStatus, this.adminUserToken)
+        this.$store.dispatch('setAdminPostList', null)
         this.$store.dispatch('setLoading', false)
         this.post = res
         this.$emit('posted', res)
@@ -538,6 +539,7 @@ export default{
         this.$store.dispatch('setLoading', true)
         await this.checkAndRefreshTokens()
         const res = await Admin.deletePost(this.serviceId, this.postId, this.adminUserToken)
+        this.$store.dispatch('setAdminPostList', null)
         this.$store.dispatch('setLoading', false)
         this.$router.push(`/admin/posts/${this.serviceId}`)
       } catch (err) {

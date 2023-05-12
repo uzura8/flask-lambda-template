@@ -47,6 +47,7 @@ export default {
 
   [types.SET_ADMIN_POST_LIST] (state, posts) {
     state.adminPostList = []
+    if (!posts) return
     posts.map((post) => {
       state.adminPostList.push(post)
     })
