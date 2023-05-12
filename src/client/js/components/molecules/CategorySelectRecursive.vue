@@ -98,7 +98,7 @@ export default{
     async setCategories(parentCateSlug) {
       this.isLoadingLocal = true
       try {
-        this.categories.splice(0, this.categories.length);
+        this.categories.splice(0, this.categories.length)
         const items = await Category.getChildren(this.serviceId, parentCateSlug)
         items.map((item) => {
           this.categories.push(item)

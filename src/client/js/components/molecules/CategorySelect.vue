@@ -5,7 +5,7 @@
         v-model="categorySlug"
         parent-category-slug="root"
       ></category-select-recursive>
-      <div v-if="isEnabledUndo === true && defaultCategorySlug">
+      <div v-if="isEnabledUndo === true && initialCategorySlug">
         <a
           @click="updateCategoryEditMode(false)"
           class="u-clickable"
@@ -36,10 +36,16 @@ export default{
   },
 
   props: {
-    // categorySlug
+    // v-model value set from parent
     value: {
       type: String,
       default: '',
+    },
+
+    // is list loaded on parent
+    isListLoaded: {
+      type: Boolean,
+      default: false,
     },
 
     isEnabledUndo: {
@@ -50,10 +56,10 @@ export default{
 
   data(){
     return {
-      categorySlug: '',
-      defaultCategorySlug: '',
-      isEditModeActive: false,
-      inputtedCategory: null,
+      categorySlug: '', // category value for handle
+      initialCategorySlug: '',// to use reset to initial value
+      isEditModeActive: true,// if true, display select field
+      inputtedCategory: null, // if set value on parent, set category object
     }
   },
 
@@ -64,6 +70,7 @@ export default{
         return this.inputtedCategory.label
       }
 
+      // set parent categories
       let items = []
       this.inputtedCategory.parents.map((cate) => {
         items.push(cate.label)
@@ -74,37 +81,62 @@ export default{
   },
 
   watch: {
-    categorySlug(val) {
+    categorySlug(val, oldVal) {
+      // emit to parent on changed at child components
       this.$emit('input', val)
     },
 
-    async value(val) {
+    isListLoaded(val) {
+      // is parent list loaded
+      if (val === true) {
+        if (this.categorySlug) {
+          // if set value, edit mode off
+          this.isEditModeActive = false
+        } else {
+          // if set no value, edit mode on
+          this.isEditModeActive = true
+        }
+      }
+    },
+
+    async value(val, oldVal) {
+      // changed value on parent
       this.categorySlug = val
       if (val) {
-        this.defaultCategorySlug = val
-        await this.setCategory()
-      }
-      if (!this.categorySlug) {
-        this.isEditModeActive = true
+        // if set value on parent, set category object
+        this.initialCategorySlug = val
+        await this.setInputtedCategory()
       } else {
-        this.isEditModeActive = false
+        // if set no value on parent, edit mode on
+        this.isEditModeActive = true
       }
     },
   },
 
   async created() {
+    this.categorySlug = this.value
+
+    // set value on parent
     if (this.value) {
-      this.defaultCategorySlug = this.value
-      await this.setCategory()
+      // reset to initial value
+      this.initialCategorySlug = this.value
+      // if set value on parent, set category object
+      await this.setInputtedCategory()
     }
-    if (!this.defaultCategorySlug || !this.inputtedCategory) this.isEditModeActive = true
+    if (this.value) {
+        // if set value on parent, edit mode off
+       this.isEditModeActive = false
+    } else {
+        // if set no value on parent, edit mode on
+       this.isEditModeActive = true
+    }
   },
 
   methods: {
-    async setCategory() {
+    async setInputtedCategory() {
       this.$store.dispatch('setLoading', true)
       try {
-        this.inputtedCategory = await Category.get(this.serviceId, this.defaultCategorySlug, { withParents: 1 })
+        this.inputtedCategory = await Category.get(this.serviceId, this.initialCategorySlug, { withParents: 1 })
         this.$store.dispatch('setLoading', false)
       } catch (err) {
         //this.debugOutput(err)
@@ -114,11 +146,14 @@ export default{
 
     updateCategoryEditMode(isActive) {
       if (isActive) {
-        this.$emit('input', '')
+        // on edit mode
+        this.categorySlug = ''
         this.isEditModeActive = true
       } else {
-        this.$emit('input', this.defaultCategorySlug)
-        this.isEditModeActive = this.defaultCategorySlug ? false : true
+        // reset to initial value
+        this.categorySlug = this.initialCategorySlug
+        // if initial value not set, edit mode on
+        this.isEditModeActive = this.initialCategorySlug ? false : true
       }
     },
   },

@@ -67,6 +67,7 @@
             <category-select
               v-model="filterCategory"
               :is-enabled-undo="false"
+              :is-list-loaded="isLoaded"
             ></category-select>
           </b-field>
         </b-field>
@@ -275,6 +276,7 @@ export default{
       filterCategory: '',
       filterCategoryInputError: '',
       requestedParams: {},
+      isLoaded: false,
     }
   },
 
@@ -460,12 +462,24 @@ export default{
     },
 
     filtersQuery(val) {
-      this.filterAttribute = this.filtersQuery.attribute
-      this.filterCompare = this.filtersQuery.compare
-      this.filterValue = this.filtersQuery.value
+      if (!val) {
+        this.filterAttribute = 'slug'
+        this.filterCompare = 'eq'
+        this.filterValue = ''
+        return
+      }
+
+      this.filterAttribute = val.attribute
+      this.filterCompare = val.compare
+      this.filterValue = val.value
+      //this.filterCategory = this.filterCategoryQuery
       this.isFilterActive = true
       this.$store.dispatch('resetAdminPostsPager', true)
       this.fetchPosts(null, true)
+    },
+
+    filterCategory(val) {
+      this.isLoaded = false
     },
   },
 
@@ -534,11 +548,10 @@ export default{
     async executeFilter() {
       this.validateFilterWithError()
       if (this.hasFilterInputError) return
-      if (this.checkUpdatedReqParams(this.currentParamsForReq) === false) return
+      if (this.checkFiltersInputChanged() === false) return
 
       this.$store.dispatch('resetAdminPostsPager', true)
       this.$router.push({ query:this.currentParamsForReq })
-      await this.fetchPosts(null, true)
     },
 
     async resetFilter() {
@@ -552,11 +565,10 @@ export default{
         sort: this.sort,
         order: this.order,
       }
-      if (this.checkUpdatedReqParams(params) === false) return
+      if (this.checkFiltersInputChanged() === false) return
 
       this.$store.dispatch('resetAdminPostsPager', true)
       this.$router.push({ query: params })
-      await this.fetchPosts(params, true)
     },
 
     async setCategories() {
@@ -591,6 +603,7 @@ export default{
         if (isForceUpdate === true || this.checkParamsChanged() === true) {
           await this.checkAndRefreshTokens()
           const res = await Admin.getPosts(this.serviceId, null, paramsForApi, this.adminUserToken)
+          this.isLoaded = true
           this.$store.dispatch('setAdminPostList', res.items)
           if (res.pagerKey) {
             const nextPagerKey = {index: this.index + 1, key: res.pagerKey}
@@ -627,6 +640,15 @@ export default{
       if (storedParams.category != null) stored.category = storedParams.category
       if (storedParams.lastIndex != null) stored.index = storedParams.lastIndex
       return utilObj.isEqual(stored, current) === false
+    },
+
+    checkFiltersInputChanged() {
+      let currentFilterInput = {...this.filtersInput}
+      const storedParams = this.$store.state.adminPostsPager
+      if (currentFilterInput != null && storedParams.filters == null) return true
+      if (utilObj.isEqual(storedParams.filters, currentFilterInput) === false) return true
+
+      return this.filterCategoryInput != storedParams.category
     },
 
     validateAll() {
@@ -680,10 +702,6 @@ export default{
 
     setRequestedParams(params) {
       this.requestedParams = params
-    },
-
-    checkUpdatedReqParams(params) {
-      return utilObj.isEqual(this.requestedParams, params) === false
     },
   },
 }
