@@ -458,6 +458,13 @@ export default{
       this.$store.dispatch('resetAdminPostsPager', true)
       this.fetchPosts(null, true)
     },
+
+    //filtersQuery(val) {
+    //  this.filterCategory = this.filterCategoryQuery
+    //  this.isFilterActive = true
+    //  this.$store.dispatch('resetAdminPostsPager', true)
+    //  this.fetchPosts(null, true)
+    //},
   },
 
   async created() {
@@ -579,7 +586,7 @@ export default{
 
       this.$store.dispatch('setLoading', true)
       try {
-        if (isForceUpdate === true) {
+        if (isForceUpdate === true || this.checkParamsChanged() === true) {
           await this.checkAndRefreshTokens()
           const res = await Admin.getPosts(this.serviceId, null, paramsForApi, this.adminUserToken)
           this.$store.dispatch('setAdminPostList', res.items)
@@ -599,6 +606,25 @@ export default{
         this.handleApiError(err, 'Failed to get data from server')
         this.$store.dispatch('setLoading', false)
       }
+    },
+
+    checkParamsChanged() {
+      let current = {...this.currentParams}
+      current.index = this.index
+
+      const storedParams = this.$store.state.adminPostsPager
+      if (current.hasOwnProperty('filters') && current.filters != null) {
+        if (storedParams.filters == null) return true
+        if (utilObj.isEqual(storedParams.filters, current.filters) === false) return true
+      }
+      delete current.filters
+
+      const stored = {}
+      if (storedParams.sort != null) stored.sort = storedParams.sort
+      if (storedParams.order != null) stored.order = storedParams.order
+      if (storedParams.category != null) stored.category = storedParams.category
+      if (storedParams.lastIndex != null) stored.index = storedParams.lastIndex
+      return utilObj.isEqual(stored, current) === false
     },
 
     validateAll() {
