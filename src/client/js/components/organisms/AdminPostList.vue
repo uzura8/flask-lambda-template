@@ -459,12 +459,14 @@ export default{
       this.fetchPosts(null, true)
     },
 
-    //filtersQuery(val) {
-    //  this.filterCategory = this.filterCategoryQuery
-    //  this.isFilterActive = true
-    //  this.$store.dispatch('resetAdminPostsPager', true)
-    //  this.fetchPosts(null, true)
-    //},
+    filtersQuery(val) {
+      this.filterAttribute = this.filtersQuery.attribute
+      this.filterCompare = this.filtersQuery.compare
+      this.filterValue = this.filtersQuery.value
+      this.isFilterActive = true
+      this.$store.dispatch('resetAdminPostsPager', true)
+      this.fetchPosts(null, true)
+    },
   },
 
   async created() {
