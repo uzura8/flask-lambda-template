@@ -305,7 +305,7 @@
           v-for="parent in post.category.parents"
         >
           <router-link :to="{
-            path: `/admin/posts/${serviceId}?categories?${parent.slug}`,
+            path: `/admin/posts/${serviceId}`,
             query: { category: parent.slug }
           }">
             {{ parent.label }}
