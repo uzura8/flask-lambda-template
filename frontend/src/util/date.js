@@ -10,7 +10,7 @@ export default {
 
   utcDateStrFromJsDate(jsDate) {
     const dt = DateTime.fromJSDate(jsDate);
-    return dt.toUTC().toFormat("yyyy-MM-dd'T'hh:mm:ss'Z'")
+    return dt.toUTC().toFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
   },
 
   unixtimeFromStr(utcDateStr) {
@@ -35,7 +35,7 @@ export default {
   },
 
   calcFromNow(value, unit='seconds', isFuture=true, format='') {
-    if (!format) format = "yyyy-MM-dd'T'hh:mm:ss'Z'"
+    if (!format) format = "yyyy-MM-dd'T'HH:mm:ss'Z'"
     let calcObj = {}
     calcObj[unit] = value
     if (isFuture) {
