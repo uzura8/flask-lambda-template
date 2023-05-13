@@ -1,4 +1,3 @@
-import moment from '@/moment'
 import store from '@/store'
 import router from '@/router'
 import cognito from '@/cognito'
@@ -182,7 +181,7 @@ export default {
       if (postStatus === 'unpublish') return false
       if (!publishAt || publishAt === 'None') return true
 
-      const current = moment.utc().add(3, 'seconds').format()
+      const current = util.date.calcFromNow(3, 'seconds')
       return publishAt < current
     },
 
@@ -190,7 +189,7 @@ export default {
       if (postStatus === 'unpublish') return 'unpublished'
       if (!publishAt) return 'published'
 
-      const current = moment.utc().add(3, 'seconds').format()
+      const current = util.date.calcFromNow(3, 'seconds')
       return publishAt < current ? 'published' : 'reserved'
     },
 
@@ -205,7 +204,7 @@ export default {
       const utime = cognito.getTokenExpirationTime(this.adminUserToken)
       if (isFormat === false) return utime
 
-      return moment.unix(utime).format('LLL')
+      return util.date.localeStrFromUnixtime(utime)
     },
 
     async checkAndRefreshTokens() {

@@ -86,8 +86,6 @@ module.exports = [
     },
     plugins: [
       new VueLoaderPlugin(),
-      // Ignore all locale files of moment.js
-      new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
     ],
     //for webpack-dev-server
     devServer: {

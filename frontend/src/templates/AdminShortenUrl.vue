@@ -108,7 +108,6 @@
 </div>
 </template>
 <script>
-import moment from '@/moment'
 import config from '@/config/config'
 import utilDate from '@/util/date'
 import { Admin } from '@/api'
@@ -184,7 +183,7 @@ export default{
 
     displayQrCode() {
       const now = utilDate.nowUtime()
-      const createdAt = moment(this.shortenUrl.createdAt).unix()
+      const createdAt = utilDate.unixtimeFromStr(this.shortenUrl.createdAt)
       if (now - createdAt > config.shortenUrl.waitingTimeForQrCodeCreated) {
         this.isDispQrCode = true
         return

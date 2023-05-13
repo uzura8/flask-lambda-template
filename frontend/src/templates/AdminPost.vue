@@ -360,7 +360,6 @@
 </div>
 </template>
 <script>
-import moment from '@/moment'
 import { Admin } from '@/api'
 import config from '@/config/config'
 import obj from '@/util/obj'

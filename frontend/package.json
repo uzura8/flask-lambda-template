@@ -23,7 +23,7 @@
     "core-js": "^3.30.0",
     "es6-promise": "^4.2.8",
     "highlight.js": "^11.7.0",
-    "moment": "^2.29.4",
+    "luxon": "^3.3.0",
     "ulid": "^2.3.0",
     "vue": "^2.7.14",
     "vue-clipboard2": "^0.3.3",

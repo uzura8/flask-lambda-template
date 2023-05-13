@@ -1,5 +1,5 @@
 import str from '@/util/str'
-import moment from '@/moment'
+import utilDate from '@/util/date'
 
 export function numFormat(num) {
   return str.numFormat(num)
@@ -13,7 +13,6 @@ export function substr(text, num) {
   return str.substr(text, num, '...')
 }
 
-export function dateFormat(date, format='LLL') {
-  return moment(date).format(format);
+export function dateFormat(utcDateStr, format='') {
+  return utilDate.localeStrFromUtcDate(utcDateStr, format)
 }
-

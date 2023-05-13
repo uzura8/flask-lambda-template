@@ -287,9 +287,9 @@
 <script>
 //import tinymce from 'tinymce'
 import { getTinymce } from '@tinymce/tinymce-vue/lib/cjs/main/ts/TinyMCE'
-import moment from 'moment'
 import str from '@/util/str'
 import obj from '@/util/obj'
+import utilDate from '@/util/date'
 import utilMedia from '@/util/media'
 import { Admin, Category, Tag } from '@/api'
 import config from '@/config/config'
@@ -477,7 +477,7 @@ export default{
       this.body = this.post.body != null ? String(this.post.body) : ''
       this.editorMode = this.getModeByFormat(this.post.bodyFormat)
       this.tags = this.checkEmpty(this.post.tags) === false ? this.post.tags : []
-      this.publishAt = this.post.publishAt && this.post.publishAt !== 'None' ? moment(this.post.publishAt).toDate() : null
+      this.publishAt = this.post.publishAt && this.post.publishAt !== 'None' ? new Date(this.post.publishAt) : null
       this.isHiddenInList = this.post.isHiddenInList
     },
 
@@ -594,8 +594,7 @@ export default{
         })
 
         if (this.publishAt) {
-          const publishAtStr = moment.utc(this.publishAt).format('YYYY-MM-DDTHH:mm:ssZ')
-          vals.publishAt = publishAtStr
+          vals.publishAt = utilDate.utcDateStrFromJsDate(this.publishAt)
         }
         if (forcePublish) {
           vals.status = 'publish'
@@ -882,7 +881,7 @@ export default{
 
     getSlugAsDateFormat(current) {
       const suffixes = 'abcdefghijklmnopqrstuvwxyz'.split('')
-      const today = moment().format('YYMMDD')
+      const today = utilDate.currentStr('yyMMdd')
       if (!current) return today
       if (current === today) return today + suffixes[0]
 
