@@ -1,17 +1,16 @@
 <template>
   <div
-    v-html="bodyMarkdown"
+    v-html="body"
     class="post-body"
   >
   </div>
 </template>
 <script>
-import marked from 'marked'
 import hljs from 'highlight.js'
 window.hljs = hljs
 
 export default{
-  name: 'PostBodyMarkdown.',
+  name: 'PostBody',
 
   components: {
   },
@@ -21,28 +20,21 @@ export default{
       type: String,
       default: '',
     },
+    //bodyFormat: {
+    //  type: String,
+    //  default: 'html',
+    //}
   },
 
   data(){
     return {
-      bodyMarkdown: '',
     }
   },
 
   computed: {
   },
 
-  created() {
-    marked.setOptions({
-      breaks: true,
-      highlight: (code, lang) => {
-        return hljs.highlightAuto(code, [lang]).value
-      },
-    })
-  },
-
   mounted() {
-    this.bodyMarkdown = marked(this.body)
     window.hljs.highlightAll()
   },
 
@@ -54,9 +46,9 @@ export default{
 @import "~highlight.js/styles/atom-one-dark.css";
 
 .post-body {
-  @import "../scss/browser-default.scss";
+  @import "scss/browser-default.scss";
   pre {
-    padding: 1.25rem 1.5rem;
+    padding: 0 0;
   }
 }
 </style>

@@ -55,12 +55,12 @@ export default{
 @import "~highlight.js/styles/atom-one-dark.css";
 .editor-preview {
   &.editor-preview-active {
-    @import "@/../scss/browser-default.scss";
+    @import "@/scss/browser-default.scss";
   }
 }
 .editor-preview-side {
   &.editor-preview-active-side {
-    @import "@/../scss/browser-default.scss";
+    @import "@/scss/browser-default.scss";
   }
 }
 .editor-toolbar {

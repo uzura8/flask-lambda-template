@@ -16,7 +16,7 @@ module.exports = [
     devtool: 'source-map',
     context: path.resolve(__dirname, '../'),
     entry: {
-      index: path.join(root, 'src/client/js/index.js'),
+      index: path.join(root, 'src/index.js'),
     },
     output: {
       path: path.join(root, 'public/assets/js'),
@@ -74,12 +74,12 @@ module.exports = [
     },
     resolve: {
       modules: [
-        path.join(root, 'src/client'),
+        path.join(root, 'src'),
         'node_modules'
       ],
       extensions: ['*', '.js', '.vue', '.json'],
       alias: {
-        '@': path.join(root, 'src/client/js'),
+        '@': path.join(root, 'src'),
         'vue$': 'vue/dist/vue.esm.js',
         'vue-router$': 'vue-router/dist/vue-router.esm.js',
       }
@@ -104,7 +104,7 @@ module.exports = [
   {
     devtool: 'source-map',
     entry: {
-      style: path.join(root, 'src/client/scss/style.scss'),
+      style: path.join(root, 'src/scss/style.scss'),
     },
     output: {
       path: path.join(root, 'public/assets/css'),

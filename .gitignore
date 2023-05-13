@@ -18,13 +18,9 @@ tags
 
 # npm
 node_modules/
-/package-lock.json
+package-lock.json
 .env
 .yarn
-
-# Python
-.venv
-__pycache__
 
 # Logs
 yarn-error.log
@@ -41,44 +37,5 @@ cypress/videos
 .vercel
 .now
 
-# config
-/src/client/js/config/config.json
-/src/client/js/config/cognito-client-config.json
-/src/client/js/config/config-prd.json
-/src/client/js/config/config-dev.json
-/src/client/js/config/config-local.json
-
 # public
-/public/assets/js/*
-/public/assets/css/*
-/public/.htaccess
-
-# Terraform
-/terraform/.terraform
-/terraform/.terraform.lock.hcl
-/terraform/.terraform.tfstate.lock.info
-/terraform/terraform.tfvars
-/terraform/terraform.tfstate*
-
-# serverless
-/.serverless
-/.serverless-wsgi
-/serverless_wsgi.py
-/wsgi_handler.py
-/.dynamodb
-/config/stages/*
-/config/templates/*
-/config/contact/*
-/config-bkup*
-
-/develop/env.sh
-/develop/var/*
-/develop/comment_importer_event.json
-/develop/media_image_maker_event.json
-/develop/db_converter/config.ini
-/develop/db_converter/config-dev.ini
-/develop/db_converter/services/*
-/develop/db_converter/var/*
-/develop/performance/post.js
-/develop/performance/post_detail.js
-/develop/bin/copy_dynamodb_table_items.py
+/public
