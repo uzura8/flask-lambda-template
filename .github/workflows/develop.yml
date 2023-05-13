@@ -28,14 +28,14 @@ jobs:
 
     #- name: Copy config file
     #  run: |
-    #    cd forntend
+    #    cd frontend
     #    cp ./src/config/config.json.dev ./src/config/config.json
 
     - name: Download config file from S3
       env: 
         S3_CONFIG_BUCKET: ${{ secrets.S3_CONFIG_BUCKET_DEV }}
       run: |
-        cd forntend
+        cd frontend
         aws s3 cp s3://$S3_CONFIG_BUCKET/config.json ./src/config/ --quiet
         aws s3 cp s3://$S3_CONFIG_BUCKET/cognito-client-config.json ./src/config/ --quiet
 
@@ -44,7 +44,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
       run: |
-        cd forntend
+        cd frontend
         npm install
         npm run build
 
@@ -52,7 +52,7 @@ jobs:
       env: 
         S3_RESOURCE_BUCKET: ${{ secrets.S3_RESOURCE_BUCKET_DEV }}
       run: |
-        cd forntend
+        cd frontend
         aws s3 sync ./public s3://$S3_RESOURCE_BUCKET
 
     # Clear CloudFront Caches
