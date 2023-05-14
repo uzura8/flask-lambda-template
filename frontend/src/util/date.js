@@ -18,18 +18,18 @@ export default {
     return dt.toUnixInteger()
   },
 
-  currentStr(format=DateTime.DATETIME_SHORT) {
+  currentStr(format=DateTime.DATETIME_MED) {
     return DateTime.now().toFormat(format)
   },
 
   localeStrFromUtcDate(utcDateStr, format='') {
-    if (!format) format = DateTime.DATETIME_SHORT
+    if (!format) format = DateTime.DATETIME_MED
     const dt = DateTime.fromISO(utcDateStr).setLocale(i18n.locale)
     return dt.toLocaleString(format)
   },
 
   localeStrFromUnixtime(utime, format='') {
-    if (!format) format = DateTime.DATETIME_SHORT
+    if (!format) format = DateTime.DATETIME_MED
     const dt = DateTime.fromSeconds(utime).setLocale(i18n.locale)
     return dt.toLocaleString(format)
   },
