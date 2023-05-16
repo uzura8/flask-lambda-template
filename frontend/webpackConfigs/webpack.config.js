@@ -1,10 +1,12 @@
 'use strict';
-const webpack = require('webpack');
 const path = require('path');
 const root = path.join(__dirname, '../');
 
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const siteConfig = require(path.join(root, 'src/config/config.json'));
 
 const devServerRouteConfig = require('./dev-server-route-config');
 const cssLoaderConfig = require('./css-loader-config');
@@ -19,15 +21,9 @@ module.exports = [
       index: path.join(root, 'src/index.js'),
     },
     output: {
-      path: path.join(root, 'public/assets/js'),
+      path: path.join(root, 'public/assets/dist'),
       filename: '[name].js',
-      publicPath: '/assets/js',
-    },
-    optimization: {
-      splitChunks: {
-        name: 'vendor',
-        chunks: 'initial'
-      },
+      publicPath: '/assets/dist',
     },
     module: {
       rules: [
@@ -61,15 +57,25 @@ module.exports = [
             },
           ]
         },
+        //{
+        //  test: /\.(sa|sc|c)ss$/,
+        //  use: [
+        //    'style-loader',
+        //    cssLoaderConfig,
+        //    postcssLoaderConfig,
+        //    sassLoaderConfig,
+        //  ],
+        //},
         {
           test: /\.(sa|sc|c)ss$/,
           use: [
-            'style-loader',
+            MiniCssExtractPlugin.loader,
+            //'style-loader',
             cssLoaderConfig,
             postcssLoaderConfig,
             sassLoaderConfig,
-          ],
-        },
+          ]
+        }
       ]
     },
     resolve: {
@@ -86,7 +92,22 @@ module.exports = [
     },
     plugins: [
       new VueLoaderPlugin(),
+      new HtmlWebpackPlugin({
+        template: path.join(root, 'src/index.html'),
+        filename: '../../index.html',
+        title: siteConfig.siteName,
+        hash: true,
+      }),
+      new MiniCssExtractPlugin({
+        filename: '[name].css',
+      }),
     ],
+    optimization: {
+      splitChunks: {
+        name: 'vendor',
+        chunks: 'initial'
+      },
+    },
     //for webpack-dev-server
     devServer: {
       open: true,// Open at brower automatically
@@ -98,34 +119,5 @@ module.exports = [
       before: devServerRouteConfig,
       clientLogLevel: 'debug',
     },
-  },
-  {
-    devtool: 'source-map',
-    entry: {
-      style: path.join(root, 'src/scss/style.scss'),
-    },
-    output: {
-      path: path.join(root, 'public/assets/css'),
-      filename: '[name].css',
-      publicPath: '/assets/css',
-    },
-    module: {
-      rules: [
-        {
-          test: /\.(sa|sc|c)ss$/,
-          use: [
-            MiniCssExtractPlugin.loader,
-            cssLoaderConfig,
-            postcssLoaderConfig,
-            sassLoaderConfig,
-          ]
-        }
-      ]
-    },
-    plugins: [
-      new MiniCssExtractPlugin({
-        filename: '[name].min.css'
-      })
-    ]
   },
 ];
