@@ -6,6 +6,6 @@
 /src/config/config-local.json
 
 # public
-/public/assets/js/*
-/public/assets/css/*
+/public/assets/dist/*
 /public/.htaccess
+/public/index.html
