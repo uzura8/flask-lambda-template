@@ -1,0 +1,26 @@
+# Python
+.venv
+__pycache__
+
+# serverless
+/.serverless
+/.serverless-wsgi
+/serverless_wsgi.py
+/wsgi_handler.py
+/.dynamodb
+/config/stages/*
+/config/templates/*
+/config/contact/*
+/config-bkup*
+
+/develop/env.sh
+/develop/var/*
+/develop/comment_importer_event.json
+/develop/media_image_maker_event.json
+/develop/db_converter/config.ini
+/develop/db_converter/config-dev.ini
+/develop/db_converter/services/*
+/develop/db_converter/var/*
+/develop/performance/post.js
+/develop/performance/post_detail.js
+/develop/bin/copy_dynamodb_table_items.py
