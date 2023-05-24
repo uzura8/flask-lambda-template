@@ -45,12 +45,16 @@ export default {
     })
   },
 
-  [types.SET_ADMIN_POST_LIST] (state, posts) {
+  [types.SET_ADMIN_POST_LIST] (state, payload) {
     state.adminPostList = []
-    if (!posts) return
-    posts.map((post) => {
-      state.adminPostList.push(post)
+    state.adminPostListServiceId = null
+    if (payload == null || !payload.items || !payload.serviceId) {
+      return
+    }
+    payload.items.map((item) => {
+      state.adminPostList.push(item)
     })
+    state.adminPostListServiceId = payload.serviceId
   },
 
   [types.PUSH_ITEM_TO_ADMIN_POSTS_PAGER_KEYS] (state, payload) {

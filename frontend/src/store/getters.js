@@ -62,7 +62,8 @@ export default {
     return acceptServiceIds.includes(serviceId)
   },
 
-  adminPostListStored: state => () => {
+  adminPostListStored: state => (serviceId) => {
+    if (state.adminPostListServiceId != serviceId) return false
     return state.adminPostList.length > 0
   },
 
