@@ -56,8 +56,8 @@ export default {
     ctx.commit(types.SET_CATEGORY_ITEMS, payload)
   },
 
-  setAdminPostList: async (ctx, posts) => {
-    ctx.commit(types.SET_ADMIN_POST_LIST, posts)
+  setAdminPostList: async (ctx, payload) => {
+    ctx.commit(types.SET_ADMIN_POST_LIST, payload)
   },
 
   pushItemToAdminPostsPagerKeys: async (ctx, payload) => {
