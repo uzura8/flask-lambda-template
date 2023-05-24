@@ -156,6 +156,7 @@ package:
     - public/**
     - webpackConfigs/**
     - develop/**
+    - app/bin/**
     - terraform/**
 
 functions:
