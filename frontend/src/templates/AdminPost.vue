@@ -528,9 +528,10 @@ export default{
       }
     },
 
-    cancelEditBody() {
-      this.isEditPostBody = false
+    async cancelEditBody() {
       this.body = this.post.body
+      await this.updatePostBody()
+      this.isEditPostBody = false
     },
 
     async deletePost() {
