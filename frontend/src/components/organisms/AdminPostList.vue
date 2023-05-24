@@ -497,7 +497,7 @@ export default{
       this.filterCategory = this.filterCategoryQuery
       this.isFilterActive = true
     }
-    const isReqLatestPosts = this.$store.getters.adminPostListStored() === false
+    const isReqLatestPosts = this.$store.getters.adminPostListStored(this.serviceId) === false
     await this.fetchPosts(null, isReqLatestPosts)
   },
 
@@ -604,7 +604,10 @@ export default{
           await this.checkAndRefreshTokens()
           const res = await Admin.getPosts(this.serviceId, null, paramsForApi, this.adminUserToken)
           this.isLoaded = true
-          this.$store.dispatch('setAdminPostList', res.items)
+          this.$store.dispatch('setAdminPostList', {
+            items: res.items,
+            serviceId: this.serviceId
+          })
           if (res.pagerKey) {
             const nextPagerKey = {index: this.index + 1, key: res.pagerKey}
             this.$store.dispatch('pushItemToAdminPostsPagerKeys', nextPagerKey)
