@@ -207,7 +207,7 @@ functions:
     handler: app/url_shorten_qrcode_maker.handler
     name: ${self:service}-${self:provider.stage}-urlShortenQrcodeMaker
     layers:
-      - arn:aws:lambda:ap-northeast-1:770693421928:layer:Klayers-p38-Pillow:5 # Ref https://github.com/keithrozario/Klayers/tree/master/deployments
+      - arn:aws:lambda:ap-northeast-1:770693421928:layer:Klayers-p310-Pillow:2 # Ref https://github.com/keithrozario/Klayers/tree/master/deployments
     memorySize: ${file(${self:custom.stageConfigFileName}):urlShortenQrcodeMakerMemorySize}
     timeout: ${file(${self:custom.stageConfigFileName}):urlShortenQrcodeMakerTimeout}
     events:
