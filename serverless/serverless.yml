@@ -89,7 +89,7 @@ custom:
 
 provider:
   name: aws
-  runtime: python3.8
+  runtime: python3.10
   stage: ${opt:stage, self:custom.defaultStage}
   region: ${file(./config/stages/common.yml):defaultRegion}
   endpointType: REGIONAL
@@ -255,6 +255,7 @@ resources:
     PostTagDynamoDBTable: ${file(./config/dynamodb/post-tag.yml)}
     FileDynamoDBTable: ${file(./config/dynamodb/file.yml)}
     ShortenUrlDynamoDBTable: ${file(./config/dynamodb/shorten-url.yml)}
+    ShortenUrlDomainDynamoDBTable: ${file(./config/dynamodb/shorten-url-domain.yml)}
     VoteCountDynamoDBTable: ${file(./config/dynamodb/vote-count.yml)}
     VoteLogDynamoDBTable: ${file(./config/dynamodb/vote-log.yml)}
     #ContactDynamoDBTable: ${file(./config/dynamodb/contact.yml)}

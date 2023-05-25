@@ -7,6 +7,7 @@ class ShortenUrl(Base):
         'urlId',
         'locationTo',
         'createdAt',
+        'updatedAt',
     ]
     response_attrs = public_attrs + []
     private_attrs = [
@@ -18,6 +19,8 @@ class ShortenUrl(Base):
         'name',
         'description',
         'createdBy',
+        'domain'
+        'serviceIdDomain',
     ]
     all_attrs = public_attrs + private_attrs
 
