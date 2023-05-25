@@ -25,9 +25,6 @@ Properties:
     - Key: backup
       Value: ${self:custom.dynamoDbBackupTargetTagValue}
 
-  StreamSpecification:
-    StreamViewType: NEW_IMAGE
-
   GlobalSecondaryIndexes:
     -
       IndexName: serviceIdIndex
