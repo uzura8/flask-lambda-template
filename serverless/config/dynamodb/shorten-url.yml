@@ -11,6 +11,9 @@ Properties:
     -
       AttributeName: createdAt
       AttributeType: S
+    -
+      AttributeName: serviceIdDomain
+      AttributeType: S
   KeySchema:
     -
       AttributeName: urlId
@@ -40,6 +43,14 @@ Properties:
         KeyType: RANGE
       Projection:
         ProjectionType: ALL
-      #ProvisionedThroughput:
-      #  ReadCapacityUnits: 5
-      #  WriteCapacityUnits: 3
+    -
+      IndexName: serviceIdDomainIndex
+      KeySchema:
+      -
+        AttributeName: serviceIdDomain
+        KeyType: HASH
+      -
+        AttributeName: createdAt
+        KeyType: RANGE
+      Projection:
+        ProjectionType: ALL

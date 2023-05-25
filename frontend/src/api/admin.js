@@ -387,10 +387,10 @@ export default {
     })
   },
 
-  deleteShortenUrl: (identifer, token = null) => {
+  deleteShortenUrl: (serviceId, identifer, token = null) => {
     return new Promise((resolve, reject) => {
       const options = utilUri.getReqOptions(null, token)
-      const uri = `admin/shorten-urls/${identifer}`
+      const uri = `admin/shorten-urls/${serviceId}/${identifer}`
       client.delete(uri, options)
         .then(res => resolve(res.data))
         .catch(err => reject(err))

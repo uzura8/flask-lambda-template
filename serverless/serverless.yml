@@ -89,7 +89,7 @@ custom:
 
 provider:
   name: aws
-  runtime: python3.8
+  runtime: python3.10
   stage: ${opt:stage, self:custom.defaultStage}
   region: ${file(./config/stages/common.yml):defaultRegion}
   endpointType: REGIONAL
@@ -156,6 +156,7 @@ package:
     - public/**
     - webpackConfigs/**
     - develop/**
+    - app/bin/**
     - terraform/**
 
 functions:
@@ -206,7 +207,7 @@ functions:
     handler: app/url_shorten_qrcode_maker.handler
     name: ${self:service}-${self:provider.stage}-urlShortenQrcodeMaker
     layers:
-      - arn:aws:lambda:ap-northeast-1:770693421928:layer:Klayers-p38-Pillow:5 # Ref https://github.com/keithrozario/Klayers/tree/master/deployments
+      - arn:aws:lambda:ap-northeast-1:770693421928:layer:Klayers-p310-Pillow:2 # Ref https://github.com/keithrozario/Klayers/tree/master/deployments
     memorySize: ${file(${self:custom.stageConfigFileName}):urlShortenQrcodeMakerMemorySize}
     timeout: ${file(${self:custom.stageConfigFileName}):urlShortenQrcodeMakerTimeout}
     events:
@@ -254,6 +255,7 @@ resources:
     PostTagDynamoDBTable: ${file(./config/dynamodb/post-tag.yml)}
     FileDynamoDBTable: ${file(./config/dynamodb/file.yml)}
     ShortenUrlDynamoDBTable: ${file(./config/dynamodb/shorten-url.yml)}
+    ShortenUrlDomainDynamoDBTable: ${file(./config/dynamodb/shorten-url-domain.yml)}
     VoteCountDynamoDBTable: ${file(./config/dynamodb/vote-count.yml)}
     VoteLogDynamoDBTable: ${file(./config/dynamodb/vote-log.yml)}
     #ContactDynamoDBTable: ${file(./config/dynamodb/contact.yml)}

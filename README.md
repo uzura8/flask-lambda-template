@@ -13,9 +13,14 @@ Constructed by
 
 You need below
 
-- nodeJS >= v14.15.X
-- aws-cli >= 1.18.X
-- Terraform >= 0.14.5
+- common
+    - aws-cli >= 1.18.X
+    - Terraform >= 0.14.5
+- serverless
+    - nodeJS >= 18.16.X
+    - Python >= 3.10.X
+- frontend
+    - nodeJS >= v14.15.X
 
 #### Install tools
 
