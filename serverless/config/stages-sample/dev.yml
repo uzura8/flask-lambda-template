@@ -116,6 +116,11 @@ dynamodbConfig:
     provisionedThroughput:
       readCapacityUnits: 0
       writeCapacityUnits: 0
+  shortenUrlDomain:
+    billingMode: 'PAY_PER_REQUEST'
+    provisionedThroughput:
+      readCapacityUnits: 0
+      writeCapacityUnits: 0
   voteCount:
     billingMode: 'PAY_PER_REQUEST'
     provisionedThroughput:
