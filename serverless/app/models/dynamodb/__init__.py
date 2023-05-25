@@ -15,6 +15,7 @@ from .vote_count import VoteCount
 from .vote_log import VoteLog
 #from .contact import Contact
 from .shorten_url import ShortenUrl
+from .shorten_url_domain import ShortenUrlDomain
 
 __all__ = [
     'Base',
@@ -35,4 +36,5 @@ __all__ = [
     'VoteLog',
     #'Contact',
     'ShortenUrl',
+    'ShortenUrlDomain',
 ]

@@ -174,6 +174,12 @@ class Base():
         )
         return res
 
+    @classmethod
+    def delete_table(self):
+        table = self.get_table()
+        res = table.delete()
+        return res
+
 
     @classmethod
     def get_reserved_values(self, attr):

@@ -1,0 +1,45 @@
+Type: 'AWS::DynamoDB::Table'
+Properties:
+  TableName: ${self:custom.prjPrefix}-shorten-url-domain
+  AttributeDefinitions:
+    -
+      AttributeName: serviceIdDomain
+      AttributeType: S
+    -
+      AttributeName: serviceId
+      AttributeType: S
+    -
+      AttributeName: domain
+      AttributeType: S
+  KeySchema:
+    -
+      AttributeName: serviceIdDomain
+      KeyType: HASH
+
+  BillingMode: ${self:custom.dynamodbConfig.shortenUrlDomain.billingMode, 'PAY_PER_REQUEST'}
+  ProvisionedThroughput:
+    ReadCapacityUnits: ${self:custom.dynamodbConfig.shortenUrlDomain.provisionedThroughput.readCapacityUnits, 0}
+    WriteCapacityUnits: ${self:custom.dynamodbConfig.shortenUrlDomain.provisionedThroughput.writeCapacityUnits, 0}
+
+  Tags:
+    - Key: backup
+      Value: ${self:custom.dynamoDbBackupTargetTagValue}
+
+  StreamSpecification:
+    StreamViewType: NEW_IMAGE
+
+  GlobalSecondaryIndexes:
+    -
+      IndexName: serviceIdIndex
+      KeySchema:
+      -
+        AttributeName: serviceId
+        KeyType: HASH
+      -
+        AttributeName: domain
+        KeyType: RANGE
+      Projection:
+        ProjectionType: ALL
+      #ProvisionedThroughput:
+      #  ReadCapacityUnits: 5
+      #  WriteCapacityUnits: 3
