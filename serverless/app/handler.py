@@ -3,7 +3,7 @@ from flask import Flask, jsonify, request
 from flask_cognito import CognitoAuth
 from werkzeug.routing import Rule
 from app.common.error import InvalidUsage
-from app.common.decimal_encoder import DecimalEncoder
+from app.common.custom_json_provider import CustomJsonProvider
 from app.root import bp as root_module
 from app.vote import bp as vote_module
 from app.post import bp as post_module
@@ -21,7 +21,7 @@ app = Flask(
     __name__,
     template_folder='../config')
 app.url_map.strict_slashes = False
-app.json_encoder = DecimalEncoder
+app.json = CustomJsonProvider(app)
 
 jinja_options = app.jinja_options.copy()
 jinja_options.update({
