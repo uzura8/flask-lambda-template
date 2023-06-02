@@ -174,7 +174,7 @@ functions:
     handler: app/media_image_maker_handler.handler
     name: ${self:service}-${self:provider.stage}-mediaImageMaker
     layers:
-      - arn:aws:lambda:ap-northeast-1:770693421928:layer:Klayers-p38-Pillow:5 # Ref https://github.com/keithrozario/Klayers/tree/master/deployments
+      - arn:aws:lambda:ap-northeast-1:770693421928:layer:Klayers-p310-Pillow:2 # Ref https://github.com/keithrozario/Klayers/tree/master/deployments
     memorySize: ${file(${self:custom.stageConfigFileName}):mediaImageMakerMemorySize}
     timeout: ${file(${self:custom.stageConfigFileName}):mediaImageMakerTimeout}
     events:
@@ -199,7 +199,7 @@ functions:
   #  handler: app/media_image_modifier_handler.handler
   #  name: ${self:service}-${self:provider.stage}-mediaImageModifier
   #  layers:
-  #    - arn:aws:lambda:ap-northeast-1:770693421928:layer:Klayers-p38-Pillow:5 # Ref https://github.com/keithrozario/Klayers/tree/master/deployments
+  #    - arn:aws:lambda:ap-northeast-1:770693421928:layer:Klayers-p310-Pillow:2 # Ref https://github.com/keithrozario/Klayers/tree/master/deployments
   #  memorySize: ${file(${self:custom.stageConfigFileName}):mediaImageMakerMemorySize}
   #  timeout: ${file(${self:custom.stageConfigFileName}):mediaImageMakerTimeout}
 
