@@ -87,3 +87,11 @@ a:not([href]) {
 .table-responsive {
   overflow-x: auto;
 }
+
+.jsoneditor {
+  border: thin solid #9b9b9b !important;
+}
+.jsoneditor-menu{
+  background-color: #9b9b9b !important;
+  border-bottom: 1px solid #9b9b9b !important;
+}

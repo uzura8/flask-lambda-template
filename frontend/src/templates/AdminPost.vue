@@ -32,8 +32,7 @@
   </h1>
 
   <div
-    class="is-clearfix"
-    :class="{ 'mb-4': isEditablePostBody }"
+    class="is-clearfix mb-4"
   >
     <div class="is-pulled-right">
       <eb-dropdown
@@ -199,11 +198,19 @@
       @blur="updatePostBody(false)"
     ></markdown-editor>
   </div>
-  <div v-else>
+  <div
+    v-else
+    class="mb-6"
+  >
     <post-body-markdown
       v-if="post.bodyFormat === 'markdown'"
       :body="body"
     ></post-body-markdown>
+
+    <post-body-json
+      v-else-if="post.bodyFormat === 'json'"
+      :body-json="post.bodyJson"
+    ></post-body-json>
 
     <post-body
       v-else
@@ -339,7 +346,7 @@
     </div>
   </div>
 
-  <ul class="block">
+  <ul class="block mt-4">
     <li>
       <label class="has-text-weight-semibold mr-2">{{ $t('common.publishAt') }}</label>
       <inline-time
@@ -364,6 +371,7 @@ import { Admin } from '@/api'
 import config from '@/config/config'
 import obj from '@/util/obj'
 import PostBody from '@/components/atoms/PostBody'
+import PostBodyJson from '@/components/atoms/PostBodyJson'
 import PostBodyMarkdown from '@/components/atoms/PostBodyMarkdown'
 import InlineTime from '@/components/atoms/InlineTime'
 import EbDropdown from '@/components/molecules/EbDropdown'
@@ -378,6 +386,7 @@ export default{
     InlineTime,
     EbDropdown,
     PostBody,
+    PostBodyJson,
     PostBodyMarkdown,
     MarkdownEditor,
     FbImg,
@@ -449,6 +458,11 @@ export default{
 
     isEditedPostBodyFromLastPost() {
       return this.body !== this.bodyLastPosted
+    },
+
+    formattedBodyJson() {
+      if (this.post.bodyFormat !== 'json') return ''
+      return JSON.stringify(this.post.bodyJson, null, "  ").trim()
     },
   },
 

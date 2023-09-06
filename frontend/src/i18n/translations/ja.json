@@ -249,6 +249,7 @@
     "markdown": "Markdown",
     "text": "テキスト",
     "rawHtml": "生HTML",
+    "json": "JSON",
     "postGroup": "投稿グループ",
     "shortenUrl": "短縮URL",
     "generateUrl": "生成されるURL",

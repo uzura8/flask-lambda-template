@@ -1,3 +1,4 @@
+import json
 import re
 import string
 import random
@@ -103,6 +104,14 @@ def validate_email(email):
 
 def validate_url(url):
     return re.match('^https?://[\w\-\.\!~\*\'\(\);\/\?\:@&=+\$,%#]+$', url)
+
+
+def validate_json(json_string):
+    try:
+        json.loads(json_string)
+        return True
+    except json.JSONDecodeError:
+        return False
 
 
 def nl2br(text):

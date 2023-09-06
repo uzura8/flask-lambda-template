@@ -56,7 +56,6 @@
       @blur="validate('title')"
     ></b-input>
   </b-field>
-
   <b-field
     :label="$t('form.body')"
     :message="checkEmpty(errors.editorModeOption) ? '' : errors.editorModeOption[0]"
@@ -85,6 +84,15 @@
       v-else-if="editorMode === 'markdown'"
       v-model="body"
     ></markdown-editor>
+
+    <v-jsoneditor
+      v-model="body"
+      v-else-if="editorMode === 'json'"
+      height="500px"
+      @error="handleJsonEditorError"
+      :options=jsonEditorOptions
+      :plus="false"
+    />
 
     <b-input
       v-else
@@ -287,6 +295,7 @@
 <script>
 //import tinymce from 'tinymce'
 import { getTinymce } from '@tinymce/tinymce-vue/lib/cjs/main/ts/TinyMCE'
+import VJsoneditor from 'v-jsoneditor'
 import str from '@/util/str'
 import obj from '@/util/obj'
 import utilDate from '@/util/date'
@@ -310,6 +319,7 @@ export default{
     MarkdownEditor,
     CategorySelect,
     EbDropdown,
+    VJsoneditor,
   },
 
   props: {
@@ -354,7 +364,17 @@ export default{
           mode: 'rawHtml',
           format: 'html',
         },
+        {
+          mode: 'json',
+          format: 'json',
+        },
       ],
+      jsonEditorOptions: {
+        mode: 'code',
+        onEditable: function (node) {
+          return true;
+        }
+      }
     }
   },
 
@@ -435,6 +455,17 @@ export default{
     links(vals) {
       this.initError('links')
     },
+
+    body(vals) {
+      if (this.bodyFormat === 'json') {
+        this.initError('body')
+      }
+    },
+
+    editorMode(val, oldVal) {
+      if (!oldVal) return
+      this.setBody()
+    },
   },
 
   async created() {
@@ -474,11 +505,24 @@ export default{
       this.images = this.post.images != null ? this.post.images : []
       this.files = this.post.files != null ? this.post.files : []
       this.links = this.post.links != null ? this.post.links : []
-      this.body = this.post.body != null ? String(this.post.body) : ''
       this.editorMode = this.getModeByFormat(this.post.bodyFormat)
+      if (this.post.bodyFormat === 'json') {
+        this.body = this.post.body != null ? JSON.parse(this.post.body) : {}
+      } else {
+        this.body = this.post.body != null ? String(this.post.body) : ''
+      }
       this.tags = this.checkEmpty(this.post.tags) === false ? this.post.tags : []
       this.publishAt = this.post.publishAt && this.post.publishAt !== 'None' ? new Date(this.post.publishAt) : null
       this.isHiddenInList = this.post.isHiddenInList
+    },
+
+    setBody() {
+      const defBody = this.isEdit ? this.post.body : ''
+      if (this.bodyFormat === 'json' && typeof this.body === 'string') {
+        this.body = str.checkJson(this.body) ? JSON.parse(this.body) : {}
+      } else if (this.bodyFormat !== 'json' && typeof this.body !== 'string') {
+        this.body = defBody
+      }
     },
 
     async setSlug(format) {
@@ -577,12 +621,16 @@ export default{
         vals.slug = this.slug
         vals.category = this.category
         vals.title = this.title
-        vals.body = this.body
         vals.bodyFormat = this.bodyFormat
         vals.images = this.images
         vals.files = this.files
         vals.links = this.links
         vals.isHiddenInList = this.isHiddenInList
+        if (this.bodyFormat === 'json') {
+          vals.body = JSON.stringify(this.body)
+        } else {
+          vals.body = this.body
+        }
 
         vals.tags = []
         this.tags.map((tag) => {
@@ -645,6 +693,12 @@ export default{
       this.$router.push(this.postsPageUriObj)
     },
 
+    handleJsonEditorError(ev) {
+      this.initError('body')
+      this.errors.body.push(this.$t('msg.ErrorsExist'))
+      // console.log(ev)
+    },
+
     validateAll() {
       this.fieldKeys.map(field => {
         this.validate(field)
@@ -695,8 +749,14 @@ export default{
 
     validateBody() {
       this.initError('body')
-      if (this.body === null) this.body = ''
-      this.body = this.body.trimEnd()
+      if (this.body === null) {
+        if (this.bodyFormat === 'json') {
+          this.body = {}
+        } else {
+          this.body = ''
+        }
+      }
+      if (this.bodyFormat !== 'json') this.body = this.body.trimEnd()
       //if (this.checkEmpty(this.body)) this.errors.body.push(this.$t('msg["Input required"]'))
     },
 

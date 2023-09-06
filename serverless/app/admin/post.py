@@ -6,7 +6,7 @@ from app.models.dynamodb import Post, Tag, Category, PostTag, File, PostGroup, M
 from app.common.site import media_accept_mimetypes
 from app.common.error import InvalidUsage
 from app.common.request import validate_req_params
-from app.common.string import validate_uuid
+from app.common.string import validate_uuid, validate_json
 from app.validators import NormalizerUtils
 from app.admin import bp, site_before_request, check_acl_service_id, admin_role_editor_required
 
@@ -25,8 +25,7 @@ def post_list(service_id):
 
     post = None
     if request.method == 'POST':
-        schema = validation_schema_posts_post(service['configs'])
-        vals = validate_req_params(schema, request.json)
+        vals = validate_post_data(request.json, service['configs'])
         vals['serviceId'] = service_id
         created_by = current_cognito_jwt.get('cognito:username', '')
         if created_by:
@@ -123,8 +122,7 @@ def post_detail(service_id, identifer):
 
     saved = None
     if request.method == 'POST':
-        schema = validation_schema_posts_post(service['configs'])
-        vals = validate_req_params(schema, request.json)
+        vals = validate_post_data(request.json, service['configs'])
         vals['serviceId'] = service_id
         vals['updatedBy'] = current_cognito_jwt.get('cognito:username', '')
 
@@ -276,6 +274,15 @@ def post_status(service_id, identifer):
     return jsonify(saved), 200
 
 
+def validate_post_data(vals, service_configs):
+    schema = validation_schema_posts_post(service_configs)
+    vals = validate_req_params(schema, request.json)
+    if vals['bodyFormat'] == 'json':
+        if not validate_json(vals['body']):
+            raise InvalidUsage('body is invalid as json', 400)
+    return vals
+
+
 def get_post_by_identifer(service_id, identifer):
     is_uuid = validate_uuid(identifer)
     if is_uuid:
@@ -420,7 +427,7 @@ def validation_schema_posts_post(service_configs=None):
             'coerce': (NormalizerUtils.trim),
             'required': True,
             'empty': False,
-            'allowed': ['html', 'text', 'markdown'],
+            'allowed': ['html', 'text', 'markdown', 'json'],
         },
         'body': {
             'type': 'string',

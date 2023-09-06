@@ -1,9 +1,11 @@
+import json
 import secrets
 import markdown
 from app.common.date import utc_iso, iso_offset2utc
 from app.common.string import new_uuid, nl2br, url2link, strip_html_tags
 from app.common.dict import keys_from_dicts
 from app.common.list import find_dicts
+from app.common.util import float_to_decimal
 from app.models.dynamodb.base import Base, ModelInvalidParamsException
 from app.models.dynamodb.category import Category
 from app.models.dynamodb.post_tag import PostTag
@@ -21,6 +23,7 @@ class Post(Base):
         'bodyFormat',
         'bodyHtml',
         'bodyText',
+        'bodyJson',
         'publishAt',
         'updatedAt',
         'createdAt',
@@ -404,7 +407,7 @@ class Post(Base):
 
         body_raw = vals['body']
         body_format = vals['bodyFormat']
-        body_html, body_text = self.conv_body_to_each_format(body_raw, body_format)
+        body_html, body_text, body_json = self.conv_body_to_each_format(body_raw, body_format)
 
         if vals.get('images'):
             file_ids = [ file['fileId'] for file in vals['images'] ]
@@ -431,6 +434,7 @@ class Post(Base):
             'body': body_raw,
             'bodyHtml': body_html,
             'bodyText': body_text,
+            'bodyJson': body_json,
             'bodyFormat': body_format,
             'serviceIdSlug': '#'.join([service_id, slug]),
             'isHiddenInList': is_hidden,
@@ -575,11 +579,13 @@ class Post(Base):
             return {'item':None, 'is_updated_index':False}
 
         if 'body' in upd_attrs or 'bodyFormat' in upd_attrs:
-            body_html, body_text = self.conv_body_to_each_format(vals['body'], vals['bodyFormat'])
+            body_html, body_text, body_json = self.conv_body_to_each_format(vals['body'], vals['bodyFormat'])
             exp_items.append('%s=:%s' % ('bodyHtml', 'bodyHtml'))
             exp_items.append('%s=:%s' % ('bodyText', 'bodyText'))
+            exp_items.append('%s=:%s' % ('bodyJson', 'bodyJson'))
             exp_vals[':bodyHtml'] = body_html
             exp_vals[':bodyText'] = body_text
+            exp_vals[':bodyJson'] = body_json
 
         if is_update_time:
             updated_at = time
@@ -629,6 +635,7 @@ class Post(Base):
     def conv_body_to_each_format(body_raw, body_format):
         body_html = ''
         body_text = ''
+        body_json = None
         if body_format == 'markdown':
             body_raw = url2link(body_raw)
             extensions = ['extra', 'admonition', 'nl2br', 'sane_lists', 'toc']
@@ -638,11 +645,14 @@ class Post(Base):
         elif body_format == 'text':
             body_html = nl2br(url2link(body_raw))
             body_text = body_raw
+        elif body_format == 'json':
+            body_json = float_to_decimal(json.loads(body_raw))
+            body_html = f'<pre><code class="language-json">{body_raw}</code></pre>'
         else:
             body_html = body_raw
             body_text = strip_html_tags(body_raw)
 
-        return body_html, body_text
+        return body_html, body_text, body_json
 
 
     @staticmethod
