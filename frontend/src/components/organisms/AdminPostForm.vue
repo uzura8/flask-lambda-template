@@ -154,7 +154,7 @@
       </li>
     </ul>
   </b-field>
-  <b-field
+  <b-field>
     <button
       @click="addLink"
       class="button"
